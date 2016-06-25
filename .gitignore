@@ -1,7 +1,8 @@
 
-Debug\
+Debug/
 *.sdf
 *.props
+*.opensdf
 
 # Compiled Object files
 *.slo
