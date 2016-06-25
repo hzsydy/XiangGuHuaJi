@@ -1,3 +1,8 @@
+
+Debug\
+*.sdf
+*.props
+
 # Compiled Object files
 *.slo
 *.lo
