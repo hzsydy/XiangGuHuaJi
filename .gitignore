@@ -3,6 +3,7 @@ Debug/
 *.sdf
 *.props
 *.opensdf
+*.suo
 
 # Compiled Object files
 *.slo
