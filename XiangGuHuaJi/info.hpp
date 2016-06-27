@@ -38,16 +38,20 @@ public:
         TMapPara **  MapDefenseRatio,
         TMapPara **  MapAttackRatio,
         TId **       Ownership,
-        TMilitary *** MilitaryMap,
-        TAttack *** AttackPointsMap,
+        vector<TMilitary**> MilitaryMap,
+        vector<TAttack**> AttackPointsMap,
         TDefense ** DefensePointsMap,
-        PlayerInfo * PlayerList,
-        DiplomaticStatus ** DiplomaticMap)
-        : id(id), round(round), x(x), y(y), PlayerSize(PlayerSize), saving(PlayerList[id].Saving),
+        vector<PlayerInfo> PlayerList,
+        DiplomaticStatus ** DiplomaticMap,
+        vector<DiplomaticCommand> & DiplomaticCommandList,
+        vector<vector<TMilitary> > & MilitaryCommand)
+        :
+        id(id), round(round), x(x), y(y), PlayerSize(PlayerSize), saving(PlayerList[id].Saving),
         mask(mask), control(control), DiplomaticMap(DiplomaticMap), Ownership(Ownership),
         MapResource(MapResource), MapDefenseRatio(MapDefenseRatio), MapAttackRatio(MapAttackRatio),
         MilitaryMap(MilitaryMap), AttackPointsMap(AttackPointsMap), DefensePointsMap(DefensePointsMap),
-        PlayerList(PlayerList)
+        PlayerList(PlayerList),
+        DiplomaticCommandList(DiplomaticCommandList), MilitaryCommand(MilitaryCommand)
     {
         for (TId i=0; i<PlayerSize; ++i) DiplomaticCommandList[i] = KeepNeutral;
     }
@@ -61,8 +65,8 @@ public:
     const unsigned char*const*const     mask;    //当前可见地区
     const unsigned char*const*const     control; //你可以放兵的地区
 
-    const DiplomaticStatus*const*const  DiplomaticMap; //全体外交状态
-    const TId*const*const Ownership;            //地图主权
+    const DiplomaticStatus*const*const DiplomaticMap; //全体外交状态
+    const TId*const*const      Ownership;             //地图主权
     const TMapPara*const*const MapResource;     //地图资源参数
     const TMapPara*const*const MapAttackRatio;  //地图攻击参数
     const TMapPara*const*const MapDefenseRatio; //地图防御参数
@@ -87,7 +91,6 @@ public:
 
         return point;
     }
-
     //获取一个玩家的信息
     PlayerInfo getPlayerInfo(TId targetId)
     {
@@ -114,18 +117,19 @@ public:
         default:
             return player;
         }
-
     }
 
 //可供写的信息
-    vector<DiplomaticCommand> DiplomaticCommandList;
-    vector<vector<unsigned char> > MilitaryCommand;
+
+    vector<DiplomaticCommand> & DiplomaticCommandList;
+    vector<vector<TMilitary> > & MilitaryCommand;
 
 private:
-    const TMilitary*const*const*const MilitaryMap;
-    const TAttack*const*const*const   AttackPointsMap;
-    const TDefense*const*const        DefensePointsMap;
-    const PlayerInfo*const            PlayerList;
+//受到游戏规则限制的信息
+    vector<TMilitary**>   MilitaryMap;
+    vector<TAttack**>     AttackPointsMap;
+    TDefense**            DefensePointsMap;
+    vector<PlayerInfo>    PlayerList;
 };
 
 

@@ -16,12 +16,19 @@ void player_ai(Info& info)
         {
             if (mySaving<1) break;
             if (info.control[i][j])
-            {
-             
+            { 
                 info.MilitaryCommand[i][j] += 1;
                 mySaving -= 1;
             }
         }
     }   
+
+    for (TId i=0; i<info.PlayerSize; ++i)
+    {
+        if (info.DiplomaticMap[info.id][i] != DiplomaticStatus::War)
+            info.DiplomaticCommandList[i] = DiplomaticCommand::AskForUnion;
+        else
+            info.DiplomaticCommandList[i] = DiplomaticCommand::ClaimWar;
+    }
 
 }

@@ -11,12 +11,16 @@ typedef unsigned int  TMapArea;  //地图面积
 typedef unsigned int  TRound;    //回合数
 
 typedef unsigned char TMapPara;  //地图参数(MapResource, MapDefenseRatio, MapAttackRatio)
+#define TMatMapPara CV_8UC1
 typedef unsigned int  TSaving;   //用户库存量
 
 typedef unsigned char TDefense;  //防守点数(DefensePoints)
+#define TMatDefense CV_8UC1
 typedef unsigned char TAttack;   //攻击点数(AttackPoints)
+#define TMatAttack CV_8UC1
 
 typedef unsigned char TMilitary; //一个点放置的兵力
+#define TMatMilitary CV_8UC1
 typedef unsigned int  TMilitarySummary; //玩家的总兵力
 
 //外交关系

@@ -81,6 +81,7 @@
   <ItemGroup>
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="map.cpp" />
     <ClCompile Include="MapParser.cpp" />
     <ClCompile Include="player.cpp" />
   </ItemGroup>
@@ -104,6 +105,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="info.hpp" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="matrix.hpp" />
     <ClInclude Include="player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
