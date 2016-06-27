@@ -79,14 +79,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapParser.cpp" />
-    <ClCompile Include="player.cpp" />    
+    <ClCompile Include="player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib_json.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="definition.h" />
     <ClInclude Include="json\assertions.h" />
     <ClInclude Include="json\autolink.h" />
     <ClInclude Include="json\config.h" />

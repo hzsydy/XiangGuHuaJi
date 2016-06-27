@@ -24,12 +24,12 @@
     <ClCompile Include="MapParser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="map.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="player.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>    
+    </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib_json.lib">
@@ -83,6 +83,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="info.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="definition.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

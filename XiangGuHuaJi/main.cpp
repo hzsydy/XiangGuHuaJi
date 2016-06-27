@@ -9,15 +9,21 @@
 
 #include "MapParser.h"
 
+#include"player.h"
+
 using namespace std;
 using namespace XGHJ;
-
 
 int main() 
 {
 	MapParser mp;
 	mp.readjson("test.json");
-	system("pause");
+	
+
+    Player player("TestAi.dll", 0);
+    
+
+    system("pause");
 	return 0;
 
 } 
