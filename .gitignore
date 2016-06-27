@@ -3,7 +3,6 @@ Debug/
 *.sdf
 *.props
 *.opensdf
-!lib_json.lib
 *.suo
 
 # Compiled Object files
@@ -19,7 +18,6 @@ Debug/
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -28,7 +26,6 @@ Debug/
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
