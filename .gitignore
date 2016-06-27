@@ -4,6 +4,7 @@ Debug/
 *.props
 *.opensdf
 !lib_json.lib
+*.suo
 
 # Compiled Object files
 *.slo

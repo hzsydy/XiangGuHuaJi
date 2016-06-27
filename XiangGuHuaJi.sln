@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XiangGuHuaJi", "XiangGuHuaJ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldEditor", "WorldEditor\WorldEditor.csproj", "{7F52032D-5031-4BD8-A52C-0A1D1B64647E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestAi", "TestAi\TestAi.vcxproj", "{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,14 @@ Global
 		{7F52032D-5031-4BD8-A52C-0A1D1B64647E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{7F52032D-5031-4BD8-A52C-0A1D1B64647E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7F52032D-5031-4BD8-A52C-0A1D1B64647E}.Release|Win32.ActiveCfg = Release|Any CPU
+		{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}.Debug|Win32.Build.0 = Debug|Win32
+		{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}.Release|Any CPU.ActiveCfg = Release|Win32
+		{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}.Release|Win32.ActiveCfg = Release|Win32
+		{7A95DCFC-C2E2-4747-A7E4-76CE6A1FD719}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
