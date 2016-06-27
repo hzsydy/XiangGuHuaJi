@@ -3,6 +3,7 @@ Debug/
 *.sdf
 *.props
 *.opensdf
+!lib_json.lib
 
 # Compiled Object files
 *.slo
