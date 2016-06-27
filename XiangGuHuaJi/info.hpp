@@ -13,18 +13,18 @@ using namespace std;
 
 typedef unsigned char TId;       //玩家Id
 typedef unsigned char TMapSize;  //地图尺寸(x,y)
-typedef int           TMapArea;  //地图面积
-typedef int           TRound;    //回合数
-typedef int           TPlayerSize; //玩家数量
+typedef unsigned int  TMapArea;  //地图面积
+typedef unsigned int  TRound;    //回合数
+typedef unsigned int  TPlayerSize; //玩家数量
 
 typedef unsigned char TMapPara;  //地图参数(MapResource, MapDefenseRatio, MapAttackRatio)
-typedef int           TSaving;   //用户库存量
+typedef unsigned int  TSaving;   //用户库存量
 
 typedef unsigned char TDefense;  //防守点数(DefensePoints)
 typedef unsigned char TAttack;   //攻击点数(AttackPoints)
 
 typedef unsigned char TMilitary; //一个点放置的兵力
-typedef int           TMilitarySummary; //玩家的总兵力
+typedef unsigned int  TMilitarySummary; //玩家的总兵力
 
 
 //外交关系
@@ -78,6 +78,7 @@ public:
     Info(
         TId id, TRound round, TMapSize x, TMapSize y, TId PlayerSize,
         unsigned char **  mask,
+        unsigned char **  control,
         TMapPara **  MapResource,
         TMapPara **  MapDefenseRatio,
         TMapPara **  MapAttackRatio,
@@ -87,8 +88,8 @@ public:
         TDefense ** DefensePointsMap,
         PlayerInfo * PlayerList,
         DiplomaticStatus ** DiplomaticMap)
-        : id(id), round(round), x(x), y(y), PlayerSize(PlayerSize),
-        mask(mask), DiplomaticMap(DiplomaticMap), Ownership(Ownership),
+        : id(id), round(round), x(x), y(y), PlayerSize(PlayerSize), saving(PlayerList[id].Saving),
+        mask(mask), control(control), DiplomaticMap(DiplomaticMap), Ownership(Ownership),
         MapResource(MapResource), MapDefenseRatio(MapDefenseRatio), MapAttackRatio(MapAttackRatio),
         MilitaryMap(MilitaryMap), AttackPointsMap(AttackPointsMap), DefensePointsMap(DefensePointsMap),
         PlayerList(PlayerList)
@@ -98,10 +99,13 @@ public:
     
     const TId       id;    //自己的ID
     const TRound    round; //当前回合数
+    const TSaving   saving;//当前库存
     const TMapSize  x, y;  //地图的尺寸
     const TId       PlayerSize; //玩家数量
     
-    const unsigned char*const*const     mask; //当前可见地区
+    const unsigned char*const*const     mask;    //当前可见地区
+    const unsigned char*const*const     control; //你可以放兵的地区
+
     const DiplomaticStatus*const*const  DiplomaticMap; //全体外交状态
     const TId*const*const Ownership;            //地图主权
     const TMapPara*const*const MapResource;     //地图资源参数
@@ -109,12 +113,23 @@ public:
     const TMapPara*const*const MapDefenseRatio; //地图防御参数
 
     //获取一个点的信息
-    PointMilitary getPointMilitary(int x, int y) 
+    PointMilitary getPointMilitary(int i, int j) 
     {
         PointMilitary point;
         
-        //TODO
+        if (mask[i][j]) point.Visible = true;
+        else { point.Visible = false; return point; }
+
+        point.Owner = Ownership[i][j];
+        point.Union = DiplomaticMap[id][point.Owner] == Union;
         
+        for (TId t=0; t<PlayerSize; ++t)
+        {
+            point.Military.push_back(MilitaryMap[i][j][t]);
+            point.AttackSummary.push_back(AttackPointsMap[i][j][t]);
+        }
+        point.DefensePoints = DefensePointsMap[i][j];
+
         return point;
     }
 
