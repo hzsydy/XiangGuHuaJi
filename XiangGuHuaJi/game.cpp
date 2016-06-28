@@ -20,10 +20,18 @@ Game::~Game()
 
 bool Game::Run()
 {
-    vector<cv::Mat> MilitaryCommandList;
-    vector<vector<TDiplomaticCommand> > DiplomaticCommandMap;
+    vector<cv::Mat/*TMatMilitary*/>     MilitaryCommandList(PlayerSize);
+    vector<vector<TDiplomaticCommand> > DiplomaticCommandMap(PlayerSize);
 
     //0. 预处理 & 每一个玩家行动
+    for (TId id=0; id<PlayerSize; ++id)
+    {
+        cv::Mat/*TMatMilitary*/	    MilitaryCommand_;
+        vector<TDiplomaticCommand>  DiplomaticCommand;
+        players[id].Run(*this, MilitaryCommand_, DiplomaticCommand);
+        MilitaryCommandList[id]     = MilitaryCommand_;
+        DiplomaticCommandMap[id]    = DiplomaticCommand;
+    }
 
     //1.建造 处理MilitaryMapList
 

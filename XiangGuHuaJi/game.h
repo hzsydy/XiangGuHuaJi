@@ -21,7 +21,6 @@
 #include<opencv2/opencv.hpp>
 
 #include"definition.h"
-#include"matrix.hpp"
 
 #include"map.h"
 #include"player.h"
@@ -49,7 +48,7 @@ public:
     cv::Mat             DefensePointsMap_;
     vector<vector<vector<TMilitary > > >	MilitaryMap;
     vector<vector<vector<TAttack > > >	    AttackPointsMap;
-    vector<vector<TDefense> >	            DefensePoints;
+    vector<vector<TDefense> >	            DefensePointsMap;
 
     vector<cv::Mat>     OwnershipMasks_;
     vector<TPlayerInfo>	PlayerInfoList;

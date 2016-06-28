@@ -12,7 +12,6 @@
 #include<opencv2/opencv.hpp>
 
 #include"definition.h"
-#include"matrix.hpp"
 
 #include"ai.h"
 #include"game.h"
@@ -33,11 +32,11 @@ public:
     ~Player();
 
     void Run(
-        Game&       game,
-        cv::Mat&    MilitaryCommamd,
+        Game&                       game,
+        cv::Mat&                    MilitaryCommamd,
         vector<TDiplomaticCommand>& DiplomaticCommandList);
 
-    inline bool isValid() { return Valid; }
+    inline bool     isValid() { return Valid; }
 
 private:
     TPlayerAi       player_ai;

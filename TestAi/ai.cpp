@@ -4,7 +4,6 @@
 
 #include "ai.h"
 
-
 void player_ai(Info& info)
 {
     TSaving mySaving = info.saving;
@@ -15,7 +14,7 @@ void player_ai(Info& info)
         for (TMapSize j=0; j<info.y; ++j)
         {
             if (mySaving<1) break;
-            if (info.control[i][j])
+            if (info.ControlMask[i][j])
             { 
                 info.MilitaryCommand[i][j] += 1;
                 mySaving -= 1;
@@ -25,7 +24,7 @@ void player_ai(Info& info)
 
     for (TId i=0; i<info.PlayerSize; ++i)
     {
-        if (info.DiplomaticMap[info.id][i] != TDiplomaticStatus::War)
+        if (info.Diplomatic[info.id][i] != TDiplomaticStatus::War)
             info.DiplomaticCommandList[i] = TDiplomaticCommand::AskForUnion;
         else
             info.DiplomaticCommandList[i] = TDiplomaticCommand::ClaimWar;

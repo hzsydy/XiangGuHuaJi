@@ -89,6 +89,7 @@
     <Library Include="lib_json.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="converter.hpp" />
     <ClInclude Include="definition.h" />
     <ClInclude Include="json\assertions.h" />
     <ClInclude Include="json\autolink.h" />
@@ -105,7 +106,6 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="info.hpp" />
     <ClInclude Include="map.h" />
-    <ClInclude Include="matrix.hpp" />
     <ClInclude Include="player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
