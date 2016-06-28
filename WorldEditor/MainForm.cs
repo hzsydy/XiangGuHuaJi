@@ -7,19 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows;
 
 namespace WorldEditor
 {
     public partial class MainForm : Form
     {
-        Map map;
-        LandScapeForm landscapeForm;
-        const string landscapeJsonName = "landscape.json";
 
-        public List<Landscape> landscapes { get; set; }
-
-        const int maxSize = 100;
-
+        #region UI 
         public MainForm()
         {
             InitializeComponent();
@@ -29,6 +24,7 @@ namespace WorldEditor
         {
             landscapeForm = new LandScapeForm(this);
             landscapes = MapParser.readLandscape(landscapeJsonName);
+            refreshComboBox();
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -46,7 +42,15 @@ namespace WorldEditor
             }
             if (rows > 0 && rows < maxSize && cols > 0 && cols < maxSize)
             {
-                map = new Map(rows, cols);
+                if (landscapes.Count > 0)
+                {
+                    map = new Map(rows, cols, landscapes[0]);
+                }
+                else
+                {
+                    map = new Map(rows, cols, new Landscape());
+                }
+                DrawMap();
             }
             else
             {
@@ -65,7 +69,8 @@ namespace WorldEditor
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 localFilePath = openFileDialog.FileName.ToString();
-                MapParser.readMap(localFilePath, out map);
+                map = MapParser.readMap(localFilePath);
+                DrawMap();
             }
 
         }
@@ -95,11 +100,6 @@ namespace WorldEditor
             newToolStripMenuItem_Click(this, e);
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void buttonLandScape_Click(object sender, EventArgs e)
         {
             landscapeForm.Show();
@@ -109,9 +109,12 @@ namespace WorldEditor
         void refreshComboBox()
         {
             comboBox1.Items.Clear();
-            foreach (var ls in landscapes)
+            if (landscapes != null)
             {
-                comboBox1.Items.Add(ls.Name);
+                foreach (var ls in landscapes)
+                {
+                    comboBox1.Items.Add(ls.Name);
+                }
             }
         }
 
@@ -121,11 +124,88 @@ namespace WorldEditor
                 refreshComboBox();
             base.SetVisibleCore(value);
         }
+        #endregion
 
-        private void MainForm_MouseClick(object sender, MouseEventArgs e)
+        Map map { get; set; }
+        Bitmap mapImage { get; set; }
+
+        LandScapeForm landscapeForm;
+        const string landscapeJsonName = "landscape.json";
+        public List<Landscape> landscapes { get; set; }
+
+        const int maxSize = 50;
+
+        const int mapStartX = 140;
+        const int mapStartY = 30;
+        const int mapSquareSize = 12;
+        const int mapSquareDist = 13;
+
+        int selectX { get; set; }
+        int selectY { get; set; }
+
+
+        void DrawMap()
         {
-
+            int rows = map.rows;
+            int cols = map.cols;
+            mapImage = new Bitmap(cols * mapSquareDist, rows * mapSquareDist);
+            Graphics g = Graphics.FromImage(mapImage);
+            g.Clear(this.BackColor);
+            for (int i = 0; i < cols; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    using (var brush = new System.Drawing.SolidBrush(map.landscape[i, j].LandColor))
+                    {
+                        Rectangle r = new Rectangle(
+                            i * mapSquareDist,
+                            j * mapSquareDist,
+                            mapSquareSize,
+                            mapSquareSize
+                        );
+                        g.FillRectangle(brush, r);
+                    }
+                }
+            }
+            g.Dispose();
+            pictureBox1.Width = mapImage.Width;
+            pictureBox1.Height = mapImage.Height;
+            pictureBox1.Image = mapImage;
+            textBoxRows.Text = rows.ToString();
+            textBoxCols.Text = cols.ToString();
         }
-        
+
+        private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
+        {
+            selectX = e.X / mapSquareDist;
+            selectY = e.Y / mapSquareDist;
+            labelPosX.Text = "当前横坐标:" + selectX.ToString();
+            labelPosY.Text = "当前纵坐标:" + selectY.ToString();
+            int index = landscapes.FindIndex(ls => ls.Equals(map.landscape[selectX, selectY]));
+            comboBox1.SelectedIndex = index;
+            textBoxRes.Text = map.resources[selectX, selectY].ToString();
+        }
+
+        private void textBoxRes_TextChanged(object sender, EventArgs e)
+        {
+            int res;
+            try
+            {
+                res = Convert.ToInt32(textBoxRes.Text);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("请不要用不是数字的东西来日地图编辑器");
+                return;
+            }
+            map.resources[selectX, selectY] = res;
+            DrawMap();
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            map.landscape[selectX, selectY] = landscapes[comboBox1.SelectedIndex].Clone();
+            DrawMap();
+        }
     }
 }

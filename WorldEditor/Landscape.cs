@@ -22,5 +22,27 @@ namespace WorldEditor
             Effect = p_effect;
             LandColor = p_color;
         }
+
+        public Landscape()
+            : this("", 100, 100, 0, Color.White)
+        {
+            ;
+        }
+
+        public Landscape Clone()
+        {
+            return new Landscape(Name, Attack, Defense, Effect, LandColor);
+        }
+
+        public override bool Equals(object obj)
+        {
+            Landscape ls = (Landscape)obj;
+            return (
+                ls.Defense == Defense &&
+                ls.Attack == Attack &&
+                ls.Effect == Effect &&
+                ls.Name == Name
+            );
+        }
     }
 }

@@ -29,12 +29,13 @@ namespace WorldEditor
             }
         }
 
-        public static void readMap(string filename, out Map m)
+        public static Map readMap(string filename)
         {
             StreamReader sr = new StreamReader(filename);
             string str = sr.ReadToEnd();
-            m = JsonConvert.DeserializeObject<Map>(str);
+            Map m = JsonConvert.DeserializeObject<Map>(str);
             sr.Close();
+            return m;
         }
 
         public static void writeLandscape(string filename, List<Landscape> l)

@@ -40,16 +40,18 @@
             this.textBoxCols = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.textBoxRes = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.buttonLandScape = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.labelPosY = new System.Windows.Forms.Label();
             this.labelPosX = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBoxRes = new System.Windows.Forms.TextBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip2
@@ -58,7 +60,7 @@
             this.fileToolStripMenuItem});
             this.menuStrip2.Location = new System.Drawing.Point(0, 0);
             this.menuStrip2.Name = "menuStrip2";
-            this.menuStrip2.Size = new System.Drawing.Size(531, 25);
+            this.menuStrip2.Size = new System.Drawing.Size(600, 25);
             this.menuStrip2.TabIndex = 1;
             this.menuStrip2.Text = "menuStrip2";
             // 
@@ -167,6 +169,24 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "地形";
             // 
+            // textBoxRes
+            // 
+            this.textBoxRes.Location = new System.Drawing.Point(54, 87);
+            this.textBoxRes.Name = "textBoxRes";
+            this.textBoxRes.Size = new System.Drawing.Size(61, 21);
+            this.textBoxRes.TabIndex = 4;
+            this.textBoxRes.Text = "0";
+            this.textBoxRes.TextChanged += new System.EventHandler(this.textBoxRes_TextChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 90);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(29, 12);
+            this.label4.TabIndex = 5;
+            this.label4.Text = "资源";
+            // 
             // buttonLandScape
             // 
             this.buttonLandScape.Location = new System.Drawing.Point(8, 119);
@@ -213,28 +233,21 @@
             this.labelPosX.TabIndex = 0;
             this.labelPosX.Text = "当前横坐标";
             // 
-            // label4
+            // pictureBox1
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 90);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(29, 12);
-            this.label4.TabIndex = 5;
-            this.label4.Text = "资源";
-            // 
-            // textBoxRes
-            // 
-            this.textBoxRes.Location = new System.Drawing.Point(54, 87);
-            this.textBoxRes.Name = "textBoxRes";
-            this.textBoxRes.Size = new System.Drawing.Size(61, 21);
-            this.textBoxRes.TabIndex = 4;
-            this.textBoxRes.Text = "0";
+            this.pictureBox1.Location = new System.Drawing.Point(132, 34);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(376, 295);
+            this.pictureBox1.TabIndex = 5;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseClick);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(531, 444);
+            this.ClientSize = new System.Drawing.Size(600, 477);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip2);
@@ -242,13 +255,13 @@
             this.Text = "自动化系香菇滑稽大赛 地图编辑器";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseClick);
             this.menuStrip2.ResumeLayout(false);
             this.menuStrip2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -275,6 +288,7 @@
         private System.Windows.Forms.Button buttonLandScape;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox textBoxRes;
+        private System.Windows.Forms.PictureBox pictureBox1;
 
     }
 }
