@@ -41,7 +41,8 @@ namespace WorldEditor
                 ls.Defense == Defense &&
                 ls.Attack == Attack &&
                 ls.Effect == Effect &&
-                ls.Name == Name
+                ls.Name == Name &&
+                ls.LandColor == LandColor
             );
         }
     }

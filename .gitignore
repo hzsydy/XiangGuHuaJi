@@ -4,7 +4,7 @@ Debug/
 *.props
 *.opensdf
 *.suo
-fuck.*
+fuck*
 
 # Compiled Object files
 *.slo

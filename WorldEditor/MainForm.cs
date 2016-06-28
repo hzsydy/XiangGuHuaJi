@@ -182,7 +182,14 @@ namespace WorldEditor
             labelPosX.Text = "当前横坐标:" + selectX.ToString();
             labelPosY.Text = "当前纵坐标:" + selectY.ToString();
             int index = landscapes.FindIndex(ls => ls.Equals(map.landscape[selectX, selectY]));
-            comboBox1.SelectedIndex = index;
+            if (index != -1)
+            {
+                comboBox1.SelectedIndex = index;
+            }
+            else
+            {
+                comboBox1.SelectedIndex = -1;
+            }
             textBoxRes.Text = map.resources[selectX, selectY].ToString();
         }
 
@@ -204,8 +211,11 @@ namespace WorldEditor
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            map.landscape[selectX, selectY] = landscapes[comboBox1.SelectedIndex].Clone();
-            DrawMap();
+            if (comboBox1.SelectedIndex != -1)
+            {
+                map.landscape[selectX, selectY] = landscapes[comboBox1.SelectedIndex].Clone();
+                DrawMap();
+            }
         }
     }
 }

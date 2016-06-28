@@ -13,16 +13,13 @@ namespace WorldEditor
     public partial class LandScapeForm : Form
     {
         MainForm mainform;
-
-        public LandScapeForm()
-        {
-            InitializeComponent();
-        }
+        int lastindex { get; set; }
 
         public LandScapeForm(MainForm mf)
         {
             InitializeComponent();
             mainform = mf;
+            lastindex = -1;
         }
 
         Landscape getNewLandscape()
@@ -49,13 +46,12 @@ namespace WorldEditor
             this.Hide();
         }
 
-        void changeLandscape()
+        void changeLandscape(int index)
         {
-            int index = listBox1.SelectedIndex;
             if (index != -1)
             {
                 var ls = getNewLandscape();
-                if (ls != null)
+                if (ls != null && !ls.Equals(mainform.landscapes[index]))
                 {
                     mainform.landscapes[index] = ls;
                     listBox1.Items[index] = ls.Name;
@@ -105,13 +101,13 @@ namespace WorldEditor
             {
                 labelColor.BackColor = colorDialog1.Color;
             }
-            changeLandscape();
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            changeLandscape(lastindex);
             int index = listBox1.SelectedIndex;
-            if (index != -1)
+            if (index != -1 && index != lastindex)
             {
                 var ls = mainform.landscapes[index];
                 textBoxName.Text = ls.Name;
@@ -120,13 +116,7 @@ namespace WorldEditor
                 textBoxEffect.Text = ls.Effect.ToString();
                 labelColor.BackColor = ls.LandColor;
             }
-            else
-            {
-                textBoxName.Text = "";
-                textBoxAttack.Text = "";
-                textBoxDefend.Text = "";
-                textBoxEffect.Text = "";
-            }
+            lastindex = index;
         }
 
         private void LandScapeForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -136,22 +126,22 @@ namespace WorldEditor
 
         private void textBoxName_TextChanged(object sender, EventArgs e)
         {
-            changeLandscape();
+            ;
         }
 
         private void textBoxAttack_TextChanged(object sender, EventArgs e)
         {
-            changeLandscape();
+            ;
         }
 
         private void textBoxDefend_TextChanged(object sender, EventArgs e)
         {
-            changeLandscape();
+            ;
         }
 
         private void textBoxEffect_TextChanged(object sender, EventArgs e)
         {
-            changeLandscape();
+            ;
         }
 
     }
