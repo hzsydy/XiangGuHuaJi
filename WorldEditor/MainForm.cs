@@ -13,6 +13,8 @@ namespace WorldEditor
     public partial class MainForm : Form
     {
         Map map;
+        LandScapeForm landscapeForm;
+        const string landscapeJsonName = "landscape.json";
 
         public List<Landscape> landscapes { get; set; }
 
@@ -25,6 +27,8 @@ namespace WorldEditor
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            landscapeForm = new LandScapeForm(this);
+            landscapes = MapParser.readLandscape(landscapeJsonName);
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -55,8 +59,8 @@ namespace WorldEditor
         {
             string localFilePath = String.Empty;
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
-            openFileDialog.FilterIndex = 2;
+            openFileDialog.Filter = "地图json(*.json)|*.json|所有文件(*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
             openFileDialog.RestoreDirectory = true;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -70,8 +74,8 @@ namespace WorldEditor
         {
             string localFilePath = String.Empty;
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "文本文件(*.txt)|*.txt|所有文件(*.*)|*.*";
-            saveFileDialog.FilterIndex = 2;
+            saveFileDialog.Filter = "地图json(*.json)|*.json|所有文件(*.*)|*.*";
+            saveFileDialog.FilterIndex = 1;
             saveFileDialog.RestoreDirectory = true;
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -80,13 +84,9 @@ namespace WorldEditor
             }
         }
 
-        private void MainForm_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            MapParser.writeLandscape(landscapeJsonName, landscapes);
             Environment.Exit(0);
         }
 
@@ -94,5 +94,38 @@ namespace WorldEditor
         {
             newToolStripMenuItem_Click(this, e);
         }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonLandScape_Click(object sender, EventArgs e)
+        {
+            landscapeForm.Show();
+            this.Hide();
+        }
+
+        void refreshComboBox()
+        {
+            comboBox1.Items.Clear();
+            foreach (var ls in landscapes)
+            {
+                comboBox1.Items.Add(ls.Name);
+            }
+        }
+
+        protected override void SetVisibleCore(bool value)
+        {
+            if(value)
+                refreshComboBox();
+            base.SetVisibleCore(value);
+        }
+
+        private void MainForm_MouseClick(object sender, MouseEventArgs e)
+        {
+
+        }
+        
     }
 }

@@ -41,6 +41,8 @@
             this.buttonNew = new System.Windows.Forms.Button();
             this.buttonDel = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.label5 = new System.Windows.Forms.Label();
+            this.labelColor = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // buttonOK
@@ -68,6 +70,7 @@
             this.textBoxName.Name = "textBoxName";
             this.textBoxName.Size = new System.Drawing.Size(89, 21);
             this.textBoxName.TabIndex = 2;
+            this.textBoxName.TextChanged += new System.EventHandler(this.textBoxName_TextChanged);
             // 
             // textBoxAttack
             // 
@@ -75,6 +78,8 @@
             this.textBoxAttack.Name = "textBoxAttack";
             this.textBoxAttack.Size = new System.Drawing.Size(89, 21);
             this.textBoxAttack.TabIndex = 4;
+            this.textBoxAttack.Text = "0";
+            this.textBoxAttack.TextChanged += new System.EventHandler(this.textBoxAttack_TextChanged);
             // 
             // label2
             // 
@@ -91,6 +96,8 @@
             this.textBoxDefend.Name = "textBoxDefend";
             this.textBoxDefend.Size = new System.Drawing.Size(89, 21);
             this.textBoxDefend.TabIndex = 6;
+            this.textBoxDefend.Text = "0";
+            this.textBoxDefend.TextChanged += new System.EventHandler(this.textBoxDefend_TextChanged);
             // 
             // label3
             // 
@@ -107,6 +114,8 @@
             this.textBoxEffect.Name = "textBoxEffect";
             this.textBoxEffect.Size = new System.Drawing.Size(89, 21);
             this.textBoxEffect.TabIndex = 8;
+            this.textBoxEffect.Text = "0";
+            this.textBoxEffect.TextChanged += new System.EventHandler(this.textBoxEffect_TextChanged);
             // 
             // label4
             // 
@@ -126,6 +135,7 @@
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(132, 184);
             this.listBox1.TabIndex = 9;
+            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
             // buttonNew
             // 
@@ -151,11 +161,34 @@
             // 
             this.colorDialog1.AnyColor = true;
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(167, 166);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(29, 12);
+            this.label5.TabIndex = 12;
+            this.label5.Text = "颜色";
+            // 
+            // labelColor
+            // 
+            this.labelColor.AutoSize = true;
+            this.labelColor.BackColor = System.Drawing.Color.Red;
+            this.labelColor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.labelColor.Location = new System.Drawing.Point(202, 166);
+            this.labelColor.Name = "labelColor";
+            this.labelColor.Size = new System.Drawing.Size(25, 14);
+            this.labelColor.TabIndex = 13;
+            this.labelColor.Text = "   ";
+            this.labelColor.Click += new System.EventHandler(this.labelColor_Click);
+            // 
             // LandScapeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(323, 243);
+            this.Controls.Add(this.labelColor);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.buttonDel);
             this.Controls.Add(this.buttonNew);
             this.Controls.Add(this.listBox1);
@@ -170,7 +203,7 @@
             this.Controls.Add(this.buttonOK);
             this.Name = "LandScapeForm";
             this.Text = "地形编辑器";
-            this.Load += new System.EventHandler(this.LandScapeForm_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LandScapeForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -191,5 +224,7 @@
         private System.Windows.Forms.Button buttonNew;
         private System.Windows.Forms.Button buttonDel;
         private System.Windows.Forms.ColorDialog colorDialog1;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label labelColor;
     }
 }

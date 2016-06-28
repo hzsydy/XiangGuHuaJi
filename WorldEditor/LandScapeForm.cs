@@ -12,6 +12,8 @@ namespace WorldEditor
 {
     public partial class LandScapeForm : Form
     {
+        MainForm mainform;
+
         public LandScapeForm()
         {
             InitializeComponent();
@@ -19,10 +21,11 @@ namespace WorldEditor
 
         public LandScapeForm(MainForm mf)
         {
-
+            InitializeComponent();
+            mainform = mf;
         }
 
-        private void buttonOK_Click(object sender, EventArgs e)
+        Landscape getNewLandscape()
         {
             string name = textBoxName.Text;
             int attack, defense, effect;
@@ -35,24 +38,120 @@ namespace WorldEditor
             catch (System.Exception ex)
             {
                 MessageBox.Show("请不要用不是数字的东西来日地图编辑器");
-                return;
+                return null;
             }
-            
+            return new Landscape(name, attack, defense, effect, labelColor.BackColor);
+        }
+
+        private void buttonOK_Click(object sender, EventArgs e)
+        {
+            mainform.Show();
+            this.Hide();
+        }
+
+        void changeLandscape()
+        {
+            int index = listBox1.SelectedIndex;
+            if (index != -1)
+            {
+                var ls = getNewLandscape();
+                if (ls != null)
+                {
+                    mainform.landscapes[index] = ls;
+                    listBox1.Items[index] = ls.Name;
+                }
+            }
         }
 
         private void buttonDel_Click(object sender, EventArgs e)
         {
-
+            int index = listBox1.SelectedIndex;
+            if (index != -1)
+            {
+                mainform.landscapes.RemoveAt(index);
+                listBox1.Items.RemoveAt(index);
+            }
         }
 
         private void buttonNew_Click(object sender, EventArgs e)
         {
-
+            var ls = getNewLandscape();
+            if (ls != null)
+            {
+                mainform.landscapes.Add(ls);
+                listBox1.Items.Add(ls.Name);
+            }
         }
 
-        private void LandScapeForm_Load(object sender, EventArgs e)
+        void refreshListbox()
         {
+            listBox1.Items.Clear();
+            foreach (Landscape ls in mainform.landscapes)
+            {
+                listBox1.Items.Add(ls.Name);
+            }
+        }
 
+        protected override void SetVisibleCore(bool value)
+        {
+            if (value)
+                refreshListbox();
+            base.SetVisibleCore(value);
+        }
+
+        private void labelColor_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                labelColor.BackColor = colorDialog1.Color;
+            }
+            changeLandscape();
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = listBox1.SelectedIndex;
+            if (index != -1)
+            {
+                var ls = mainform.landscapes[index];
+                textBoxName.Text = ls.Name;
+                textBoxAttack.Text = ls.Attack.ToString();
+                textBoxDefend.Text = ls.Defense.ToString();
+                textBoxEffect.Text = ls.Effect.ToString();
+                labelColor.BackColor = ls.LandColor;
+            }
+            else
+            {
+                textBoxName.Text = "";
+                textBoxAttack.Text = "";
+                textBoxDefend.Text = "";
+                textBoxEffect.Text = "";
+            }
+        }
+
+        private void LandScapeForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            mainform.Show();
+        }
+
+        private void textBoxName_TextChanged(object sender, EventArgs e)
+        {
+            changeLandscape();
+        }
+
+        private void textBoxAttack_TextChanged(object sender, EventArgs e)
+        {
+            changeLandscape();
+        }
+
+        private void textBoxDefend_TextChanged(object sender, EventArgs e)
+        {
+            changeLandscape();
+        }
+
+        private void textBoxEffect_TextChanged(object sender, EventArgs e)
+        {
+            changeLandscape();
         }
 
     }
