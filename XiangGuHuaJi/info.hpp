@@ -31,7 +31,10 @@ class Info
 {
 public:
     Info(
-        TId id, TRound round, TMapSize x, TMapSize y, TId PlayerSize,
+        const TId id, 
+        const TRound round, 
+        const TMapSize x, const TMapSize y, 
+        const TId PlayerSize,
         unsigned char **  mask,
         unsigned char **  control,
         TMapPara **  MapResource,
@@ -41,16 +44,16 @@ public:
         vector<TMilitary**> MilitaryMap,
         vector<TAttack**> AttackPointsMap,
         TDefense ** DefensePointsMap,
-        vector<PlayerInfo> PlayerList,
-        DiplomaticStatus ** DiplomaticMap,
-        vector<DiplomaticCommand> & DiplomaticCommandList,
+        vector<TPlayerInfo> PlayerInfoList,
+        TDiplomaticStatus ** DiplomaticMap,
+        vector<TDiplomaticCommand> & DiplomaticCommandList,
         vector<vector<TMilitary> > & MilitaryCommand)
         :
-        id(id), round(round), x(x), y(y), PlayerSize(PlayerSize), saving(PlayerList[id].Saving),
+        id(id), round(round), x(x), y(y), PlayerSize(PlayerSize), saving(PlayerInfoList[id].Saving),
         mask(mask), control(control), DiplomaticMap(DiplomaticMap), Ownership(Ownership),
         MapResource(MapResource), MapDefenseRatio(MapDefenseRatio), MapAttackRatio(MapAttackRatio),
         MilitaryMap(MilitaryMap), AttackPointsMap(AttackPointsMap), DefensePointsMap(DefensePointsMap),
-        PlayerList(PlayerList),
+        PlayerInfoList(PlayerInfoList),
         DiplomaticCommandList(DiplomaticCommandList), MilitaryCommand(MilitaryCommand)
     {
         for (TId i=0; i<PlayerSize; ++i) DiplomaticCommandList[i] = KeepNeutral;
@@ -65,7 +68,7 @@ public:
     const unsigned char*const*const     mask;    //当前可见地区
     const unsigned char*const*const     control; //你可以放兵的地区
 
-    const DiplomaticStatus*const*const DiplomaticMap; //全体外交状态
+    const TDiplomaticStatus*const*const DiplomaticMap; //全体外交状态
     const TId*const*const      Ownership;             //地图主权
     const TMapPara*const*const MapResource;     //地图资源参数
     const TMapPara*const*const MapAttackRatio;  //地图攻击参数
@@ -92,13 +95,13 @@ public:
         return point;
     }
     //获取一个玩家的信息
-    PlayerInfo getPlayerInfo(TId targetId)
+    TPlayerInfo getPlayerInfo(TId targetId)
     {
-        PlayerInfo player;
+        TPlayerInfo player;
         player.id = -1;
         if (targetId<0 || targetId>=PlayerSize) return player;
         
-        player = PlayerList[targetId];
+        player = PlayerInfoList[targetId];
         switch (DiplomaticMap[id][targetId])
         {
         case Undiscovered:
@@ -121,7 +124,7 @@ public:
 
 //可供写的信息
 
-    vector<DiplomaticCommand> & DiplomaticCommandList;
+    vector<TDiplomaticCommand> & DiplomaticCommandList;
     vector<vector<TMilitary> > & MilitaryCommand;
 
 private:
@@ -129,7 +132,7 @@ private:
     vector<TMilitary**>   MilitaryMap;
     vector<TAttack**>     AttackPointsMap;
     TDefense**            DefensePointsMap;
-    vector<PlayerInfo>    PlayerList;
+    vector<TPlayerInfo>    PlayerInfoList;
 };
 
 

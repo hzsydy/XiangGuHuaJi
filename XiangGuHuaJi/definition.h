@@ -6,6 +6,7 @@
 #define _XIANGGUHUAJI_DEFINITION_H__
 
 typedef unsigned char TId;       //玩家Id
+#define TMatId CV_8UC1
 typedef unsigned char TMapSize;  //地图尺寸(x,y)
 typedef unsigned int  TMapArea;  //地图面积
 typedef unsigned int  TRound;    //回合数
@@ -24,7 +25,7 @@ typedef unsigned char TMilitary; //一个点放置的兵力
 typedef unsigned int  TMilitarySummary; //玩家的总兵力
 
 //外交关系
-enum DiplomaticStatus
+enum TDiplomaticStatus
 {
     Undiscovered, //未知国家
     Neutral, //中立
@@ -33,7 +34,7 @@ enum DiplomaticStatus
     StopWar  //停战
 };
 //外交指令
-enum DiplomaticCommand
+enum TDiplomaticCommand
 {
     KeepNeutral, //保持中立
     AskForUnion, //请求同盟
@@ -41,7 +42,7 @@ enum DiplomaticCommand
 };
 
 //玩家信息
-struct PlayerInfo
+struct TPlayerInfo
 {    
     TId id; //玩家ID
     bool Visible; //辅助参考信息: 此玩家基本信息是否对你可见

@@ -33,21 +33,16 @@ public:
     ~Player();
 
     void Run(
-    Game&               game,
-    Map&                map,
-    TId **              Ownership,
-    vector<TMilitary**> MilitaryMap,
-    vector<TAttack**>   AttckPointsMap,
-    TDefense**          DefenseMap,
-    cv::Mat&            MilitaryCommamd,
-    vector<DiplomaticCommand>& DiplomaticCommandList);
+        Game&       game,
+        cv::Mat&    MilitaryCommamd,
+        vector<TDiplomaticCommand>& DiplomaticCommandList);
 
     inline bool isValid() { return Valid; }
 
 private:
     TPlayerAi       player_ai;
     string          file_name;
-    int             id;
+    TId             id;
     bool            Valid;
 };
 

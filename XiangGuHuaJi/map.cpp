@@ -17,9 +17,9 @@ Map::Map(int x, int y)
     MapAttackRatio  = cv::Mat(x, y, TMatMapPara);
     MapDefenseRatio = cv::Mat(x, y, TMatMapPara);
 
-    MMapResource     = newCopyMatrix<TMapPara>(MapResource);
-    MMapDefenseRatio = newCopyMatrix<TMapPara>(MapAttackRatio);
-    MMapAttackRatio  = newCopyMatrix<TMapPara>(MapDefenseRatio);
+    //MMapResource     = newCopyMatrix<TMapPara>(MapResource);
+    //MMapDefenseRatio = newCopyMatrix<TMapPara>(MapAttackRatio);
+    //MMapAttackRatio  = newCopyMatrix<TMapPara>(MapDefenseRatio);
 
 }
 
@@ -30,9 +30,9 @@ Map::Map(string file_name)
 
 Map::~Map()
 {
-    releaseMatrix<TMapPara>(MMapResource, x, y);
+    /*releaseMatrix<TMapPara>(MMapResource, x, y);
     releaseMatrix<TMapPara>(MMapDefenseRatio, x, y);
-    releaseMatrix<TMapPara>(MMapAttackRatio, x, y);
+    releaseMatrix<TMapPara>(MMapAttackRatio, x, y);*/
 }
 
 }

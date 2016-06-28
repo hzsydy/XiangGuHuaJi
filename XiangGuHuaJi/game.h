@@ -41,23 +41,23 @@ public:
 
     bool Run();
 
-    TRound       round;
-    const TId    PlayerSize;
-    
-    TMapSize     x,y;
-
     Map&                map;
-    vector<cv::Mat>     MilitaryMap;
-    cv::Mat             DefensePointsMap;
-    vector<cv::Mat>     AttackPointsMap;
-    vector<PlayerInfo>  PlayerInfoList;
-    cv::Mat             Ownership;
+    vector<Player>&     players;
 
-    DiplomaticStatus**  DiplomaticMap;
+    vector<cv::Mat>     MilitaryMap_;
+    vector<cv::Mat>     AttackPointsMap_;
+    cv::Mat             DefensePointsMap_;
+    vector<vector<vector<TMilitary > > >	MilitaryMap;
+    vector<vector<vector<TAttack > > >	    AttackPointsMap;
+    vector<vector<TDefense> >	            DefensePoints;
+
+    vector<cv::Mat>     OwnershipMasks_;
+    vector<TPlayerInfo>	PlayerInfoList;
+    vector<vector<TDiplomaticStatus> >	Diplomatic;
+    TRound              Round;
+    TId                 PlayerSize;
 
 private:
-    
-    vector<Player>& players;
 
 };
 

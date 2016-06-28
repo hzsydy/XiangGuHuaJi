@@ -25,10 +25,10 @@ void player_ai(Info& info)
 
     for (TId i=0; i<info.PlayerSize; ++i)
     {
-        if (info.DiplomaticMap[info.id][i] != DiplomaticStatus::War)
-            info.DiplomaticCommandList[i] = DiplomaticCommand::AskForUnion;
+        if (info.DiplomaticMap[info.id][i] != TDiplomaticStatus::War)
+            info.DiplomaticCommandList[i] = TDiplomaticCommand::AskForUnion;
         else
-            info.DiplomaticCommandList[i] = DiplomaticCommand::ClaimWar;
+            info.DiplomaticCommandList[i] = TDiplomaticCommand::ClaimWar;
     }
 
 }
