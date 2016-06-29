@@ -27,10 +27,10 @@ public:
     Map();
     ~Map();
 
-    TMapSize	x, y;
+    TMapSize	rows, cols;
 
     cv::Mat/*TMatMapPara*/	    MapResource_, MapDefenseRatio_, MapAttackRatio_;
-    vector<vector<TMapPara> >	MapResource, MapDefenseRatio, MapAttackRatio;
+    vector<vector<TMapPara> >	MapResource, MapDefenseRatio, MapAttackRatio; //[x][y]
 
 	//装载指定文件名的地图。返回装载成功时true。
 	bool load(string file_name);

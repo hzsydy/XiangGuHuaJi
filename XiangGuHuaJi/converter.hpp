@@ -17,31 +17,41 @@ using namespace std;
 
 template<typename T> void convertMat(cv::Mat mat, vector<vector<T> >& vec)
 {
-    vec.resize(mat.rows);
-    for (TMapSize i=0; i<mat.rows; ++i)
-    {
-        vec[i].resize(mat.cols);
-        for (TMapSize j=0; j<mat.cols; ++j) vec[i][j]=mat.at<T>(i, j);
-    }
+	int fuck = mat.at<T>(0, 0);
+    vec.resize(mat.cols);
+	for (TMapSize j=0; j<mat.cols; ++j)
+	{
+		vec[j].resize(mat.rows);
+		for (TMapSize i=0; i<mat.rows; ++i)
+		{
+			vec[j][i]=mat.at<T>(i, j);
+		}
+	}
+    
 }
 
 template<typename T> void resizeVector(vector<vector<T> >&vec, cv::Mat mat)
 {
-    vec.resize(mat.rows);
-    for (TMapSize i=0; i<mat.rows; ++i) vec[i].resize(mat.cols);
+	vec.resize(mat.cols);
+	for (TMapSize j=0; j<mat.cols; ++j)
+		vec[j].resize(mat.rows);
 }
 
 template<typename T> bool convertVector(vector<vector<T> >& vec, cv::Mat mat)
 {
     try
     {
-        for (TMapSize i=0; i<mat.rows; ++i)
-            for (TMapSize j=0; j<mat.cols; ++j)
-                mat.at<T>(i,j) = vec[i][j];
+		for (TMapSize j=0; j<mat.cols; ++j)
+		{
+			for (TMapSize i=0; i<mat.rows; ++i)
+			{
+				vec[j][i]=mat.at<T>(i, j);
+			}
+		}
     }
     catch(exception e)
     {
-        cout<<"[ERROR] Failed to convert vector<vector<T> > to cv::Mat. "<<endl;
+        cerr<<"[ERROR] Failed to convert vector<vector<T> > to cv::Mat. "<<endl;
         throw e;
     }
     return true;

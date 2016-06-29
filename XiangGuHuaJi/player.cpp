@@ -46,8 +46,8 @@ void Player::Run(
     Info info(
         id,
         game.Round,
-        game.map.x,
-        game.map.y,
+        game.map.rows,
+        game.map.cols,
         game.PlayerSize,
         OwnershipMask,
         VisibleMask,

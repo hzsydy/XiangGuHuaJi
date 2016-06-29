@@ -16,9 +16,11 @@ using namespace XGHJ;
 int main() 
 {
 
-    Player player("TestAi.dll", 0);
-    Map m();
-	m.load("fuck.json");
+    Map m = Map();
+	m.load("¶«²Ù.json");
+
+
+	Player player("TestAi.dll", 0);
 
     system("pause");
 	return 0;

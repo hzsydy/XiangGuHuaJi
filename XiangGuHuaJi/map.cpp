@@ -33,25 +33,28 @@ bool Map::load(string file_name)
 		return false;
 	}
 
-	x = root.get("cols", "UTF-8" ).asInt();
-	y = root.get("rows", "UTF-8" ).asInt();
+	cols = root["cols"].asInt();
+	rows = root["rows"].asInt();
 
-	MapResource = cv::Mat(x, y, TMatMapPara);
-	MapAttackRatio  = cv::Mat(x, y, TMatMapPara);
-	MapDefenseRatio = cv::Mat(x, y, TMatMapPara);
+	MapResource_ = cv::Mat(rows, cols, CV_TMapPara);
+	MapAttackRatio_  = cv::Mat(rows, cols, CV_TMapPara);
+	MapDefenseRatio_ = cv::Mat(rows, cols, CV_TMapPara);
 
-	const Json::Value resources = root["resources"];
-	const Json::Value landscape = root["landscape"];
-	for (int i=0; i<x; i++)
+	for (int i=0; i<cols; i++)
 	{
-		for (int j=0; j<y; j++)
+		for (int j=0; j<rows; j++)
 		{
-			MapResource.at<TMatMapPara>(j, i) = (TMatMapPara)(resources[i][j].asUInt());
-			MapAttackRatio.at<TMatMapPara>(j, i) = (TMatMapPara)(landscape[i][j]["Attack"].asUInt());
-			MapDefenseRatio.at<TMatMapPara>(j, i) = (TMatMapPara)(landscape[i][j]["Defense"].asUInt());
+			int fuck;
+			fuck = (root["resources"][i][j]).asInt();
+			MapResource_.at<TMapPara>(j, i) = (TMapPara)(fuck);
+			fuck = (root["landscape"][i][j]["Attack"]).asInt();
+			MapAttackRatio_.at<TMapPara>(j, i) = (TMapPara)(fuck);
+			fuck = (root["landscape"][i][j]["Defense"]).asInt();
+			MapDefenseRatio_.at<TMapPara>(j, i) = (TMapPara)(fuck);
 		}
 	}
 	convertMyMat();
+	return true;
 }
 
 }

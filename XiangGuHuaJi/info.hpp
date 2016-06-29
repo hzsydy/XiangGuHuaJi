@@ -33,8 +33,8 @@ public:
     Info(
         TId             id, 
         TRound          Round, 
-        TMapSize        x,
-        TMapSize        y, 
+        TMapSize        rows,
+        TMapSize        cols, 
         TId             PlayerSize,
         vector<vector<unsigned char> >	OwnershipMask,
         vector<vector<unsigned char> >  VisibleMask,
@@ -53,7 +53,7 @@ public:
         :
         id(id),
         Round(Round),
-        x(x), y(y),
+        rows(rows), cols(cols),
         PlayerSize(PlayerSize),
         OwnershipMask(OwnershipMask),
         VisibleMask(VisibleMask),
@@ -76,7 +76,7 @@ public:
     TId       id;           //自己的ID
     TRound    Round;        //当前回合数
     TSaving   saving;       //当前库存
-    TMapSize  x, y;         //地图的尺寸
+    TMapSize  rows, cols;         //地图的尺寸
     TId       PlayerSize;   //玩家数量
     
     vector<vector<unsigned char> >  OwnershipMask;  //你的领土
