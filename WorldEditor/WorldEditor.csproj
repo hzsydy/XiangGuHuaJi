@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller.cs" />
+    <Compile Include="CSVParser.cs" />
     <Compile Include="Landscape.cs" />
     <Compile Include="LandScapeForm.cs">
       <SubType>Form</SubType>
