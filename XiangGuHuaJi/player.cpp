@@ -21,7 +21,7 @@ Player::Player()
 
 Player::Player(string file_name, int id)
     : id(id), file_name(file_name)
- {
+{
     player_ai = NULL;
 
 #ifdef _MSC_VER    
@@ -32,11 +32,14 @@ Player::Player(string file_name, int id)
     void* hDLL = dlopen(file_name.c_str(), RTLD_LAZY);
     if (NULL != hDLL) player_ai = (TPlayerAi)dlsym(hDLL, "player_ai");
 #endif
-
+    
     Valid = NULL != player_ai;
+    
+    if (NULL == hDLL) cout << "[ERROR] failed to load \"" << file_name << "\"" << endl;
+                 else cout << "Succeed to load \"" << file_name << "\". ";
 
     if (isValid())
-        cout << "Player{" << id << "} has been loaded at "<< player_ai << endl;
+        cout << "Player{" << id << "} has been loaded. " << endl;
     else
         cout << "[ERROR] failed to load Player{"<< id << "} !" << endl;
 }
@@ -73,7 +76,7 @@ void Player::Run(
         game.AttackPointsMap,
         game.DefensePointsMap,
         game.PlayerInfoList,
-        game.Diplomatic,
+        game.Diplomacy,
         MilitaryCommand,
         DiplomaticCommandList
         );

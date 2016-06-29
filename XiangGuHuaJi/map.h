@@ -32,11 +32,11 @@ public:
     cv::Mat/*TMatMapPara*/	    MapResource_, MapDefenseRatio_, MapAttackRatio_;
     vector<vector<TMapPara> >	MapResource, MapDefenseRatio, MapAttackRatio; //[x][y]
 
-	//装载指定文件名的地图。返回装载成功时true。
-	bool load(string file_name);
+	bool                load(string file_name);
+    inline cv::Size     size() { return MapResource_.size(); }
 
 private:
-    //将cv::Mat转为vector<vector<T>>, 在加载完毕后使用
+    // convert from cv::Mat to vector<vector<T> > ; remember to call it before constructor
     void convertMyMat();
 };
 

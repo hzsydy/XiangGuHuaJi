@@ -24,10 +24,10 @@ void player_ai(Info& info)
 
     for (TId i=0; i<info.PlayerSize; ++i)
     {
-        if (info.Diplomatic[info.id][i] != War)
+        if (info.Diplomacy[info.id][i] != War)
             info.DiplomaticCommandList[i] = AskForUnion;
         else
-            info.DiplomaticCommandList[i] = ClaimWar;
+            info.DiplomaticCommandList[i] = DeclareWar;
     }
 
 }

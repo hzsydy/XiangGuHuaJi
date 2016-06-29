@@ -53,12 +53,16 @@ public:
 
     vector<cv::Mat>     OwnershipMasks_;
     vector<TPlayerInfo>	PlayerInfoList;
-    vector<vector<TDiplomaticStatus> >	Diplomatic;
+    vector<vector<TDiplomaticStatus> >	Diplomacy;
     TRound              Round;
     TId                 PlayerSize;
 
-private:
+    inline bool         isValid() { return Valid; }
 
+    const static TRound MAX_ROUND;
+
+private:
+    bool                Valid;
 };
 
 }

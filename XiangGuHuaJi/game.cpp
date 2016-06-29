@@ -9,8 +9,30 @@ namespace XGHJ
 
 Game::Game(Map& map, vector<Player>& players)
     : map(map), players(players), PlayerSize(players.size()),
-    Round(0)
+      Round(0), Valid(true)
 {
+    //MilitaryMap_, AttackPointsMap_, DefensePointsMap_
+    MilitaryMap_.resize(PlayerSize);
+    AttackPointsMap_.resize(PlayerSize);
+    for (TId id=0; id<PlayerSize; ++id)
+    {
+        MilitaryMap_[id] = cv::Mat::zeros(map.size(), CV_TMilitary);
+        AttackPointsMap_[id] = cv::Mat::zeros(map.size(), CV_TAttack);        
+    }
+    DefensePointsMap_ = cv::Mat::zeros(map.size(), CV_TDefense);
+
+    //PlayerInfoList
+    PlayerInfoList.resize(PlayerSize);
+    for (TId id=0; id<PlayerSize; ++id)     
+    {
+        PlayerInfoList[id].id = id;
+        PlayerInfoList[id].MapArea = 1;
+        PlayerInfoList[id].MilitarySummary = 1; // it should be refreshed later.
+    }
+
+    //Diplomacy
+    Diplomacy.resize(PlayerSize);
+    for (TId id=0; id<PlayerSize; ++id) Diplomacy[id].resize(PlayerSize);
 }
 
 Game::~Game()
@@ -18,13 +40,15 @@ Game::~Game()
     
 }
 
+const TRound Game::MAX_ROUND = 300;
 
-//游戏逻辑
+//Game Logic
 bool Game::Run()
 {
+    cout << "Game: Round[" << Round << "] ";
+
     vector<cv::Mat/*TMatMilitary*/>     MilitaryCommandList(PlayerSize);
     vector<vector<TDiplomaticCommand> > DiplomaticCommandMap(PlayerSize);
-
     
     Run_0();
     Run_1(MilitaryCommandList, DiplomaticCommandMap);
@@ -34,13 +58,17 @@ bool Game::Run()
     Run_5();
     Run_6();
 
-    //7.更新总数据
+    //7.Update 
     ++Round;
-    
-    return true;    
+    if (Round>=MAX_ROUND) Valid=false;
+
+
+    cout << "finished" << endl;
+
+    return Valid;    
 }
 
-//0.预处理MilitaryMap,AttackPointsMap,DefensePointsMap
+//0.Initialize MilitaryMap,AttackPointsMap,DefensePointsMap
 bool Game::Run_0()
 {
     MilitaryMap.clear();
@@ -58,16 +86,16 @@ bool Game::Run_0()
     convertMat<TDefense>(DefensePointsMap_, DefensePointsMap);
     
     return true;
-}
+} 
 
-//1.每个玩家行动
+//1.Each player runs
 bool Game::Run_1(vector<cv::Mat/*TMatMilitary*/> &     MilitaryCommandList,
                  vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap )
 {    
     for (TId id=0; id<PlayerSize; ++id)
     {
         cv::Mat/*TMatMilitary*/	    MilitaryCommand_;
-        vector<TDiplomaticCommand>  DiplomaticCommand;
+        vector<TDiplomaticCommand>  DiplomaticCommand(PlayerSize);
         players[id].Run(*this, MilitaryCommand_, DiplomaticCommand);
         MilitaryCommandList[id]     = MilitaryCommand_;
         DiplomaticCommandMap[id]    = DiplomaticCommand;
@@ -75,31 +103,31 @@ bool Game::Run_1(vector<cv::Mat/*TMatMilitary*/> &     MilitaryCommandList,
 	return false; //TODO
 }
 
-//2.建造 处理MilitaryMapList
+//2.Building (Deal with MilitaryCommandList)
 bool Game::Run_2(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
     return false; //TODO
 }
 
-//3.外交 更新Diplomatic
+//3.Diplomacy (Deal with DiplomaticCommandMap)
 bool Game::Run_3(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
     return false; //TODO
 }
 
-//4.军事 更新DefensePoints,AttackPointsMap
+//4.Military (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::Run_4(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
     return false; //TODO
 }
 
-//5.经济 更新PlayerInfoList
+//5.Economy (Deal with MapResource, PlayerInfoList)
 bool Game::Run_5()
 {
     return false; //TODO
 }
 
-//6.胜负判定
+//6.Check the winner and the loser (Deal with PlayerInfoList)
 bool Game::Run_6()
 {
     return false; //TODO
