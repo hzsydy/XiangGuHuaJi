@@ -70,7 +70,6 @@
             this.textBoxName.Name = "textBoxName";
             this.textBoxName.Size = new System.Drawing.Size(89, 21);
             this.textBoxName.TabIndex = 2;
-            this.textBoxName.TextChanged += new System.EventHandler(this.textBoxName_TextChanged);
             // 
             // textBoxAttack
             // 
@@ -79,7 +78,6 @@
             this.textBoxAttack.Size = new System.Drawing.Size(89, 21);
             this.textBoxAttack.TabIndex = 4;
             this.textBoxAttack.Text = "0";
-            this.textBoxAttack.TextChanged += new System.EventHandler(this.textBoxAttack_TextChanged);
             // 
             // label2
             // 
@@ -97,7 +95,6 @@
             this.textBoxDefend.Size = new System.Drawing.Size(89, 21);
             this.textBoxDefend.TabIndex = 6;
             this.textBoxDefend.Text = "0";
-            this.textBoxDefend.TextChanged += new System.EventHandler(this.textBoxDefend_TextChanged);
             // 
             // label3
             // 
@@ -115,7 +112,6 @@
             this.textBoxEffect.Size = new System.Drawing.Size(89, 21);
             this.textBoxEffect.TabIndex = 8;
             this.textBoxEffect.Text = "0";
-            this.textBoxEffect.TextChanged += new System.EventHandler(this.textBoxEffect_TextChanged);
             // 
             // label4
             // 

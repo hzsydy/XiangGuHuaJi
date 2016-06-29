@@ -126,25 +126,5 @@ namespace WorldEditor
             changeLandscape(lastindex);
         }
 
-        private void textBoxName_TextChanged(object sender, EventArgs e)
-        {
-            ;
-        }
-
-        private void textBoxAttack_TextChanged(object sender, EventArgs e)
-        {
-            ;
-        }
-
-        private void textBoxDefend_TextChanged(object sender, EventArgs e)
-        {
-            ;
-        }
-
-        private void textBoxEffect_TextChanged(object sender, EventArgs e)
-        {
-            ;
-        }
-
     }
 }

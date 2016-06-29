@@ -48,6 +48,9 @@
             this.labelPosY = new System.Windows.Forms.Label();
             this.labelPosX = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItemLoadRes = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItemSaveRes = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -69,7 +72,10 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newToolStripMenuItem,
             this.openToolStripMenuItem,
-            this.saveToolStripMenuItem});
+            this.saveToolStripMenuItem,
+            this.toolStripMenuItem2,
+            this.ToolStripMenuItemLoadRes,
+            this.ToolStripMenuItemSaveRes});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.fileToolStripMenuItem.Text = "文件";
@@ -77,21 +83,21 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.newToolStripMenuItem.Text = "新建";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.openToolStripMenuItem.Text = "打开";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.saveToolStripMenuItem.Text = "保存";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -176,7 +182,6 @@
             this.textBoxRes.Size = new System.Drawing.Size(61, 21);
             this.textBoxRes.TabIndex = 4;
             this.textBoxRes.Text = "0";
-            this.textBoxRes.TextChanged += new System.EventHandler(this.textBoxRes_TextChanged);
             // 
             // label4
             // 
@@ -243,6 +248,26 @@
             this.pictureBox1.TabStop = false;
             this.pictureBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseClick);
             // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(166, 22);
+            this.toolStripMenuItem2.Text = "------------------";
+            // 
+            // ToolStripMenuItemLoadRes
+            // 
+            this.ToolStripMenuItemLoadRes.Name = "ToolStripMenuItemLoadRes";
+            this.ToolStripMenuItemLoadRes.Size = new System.Drawing.Size(166, 22);
+            this.ToolStripMenuItemLoadRes.Text = "加载资源分布表";
+            this.ToolStripMenuItemLoadRes.Click += new System.EventHandler(this.ToolStripMenuItemLoadRes_Click);
+            // 
+            // ToolStripMenuItemSaveRes
+            // 
+            this.ToolStripMenuItemSaveRes.Name = "ToolStripMenuItemSaveRes";
+            this.ToolStripMenuItemSaveRes.Size = new System.Drawing.Size(166, 22);
+            this.ToolStripMenuItemSaveRes.Text = "保存资源分布表";
+            this.ToolStripMenuItemSaveRes.Click += new System.EventHandler(this.ToolStripMenuItemSaveRes_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -290,6 +315,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox textBoxRes;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemLoadRes;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemSaveRes;
 
     }
 }

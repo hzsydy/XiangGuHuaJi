@@ -90,6 +90,52 @@ namespace WorldEditor
             }
         }
 
+        private void ToolStripMenuItemLoadRes_Click(object sender, EventArgs e)
+        {
+            string localFilePath = String.Empty;
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "资源csv(*.csv)|*.csv|所有文件(*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.RestoreDirectory = true;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                localFilePath = openFileDialog.FileName.ToString();
+                int rows = -1;
+                int cols = -1;
+                int[,] table = CSVParser.readIntTable(localFilePath, ref rows, ref cols);
+                if (table != null)
+                {
+                    if (rows == map.rows && cols == map.cols)
+                    {
+                        map.resources = table;
+                        DrawMap();
+                    }
+                    else
+                    {
+                        MessageBox.Show("csv文件的行列数和地图长宽不对应");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("加载csv文件出现错误");
+                }
+            }
+        }
+
+        private void ToolStripMenuItemSaveRes_Click(object sender, EventArgs e)
+        {
+            string localFilePath = String.Empty;
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "资源csv(*.csv)|*.csv|所有文件(*.*)|*.*";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.RestoreDirectory = true;
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                localFilePath = saveFileDialog.FileName.ToString();
+                CSVParser.writeIntTable(localFilePath, map.resources, map.rows, map.cols);
+            }
+        }
+
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             MapParser.writeLandscape(landscapeJsonName, landscapes);
@@ -207,11 +253,6 @@ namespace WorldEditor
             textBoxRes.Text = map.resources[selectX, selectY].ToString();
         }
 
-        private void textBoxRes_TextChanged(object sender, EventArgs e)
-        {
-            ;
-        }
-
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBox1.SelectedIndex != -1)
@@ -220,5 +261,7 @@ namespace WorldEditor
                 DrawMap();
             }
         }
+
+        
     }
 }
