@@ -43,8 +43,6 @@ void Player::Run(
     vector<vector<unsigned char> >	OwnershipMask, VisibleMask, ControlMask;
     vector<vector<TId> >	        GlobalMap;
 
-
-
     Info info(
         id,
         game.Round,
@@ -67,6 +65,16 @@ void Player::Run(
         DiplomaticCommandList
         );
 
+    try
+    {
+        player_ai(info);
+        convertVector<TMilitary>(MilitaryCommand, MilitaryCommand_);
+    }
+    catch(...)
+    {
+        cout << "[ERROR] Player " << id << " raised an exception." <<  endl;
+        Valid = false;
+    }
     
 }
 
