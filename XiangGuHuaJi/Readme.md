@@ -29,4 +29,18 @@
 - **服务器**使用 cv::Mat，利用OpenCV辅助进行游戏逻辑。
 - **参赛Ai**使用 vector<vector< T > > 类型。 
 
+# 调试环境
+
+## Windows
+
+使用VS2012
+
+## Ubuntu
+
+使用CMake
+
+*探索中*
+
+` sudo apt-get install libjsoncpp-dev  `
+
 

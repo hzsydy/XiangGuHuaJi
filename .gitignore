@@ -1,9 +1,12 @@
 
 Debug/
+Release/
+build/
 *.sdf
 *.props
 *.opensdf
 *.suo
+*.swp
 fuck*
 
 # Compiled Object files

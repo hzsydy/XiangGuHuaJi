@@ -7,7 +7,7 @@ namespace XGHJ
 	int MapParser::readjson(std::string jsonname)
 	{
 		std::ifstream ifs;
-		ifs.open(jsonname);
+		ifs.open(jsonname.c_str());
 		if (!ifs.is_open())
 		{
 			std::cout<<"cannot open file"<<std::endl;
