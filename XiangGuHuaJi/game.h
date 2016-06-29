@@ -1,12 +1,4 @@
 /* XiangGuHuaJi 2016, game.h
- *
- * 实现游戏的主逻辑
- *    （第一回合特有）选择出生点
- *    建造
- *    外交
- *    战争
- *    经济
- *    检查胜负
  * 
  */
 
@@ -21,6 +13,7 @@
 #include<opencv2/opencv.hpp>
 
 #include"definition.h"
+#include"converter.hpp"
 
 #include"map.h"
 #include"player.h"
@@ -39,6 +32,14 @@ public:
     ~Game();
 
     bool Run();
+    bool Run_0();
+    bool Run_1(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList,
+               vector<vector<TDiplomaticCommand> > &   DiplomaticCommandMap);
+    bool Run_2(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
+    bool Run_3(vector<vector<TDiplomaticCommand> > &   DiplomaticCommandMap);
+    bool Run_4(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
+    bool Run_5();
+    bool Run_6();
 
     Map&                map;
     vector<Player>&     players;
@@ -46,9 +47,9 @@ public:
     vector<cv::Mat>     MilitaryMap_;
     vector<cv::Mat>     AttackPointsMap_;
     cv::Mat             DefensePointsMap_;
-    vector<vector<vector<TMilitary > > >	MilitaryMap;
-    vector<vector<vector<TAttack > > >	    AttackPointsMap;
-    vector<vector<TDefense> >	            DefensePointsMap;
+    vector<vector<vector<TMilitary> > >	MilitaryMap;
+    vector<vector<vector<TAttack> > >	AttackPointsMap;
+    vector<vector<TDefense> >	        DefensePointsMap;
 
     vector<cv::Mat>     OwnershipMasks_;
     vector<TPlayerInfo>	PlayerInfoList;

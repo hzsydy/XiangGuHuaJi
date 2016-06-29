@@ -11,7 +11,7 @@
 #include<opencv2/opencv.hpp>
 
 #include"definition.h"
-
+#include"converter.hpp"
 
 namespace XGHJ {
 
@@ -20,9 +20,8 @@ using namespace std;
 class Map
 {
 public:
-    Map();
+    //Map();
     ~Map();
-    Map(int x, int y);
     Map(string file_name);
 
     TMapSize	x, y;
@@ -31,7 +30,8 @@ public:
     vector<vector<TMapPara> >	MapResource, MapDefenseRatio, MapAttackRatio;
 
 private:
-
+    //将cv::Mat转为vector<vector<T>>, 在加载完毕后使用
+    void convertMyMat();
 
 };
 

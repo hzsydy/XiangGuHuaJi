@@ -39,10 +39,10 @@ template<typename T> bool convertVector(vector<vector<T> >& vec, cv::Mat mat)
             for (TMapSize j=0; j<mat.cols; ++j)
                 mat.at<T>(i,j) = vec[i][j];
     }
-    catch(...)
+    catch(exception e)
     {
         cout<<"[ERROR] Failed to convert vector<vector<T> > to cv::Mat. "<<endl;
-        return false;
+        throw e;
     }
     return true;
 }
