@@ -25,6 +25,7 @@ namespace WorldEditor
             landscapeForm = new LandScapeForm(this);
             landscapes = MapParser.readLandscape(landscapeJsonName);
             refreshComboBox();
+            newToolStripMenuItem_Click(sender, e);
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -177,6 +178,19 @@ namespace WorldEditor
 
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
+            int res;
+            try
+            {
+                res = Convert.ToInt32(textBoxRes.Text);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("请不要用不是数字的东西来日地图编辑器");
+                textBoxRes.Text = "0";
+                return;
+            }
+            map.resources[selectX, selectY] = res;
+
             selectX = e.X / mapSquareDist;
             selectY = e.Y / mapSquareDist;
             labelPosX.Text = "当前横坐标:" + selectX.ToString();
@@ -195,18 +209,7 @@ namespace WorldEditor
 
         private void textBoxRes_TextChanged(object sender, EventArgs e)
         {
-            int res;
-            try
-            {
-                res = Convert.ToInt32(textBoxRes.Text);
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show("请不要用不是数字的东西来日地图编辑器");
-                return;
-            }
-            map.resources[selectX, selectY] = res;
-            DrawMap();
+            ;
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)

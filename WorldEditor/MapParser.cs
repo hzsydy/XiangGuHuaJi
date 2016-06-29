@@ -58,10 +58,18 @@ namespace WorldEditor
 
         public static List<Landscape> readLandscape(string filename)
         {
-            StreamReader sr = new StreamReader(filename);
-            string str = sr.ReadToEnd();
-            sr.Close();
-            var l = JsonConvert.DeserializeObject<List<Landscape>>(str);
+            List<Landscape> l;
+            try
+            {
+                StreamReader sr = new StreamReader(filename);
+                string str = sr.ReadToEnd();
+                sr.Close();
+                l = JsonConvert.DeserializeObject<List<Landscape>>(str);
+            }
+            catch (System.Exception ex)
+            {
+                return new List<Landscape>();
+            }
             return l;
         }
     }

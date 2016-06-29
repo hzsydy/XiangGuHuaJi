@@ -43,6 +43,7 @@ namespace WorldEditor
         private void buttonOK_Click(object sender, EventArgs e)
         {
             mainform.Show();
+            changeLandscape(lastindex);
             this.Hide();
         }
 
@@ -122,6 +123,7 @@ namespace WorldEditor
         private void LandScapeForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             mainform.Show();
+            changeLandscape(lastindex);
         }
 
         private void textBoxName_TextChanged(object sender, EventArgs e)
