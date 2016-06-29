@@ -30,6 +30,9 @@
     <ClCompile Include="game.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="map.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib_json.lib">
@@ -86,6 +89,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="definition.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="converter.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,6 +10,9 @@
 #include<string>
 #include<opencv2/opencv.hpp>
 
+#include"definition.h"
+
+
 namespace XGHJ {
 
 using namespace std;
@@ -17,14 +20,19 @@ using namespace std;
 class Map
 {
 public:
-    // 从文件加载Map
+    Map();
+    ~Map();
+    Map(int x, int y);
     Map(string file_name);
 
-    ~Map();
+    TMapSize	x, y;
+
+    cv::Mat/*TMatMapPara*/	    MapResource_, MapDefenseRatio_, MapAttackRatio_;
+    vector<vector<TMapPara> >	MapResource, MapDefenseRatio, MapAttackRatio;
+
 private:
-    int x, y;
-    cv::Mat Resource, Defense, Attack;
-    
+
+
 };
 
 }

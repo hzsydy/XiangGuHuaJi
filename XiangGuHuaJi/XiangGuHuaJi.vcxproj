@@ -81,6 +81,7 @@
   <ItemGroup>
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="map.cpp" />
     <ClCompile Include="MapParser.cpp" />
     <ClCompile Include="player.cpp" />
   </ItemGroup>
@@ -88,6 +89,7 @@
     <Library Include="lib_json.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="converter.hpp" />
     <ClInclude Include="definition.h" />
     <ClInclude Include="json\assertions.h" />
     <ClInclude Include="json\autolink.h" />

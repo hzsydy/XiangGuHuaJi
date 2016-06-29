@@ -13,25 +13,61 @@ Player::Player()
 }
 
 Player::Player(string file_name, int id)
+    : id(id), file_name(file_name)
 {
     player_ai = NULL;
 
     HMODULE hDLL = LoadLibraryA(file_name.c_str());
     if (NULL != hDLL) player_ai = (TPlayerAi)GetProcAddress(hDLL, "player_ai");
 
-    if (NULL != player_ai) 
+    Valid = NULL != player_ai;
+
+    if (isValid())
         cout << "Player" << id << " has been loaded at "<< player_ai << endl;
     else
-        cout << "FAILED TO LOAD Player"<< id << " !" << endl;
+        cout << "ERROR: FAILED TO LOAD Player"<< id << " !" << endl;
 }
 
 Player::~Player()
 {
 }
 
-void Player::Run(Game& game, cv::Mat& MilitaryCommamd, DiplomaticCommand* DiplomaticCommandList)
+void Player::Run(
+    Game&                       game,
+    cv::Mat&                    MilitaryCommand_,
+    vector<TDiplomaticCommand>& DiplomaticCommandList)
 {
+    if (!isValid()) return;
 
+    vector<vector<TMilitary> >      MilitaryCommand;
+    vector<vector<unsigned char> >	OwnershipMask, VisibleMask, ControlMask;
+    vector<vector<TId> >	        GlobalMap;
+
+
+
+    Info info(
+        id,
+        game.Round,
+        game.map.x,
+        game.map.y,
+        game.PlayerSize,
+        OwnershipMask,
+        VisibleMask,
+        ControlMask,
+        GlobalMap,
+        game.map.MapResource,
+        game.map.MapDefenseRatio,
+        game.map.MapAttackRatio,
+        game.MilitaryMap,
+        game.AttackPointsMap,
+        game.DefensePointsMap,
+        game.PlayerInfoList,
+        game.Diplomatic,
+        MilitaryCommand,
+        DiplomaticCommandList
+        );
+
+    
 }
 
 }

@@ -22,7 +22,7 @@ struct PointMilitary
     vector<TMilitary> Military; //此地的防御建筑现状(此地的同盟玩家们分别在这里放置了多少兵)
 
     TDefense DefensePoints;        //此点的攻防现状
-    vector<TAttack> AttackSummary; //此点的攻防现状
+    vector<TAttack> AttackPoints; //此点的攻防现状
 };
 
 
@@ -31,72 +31,92 @@ class Info
 {
 public:
     Info(
-        TId id, TRound round, TMapSize x, TMapSize y, TId PlayerSize,
-        unsigned char **  mask,
-        unsigned char **  control,
-        TMapPara **  MapResource,
-        TMapPara **  MapDefenseRatio,
-        TMapPara **  MapAttackRatio,
-        TId **       Ownership,
-        TMilitary *** MilitaryMap,
-        TAttack *** AttackPointsMap,
-        TDefense ** DefensePointsMap,
-        PlayerInfo * PlayerList,
-        DiplomaticStatus ** DiplomaticMap)
-        : id(id), round(round), x(x), y(y), PlayerSize(PlayerSize), saving(PlayerList[id].Saving),
-        mask(mask), control(control), DiplomaticMap(DiplomaticMap), Ownership(Ownership),
-        MapResource(MapResource), MapDefenseRatio(MapDefenseRatio), MapAttackRatio(MapAttackRatio),
-        MilitaryMap(MilitaryMap), AttackPointsMap(AttackPointsMap), DefensePointsMap(DefensePointsMap),
-        PlayerList(PlayerList)
+        TId             id, 
+        TRound          Round, 
+        TMapSize        x,
+        TMapSize        y, 
+        TId             PlayerSize,
+        vector<vector<unsigned char> >	OwnershipMask,
+        vector<vector<unsigned char> >  VisibleMask,
+        vector<vector<unsigned char> >  ControlMask,
+        vector<vector<TId> >	        GlobalMap,
+        vector<vector<TMapPara> >       MapResource,
+        vector<vector<TMapPara> >       MapDefenseRatio,
+        vector<vector<TMapPara> >       MapAttackRatio,
+        vector<vector<vector<TMilitary > > >	MilitaryMap,
+        vector<vector<vector<TAttack > > >	    AttackPointsMap,
+        vector<vector<TDefense> >	            DefensePointsMap,
+        vector<TPlayerInfo>	                    PlayerInfoList,
+        vector<vector<TDiplomaticStatus> >	    Diplomatic,
+        vector<vector<TMilitary> > & MilitaryCommand,
+        vector<TDiplomaticCommand> & DiplomaticCommandList)
+        :
+        id(id),
+        Round(Round),
+        x(x), y(y),
+        PlayerSize(PlayerSize),
+        OwnershipMask(OwnershipMask),
+        VisibleMask(VisibleMask),
+        ControlMask(ControlMask),
+        MapResource(MapResource),
+        MapDefenseRatio(MapDefenseRatio),
+        MapAttackRatio(MapAttackRatio),
+        GlobalMap(GlobalMap),
+        MilitaryMap(MilitaryMap),
+        AttackPointsMap(AttackPointsMap),
+        DefensePointsMap(DefensePointsMap),
+        PlayerInfoList(PlayerInfoList),
+        DiplomaticCommandList(DiplomaticCommandList),
+        MilitaryCommand(MilitaryCommand),
+        saving(PlayerInfoList[id].Saving)
     {
         for (TId i=0; i<PlayerSize; ++i) DiplomaticCommandList[i] = KeepNeutral;
     }
     
-    const TId       id;    //自己的ID
-    const TRound    round; //当前回合数
-    const TSaving   saving;//当前库存
-    const TMapSize  x, y;  //地图的尺寸
-    const TId       PlayerSize; //玩家数量
+    TId       id;           //自己的ID
+    TRound    Round;        //当前回合数
+    TSaving   saving;       //当前库存
+    TMapSize  x, y;         //地图的尺寸
+    TId       PlayerSize;   //玩家数量
     
-    const unsigned char*const*const     mask;    //当前可见地区
-    const unsigned char*const*const     control; //你可以放兵的地区
+    vector<vector<unsigned char> >  OwnershipMask;  //你的领土
+    vector<vector<unsigned char> >	VisibleMask;    //当前可见地区
+    vector<vector<unsigned char> >	ControlMask;    //你可以放兵的地区
 
-    const DiplomaticStatus*const*const  DiplomaticMap; //全体外交状态
-    const TId*const*const Ownership;            //地图主权
-    const TMapPara*const*const MapResource;     //地图资源参数
-    const TMapPara*const*const MapAttackRatio;  //地图攻击参数
-    const TMapPara*const*const MapDefenseRatio; //地图防御参数
+    vector<vector<TDiplomaticStatus> >	Diplomatic;
+    vector<vector<TId> >	            GlobalMap;
+
+    vector<vector<TMapPara> >	    MapResource, MapDefenseRatio, MapAttackRatio; //地图参数
 
     //获取一个点的信息
     PointMilitary getPointMilitary(int i, int j) 
     {
         PointMilitary point;
         
-        if (mask[i][j]) point.Visible = true;
+        if (VisibleMask[i][j]) point.Visible = true;
         else { point.Visible = false; return point; }
 
-        point.Owner = Ownership[i][j];
-        point.Union = DiplomaticMap[id][point.Owner] == Union;
+        point.Owner = GlobalMap[i][j];
+        point.Union = Diplomatic[id][point.Owner] == Union;
         
         for (TId t=0; t<PlayerSize; ++t)
         {
             point.Military.push_back(MilitaryMap[t][i][j]);
-            point.AttackSummary.push_back(AttackPointsMap[t][i][j]);
+            point.AttackPoints.push_back(AttackPointsMap[t][i][j]);
         }
         point.DefensePoints = DefensePointsMap[i][j];
 
         return point;
     }
-
     //获取一个玩家的信息
-    PlayerInfo getPlayerInfo(TId targetId)
+    TPlayerInfo getPlayerInfo(TId targetId)
     {
-        PlayerInfo player;
+        TPlayerInfo player;
         player.id = -1;
         if (targetId<0 || targetId>=PlayerSize) return player;
         
-        player = PlayerList[targetId];
-        switch (DiplomaticMap[id][targetId])
+        player = PlayerInfoList[targetId];
+        switch (Diplomatic[id][targetId])
         {
         case Undiscovered:
         case War:
@@ -114,18 +134,21 @@ public:
         default:
             return player;
         }
-
     }
 
 //可供写的信息
-    vector<DiplomaticCommand> DiplomaticCommandList;
-    vector<vector<unsigned char> > MilitaryCommand;
+
+    vector<TDiplomaticCommand> & DiplomaticCommandList;
+    vector<vector<TMilitary> > & MilitaryCommand;
 
 private:
-    const TMilitary*const*const*const MilitaryMap;
-    const TAttack*const*const*const   AttackPointsMap;
-    const TDefense*const*const        DefensePointsMap;
-    const PlayerInfo*const            PlayerList;
+//受到游戏规则限制的信息
+    vector<vector<vector<TMilitary > > >	MilitaryMap;
+    vector<vector<vector<TAttack > > >	    AttackPointsMap;
+    vector<vector<TDefense> >	            DefensePointsMap;
+
+    vector<TPlayerInfo>	PlayerInfoList;
+
 };
 
 

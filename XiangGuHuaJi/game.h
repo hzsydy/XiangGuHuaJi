@@ -5,6 +5,7 @@
  *    建造
  *    外交
  *    战争
+ *    经济
  *    检查胜负
  * 
  */
@@ -12,13 +13,18 @@
 #ifndef _XIANGGUHUAJI_GAME_H__
 #define _XIANGGUHUAJI_GAME_H__
 
-#include<vector>
 
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<vector>
 #include<opencv2/opencv.hpp>
+
+#include"definition.h"
 
 #include"map.h"
 #include"player.h"
-#include"definition.h"
+
 
 namespace XGHJ {
 
@@ -34,17 +40,23 @@ public:
 
     bool Run();
 
-    TRound round;
-    TId    PlayerSize;
-    
-    cv::Mat         MapResource, MapAttack, MapDefense;
-    vector<cv::Mat> MilitaryMap;
-    cv::Mat         DefensePoints;
-    vector<cv::Mat> AttackPointsMap;
+    Map&                map;
+    vector<Player>&     players;
+
+    vector<cv::Mat>     MilitaryMap_;
+    vector<cv::Mat>     AttackPointsMap_;
+    cv::Mat             DefensePointsMap_;
+    vector<vector<vector<TMilitary > > >	MilitaryMap;
+    vector<vector<vector<TAttack > > >	    AttackPointsMap;
+    vector<vector<TDefense> >	            DefensePointsMap;
+
+    vector<cv::Mat>     OwnershipMasks_;
+    vector<TPlayerInfo>	PlayerInfoList;
+    vector<vector<TDiplomaticStatus> >	Diplomatic;
+    TRound              Round;
+    TId                 PlayerSize;
 
 private:
-    Map& map;
-    vector<Player>& players;
 
 };
 

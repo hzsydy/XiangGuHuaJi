@@ -11,9 +11,10 @@
 
 #include<opencv2/opencv.hpp>
 
+#include"definition.h"
+
 #include"ai.h"
 #include"game.h"
-#include"definition.h"
 
 namespace XGHJ {
 
@@ -30,14 +31,18 @@ public:
     Player(string file_name, int id);
     ~Player();
 
-    void Run(Game& game, cv::Mat& MilitaryCommamd, DiplomaticCommand* DiplomaticCommandList);
+    void Run(
+        Game&                       game,
+        cv::Mat&                    MilitaryCommamd,
+        vector<TDiplomaticCommand>& DiplomaticCommandList);
 
-    inline bool isValid() { return Valid; }
+    inline bool     isValid() { return Valid; }
 
 private:
-    TPlayerAi player_ai;
-    int Id;
-    bool Valid;
+    TPlayerAi       player_ai;
+    string          file_name;
+    TId             id;
+    bool            Valid;
 };
 
 }
