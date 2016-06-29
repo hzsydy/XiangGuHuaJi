@@ -72,7 +72,7 @@ bool Game::Run_1(vector<cv::Mat/*TMatMilitary*/> &     MilitaryCommandList,
         MilitaryCommandList[id]     = MilitaryCommand_;
         DiplomaticCommandMap[id]    = DiplomaticCommand;
     }
-
+	return false; //TODO
 }
 
 //2.建造 处理MilitaryMapList

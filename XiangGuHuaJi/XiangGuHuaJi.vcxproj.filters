@@ -21,9 +21,6 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MapParser.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="player.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -70,9 +67,6 @@
     <ClInclude Include="json\writer.h">
       <Filter>头文件\json</Filter>
     </ClInclude>
-    <ClInclude Include="MapParser.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="map.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -94,8 +88,5 @@
     <ClInclude Include="converter.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>
