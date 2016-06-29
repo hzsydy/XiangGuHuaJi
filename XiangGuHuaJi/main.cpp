@@ -13,16 +13,27 @@
 using namespace std;
 using namespace XGHJ;
 
+
+string TestAi_filename =
+#ifdef _MSC_VER
+    "TestAi.dll";
+#endif
+#ifdef __GNUC__
+    "./libTestAi.so";
+#endif    
+
 int main() 
 {
 
     Map m = Map();
-	m.load("¶«²Ù.json");
-
-
-	Player player("TestAi.dll", 0);
-
+	//m.load("test.json");	
+    
+    Player player(TestAi_filename, 0);
+    
+#ifdef _MSC_VER
     system("pause");
+#endif
+
 	return 0;
 
 } 

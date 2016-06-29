@@ -26,7 +26,7 @@ bool Map::load(string file_name)
 {
 	Json::Value root;
 	Json::Reader reader;
-	std::ifstream file(file_name, std::ifstream::binary);
+	std::ifstream file(file_name.c_str(), std::ifstream::binary);
 	if(!reader.parse(file, root, true)){
 		std::cerr  << "Failed to parse configuration\n"
 			<< reader.getFormattedErrorMessages();

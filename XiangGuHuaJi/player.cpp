@@ -6,26 +6,39 @@
 
 #include"player.h"
 
+#ifdef _MSC_VER
+#include"windows.h"
+#endif
+#ifdef __GNUC__
+#include"dlfcn.h"
+#endif
+
 namespace XGHJ {
 
 Player::Player()
-{
+{ 
 }
 
 Player::Player(string file_name, int id)
     : id(id), file_name(file_name)
-{
+ {
     player_ai = NULL;
 
+#ifdef _MSC_VER    
     HMODULE hDLL = LoadLibraryA(file_name.c_str());
     if (NULL != hDLL) player_ai = (TPlayerAi)GetProcAddress(hDLL, "player_ai");
+#endif
+#ifdef __GNUC__
+    void* hDLL = dlopen(file_name.c_str(), RTLD_LAZY);
+    if (NULL != hDLL) player_ai = (TPlayerAi)dlsym(hDLL, "player_ai");
+#endif
 
     Valid = NULL != player_ai;
 
     if (isValid())
-        cout << "Player" << id << " has been loaded at "<< player_ai << endl;
+        cout << "Player{" << id << "} has been loaded at "<< player_ai << endl;
     else
-        cout << "ERROR: FAILED TO LOAD Player"<< id << " !" << endl;
+        cout << "[ERROR] failed to load Player{"<< id << "} !" << endl;
 }
 
 Player::~Player()
