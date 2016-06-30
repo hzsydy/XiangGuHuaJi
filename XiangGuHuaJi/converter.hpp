@@ -17,7 +17,6 @@ using namespace std;
 
 template<typename T> void convertMat(cv::Mat mat, vector<vector<T> >& vec)
 {
-	int fuck = mat.at<T>(0, 0);
     vec.resize(mat.cols);
 	for (TMapSize j=0; j<mat.cols; ++j)
 	{
@@ -27,7 +26,6 @@ template<typename T> void convertMat(cv::Mat mat, vector<vector<T> >& vec)
 			vec[j][i]=mat.at<T>(i, j);
 		}
 	}
-    
 }
 
 template<typename T> void resizeVector(vector<vector<T> >&vec, cv::Mat mat)
@@ -42,12 +40,7 @@ template<typename T> bool convertVector(vector<vector<T> >& vec, cv::Mat mat)
     try
     {
 		for (TMapSize j=0; j<mat.cols; ++j)
-		{
-			for (TMapSize i=0; i<mat.rows; ++i)
-			{
-				vec[j][i]=mat.at<T>(i, j);
-			}
-		}
+			for (TMapSize i=0; i<mat.rows; ++i) mat.at<T>(i, j)=vec[j][i];
     }
     catch(exception e)
     {

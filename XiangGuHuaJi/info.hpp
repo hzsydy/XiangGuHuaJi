@@ -12,21 +12,21 @@
 
 using namespace std;
 
-//地图上某一个点的军事情况
+// Military details about a point
 struct PointMilitary
 {    
-    bool Visible;  //此点是否可见
-    bool Union;    //此点是否为联盟(你是否可以在这个地上放兵)
-    TId Owner;     //主权归属
+    bool Visible;  
+    bool Union;    
+    TId Owner;   
  
-    vector<TMilitary> Military; //此地的防御建筑现状(此地的同盟玩家们分别在这里放置了多少兵)
+    vector<TMilitary> Military; // everyone's Military on this point
 
-    TDefense DefensePoints;        //此点的攻防现状
-    vector<TAttack> AttackPoints; //此点的攻防现状
+    TDefense DefensePoints;       // DefensePoints currently
+    vector<TAttack> AttackPoints; // everyone's AttackPoints to this point
 };
 
 
-//玩家获取的全部数据
+// All details that AI could reach 
 class Info
 {
 public:
@@ -66,6 +66,7 @@ public:
         AttackPointsMap(AttackPointsMap),
         DefensePointsMap(DefensePointsMap),
         PlayerInfoList(PlayerInfoList),
+        Diplomacy(Diplomacy),
         DiplomaticCommandList(DiplomaticCommandList),
         MilitaryCommand(MilitaryCommand),
         saving(PlayerInfoList[id].Saving)
@@ -73,22 +74,22 @@ public:
         for (TId i=0; i<PlayerSize; ++i) DiplomaticCommandList[i] = KeepNeutral;
     }
     
-    TId       id;           //自己的ID
-    TRound    Round;        //当前回合数
-    TSaving   saving;       //当前库存
-    TMapSize  rows, cols;         //地图的尺寸
-    TId       PlayerSize;   //玩家数量
+    TId       id;           // your id Number
+    TRound    Round;        // the round currently
+    TSaving   saving;       // your resource gathered
+    TMapSize  rows, cols;   // map
+    TId       PlayerSize;   // playersize [Caution] Do not raise OutOfRange Exception 
     
-    vector<vector<unsigned char> >  OwnershipMask;  //你的领土
-    vector<vector<unsigned char> >	VisibleMask;    //当前可见地区
-    vector<vector<unsigned char> >	ControlMask;    //你可以放兵的地区
+    vector<vector<unsigned char> >  OwnershipMask;  // your land
+    vector<vector<unsigned char> >	VisibleMask;    // visible area
+    vector<vector<unsigned char> >	ControlMask;    // your and your allian's land
 
     vector<vector<TDiplomaticStatus> >	Diplomacy;
     vector<vector<TId> >	            GlobalMap;
 
-    vector<vector<TMapPara> >	    MapResource, MapDefenseRatio, MapAttackRatio; //地图参数
+    vector<vector<TMapPara> >	    MapResource, MapDefenseRatio, MapAttackRatio; // map
 
-    //获取一个点的信息
+    
     PointMilitary getPointMilitary(int i, int j) 
     {
         PointMilitary point;
@@ -108,7 +109,7 @@ public:
 
         return point;
     }
-    //获取一个玩家的信息
+    
     TPlayerInfo getPlayerInfo(TId targetId)
     {
         TPlayerInfo player;
@@ -136,13 +137,11 @@ public:
         }
     }
 
-//可供写的信息
-
     vector<TDiplomaticCommand> & DiplomaticCommandList;
     vector<vector<TMilitary> > & MilitaryCommand;
 
 private:
-//受到游戏规则限制的信息
+// Restricted info here
     vector<vector<vector<TMilitary > > >	MilitaryMap;
     vector<vector<vector<TAttack > > >	    AttackPointsMap;
     vector<vector<TDefense> >	            DefensePointsMap;
