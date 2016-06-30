@@ -47,7 +47,7 @@ public:
         vector<vector<vector<TAttack > > >	    AttackPointsMap,
         vector<vector<TDefense> >	            DefensePointsMap,
         vector<TPlayerInfo>	                    PlayerInfoList,
-        vector<vector<TDiplomaticStatus> >	    Diplomatic,
+        vector<vector<TDiplomaticStatus> >	    Diplomacy,
         vector<vector<TMilitary> > & MilitaryCommand,
         vector<TDiplomaticCommand> & DiplomaticCommandList)
         :
@@ -83,7 +83,7 @@ public:
     vector<vector<unsigned char> >	VisibleMask;    //当前可见地区
     vector<vector<unsigned char> >	ControlMask;    //你可以放兵的地区
 
-    vector<vector<TDiplomaticStatus> >	Diplomatic;
+    vector<vector<TDiplomaticStatus> >	Diplomacy;
     vector<vector<TId> >	            GlobalMap;
 
     vector<vector<TMapPara> >	    MapResource, MapDefenseRatio, MapAttackRatio; //地图参数
@@ -97,7 +97,7 @@ public:
         else { point.Visible = false; return point; }
 
         point.Owner = GlobalMap[i][j];
-        point.Union = Diplomatic[id][point.Owner] == Union;
+        point.Union = Diplomacy[id][point.Owner] == Union;
         
         for (TId t=0; t<PlayerSize; ++t)
         {
@@ -116,7 +116,7 @@ public:
         if (targetId<0 || targetId>=PlayerSize) return player;
         
         player = PlayerInfoList[targetId];
-        switch (Diplomatic[id][targetId])
+        switch (Diplomacy[id][targetId])
         {
         case Undiscovered:
         case War:

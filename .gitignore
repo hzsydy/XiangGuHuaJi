@@ -2,6 +2,7 @@
 Debug/
 Release/
 build/
+TestAi/
 *.sdf
 *.props
 *.opensdf
