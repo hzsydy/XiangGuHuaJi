@@ -85,6 +85,32 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
 //Diplomacy Phase (Deal with DiplomaticCommandMap)
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
+	for (TId i=0; i<PlayerSize; i++)
+	{
+		for (TId j=0; j<PlayerSize; j++)
+		{
+			if (i == j)
+			{
+				Diplomacy_[i][j] = Allied;
+			}
+			else
+			{
+				switch (Diplomacy_[i][j])
+				{
+				case Neutral:
+					break;
+				case AtTruce:
+					break;
+				case Undiscovered:
+					break;
+				case Allied:
+					break;
+				case AtWar:
+					break;
+				}
+			}
+		}
+	}
     return false; //TODO
 }
 

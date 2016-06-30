@@ -6,22 +6,21 @@
 #define _XIANGGUHUAJI_GAME_H__
 
 
-#include<iostream>
-#include<fstream>
-#include<string>
-#include<vector>
-#include<opencv2/opencv.hpp>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <opencv2/opencv.hpp>
 
-#include"definition.h"
-#include"map.h"
+#include "definition.h"
+#include "map.h"
+#include "converter.hpp"
 
+using std::vector;
+using std::queue;
 
 namespace XGHJ {
-
-using namespace std;
-
-class Player;
-
 class Game
 {
 public:
@@ -67,6 +66,13 @@ protected:
 	vector<cv::Mat>     OwnershipMasks_;
     vector<cv::Mat>     AttackPointsMap_;
     cv::Mat             DefensePointsMap_;
+private:
+	struct PlayerPair 
+	{
+		TId player1;
+		TId player2;
+	};
+	queue<PlayerPair> TruceList;
 };
 
 }

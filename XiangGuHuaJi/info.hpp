@@ -97,7 +97,7 @@ public:
         else { point.Visible = false; return point; }
 
         point.Owner = GlobalMap[i][j];
-        point.Union = Diplomacy[id][point.Owner] == Union;
+        point.Union = Diplomacy[id][point.Owner] == Allied;
         
         for (TId t=0; t<PlayerSize; ++t)
         {
@@ -119,7 +119,7 @@ public:
         switch (Diplomacy[id][targetId])
         {
         case Undiscovered:
-        case War:
+        case AtWar:
             player.Visible = player.Union  = false;
             player.Saving = player.MapArea = player.MilitarySummary = 0;
             return player;
@@ -128,7 +128,7 @@ public:
             player.Union = false;
             player.Saving = 0; 
             return player;
-        case Union:
+        case Allied:
             player.Visible = player.Union  = false;
             return player;
         default:
