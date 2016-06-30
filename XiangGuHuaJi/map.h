@@ -12,7 +12,6 @@
 #include <cassert>
 
 #include "definition.h"
-#include "converter.hpp"
 
 #include "json/json.h"
 #pragma comment(lib, "lib_json.lib")

@@ -76,9 +76,9 @@ namespace XGHJ
 		for (TId target=0; target<PlayerSize; ++target)
 		{
 			TDiplomaticStatus status = Diplomacy[playerid][target];
-			if (status!=Undiscovered && status!=War) 
+			if (status!=Undiscovered && status!=AtWar) 
 				VisibleMask_ += OwnershipMasks[target];
-			if (status==Union) 
+			if (status==Allied) 
 				ControlMask_ += OwnershipMasks[target];
 		}
 		return Info(

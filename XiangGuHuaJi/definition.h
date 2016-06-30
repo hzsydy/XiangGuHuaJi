@@ -31,9 +31,9 @@ enum TDiplomaticStatus
 {
     Undiscovered,   // a country that has never appeared in your visible area
     Neutral,        // default status of a newly discovered country
-    Union,          
-    War,     
-    StopWar         // Neutral but cannont DeclareWar
+    Allied,          
+    AtWar,     
+    AtTruce         // Neutral but cannont DeclareWar
 };
 enum TDiplomaticCommand
 {
