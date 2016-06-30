@@ -39,6 +39,7 @@ public:
 
     Map&                map;
 	const static TRound MAX_ROUND;
+	const static TRound TRUCE_TIME;
 
 	//first_class statistics
 	inline vector<cv::Mat>		getMilitaryMap()	 {return  MilitaryMap_		;}
@@ -67,12 +68,13 @@ protected:
     vector<cv::Mat>     AttackPointsMap_;
     cv::Mat             DefensePointsMap_;
 private:
-	struct PlayerPair 
+	struct TruceTreaty 
 	{
 		TId player1;
 		TId player2;
+		TRound lasttime;
 	};
-	queue<PlayerPair> TruceList;
+	queue<TruceTreaty> TruceList;
 };
 
 }
