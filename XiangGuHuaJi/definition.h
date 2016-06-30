@@ -38,7 +38,7 @@ enum TDiplomaticStatus
 enum TDiplomaticCommand
 {
     KeepNeutral, 
-    AskForUnion, 
+    FormAlliance, 
     DeclareWar    
 };
 

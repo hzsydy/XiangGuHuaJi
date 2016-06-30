@@ -58,6 +58,15 @@ namespace XGHJ
 			Info info = generateInfo(i);
 			infos_.push_back(info);
 		}
+
+#ifdef GAME_DEBUG
+        cv::Mat m = MilitaryMap[0].clone();
+        cv::resize(m, m, cv::Size(), 20.0, 20.0);
+        cv::imshow("status of Player{0}", m);
+        cout<<"mm: " << (int)MilitaryMap[0].at<TMask>(0,0) << endl;;
+        cv::waitKey(0);
+#endif
+
 	}
 
 	Info Controller::generateInfo(TId playerid)

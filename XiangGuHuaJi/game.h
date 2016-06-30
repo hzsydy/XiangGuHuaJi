@@ -5,6 +5,7 @@
 #ifndef _XIANGGUHUAJI_GAME_H__
 #define _XIANGGUHUAJI_GAME_H__
 
+#define GAME_DEBUG
 
 #include <iostream>
 #include <fstream>
@@ -38,7 +39,11 @@ public:
 	bool Start();
 
     Map&                map;
-	const static TRound MAX_ROUND;
+
+	const static TRound     MAX_ROUND;
+    const static TMilitary  MAX_MILITARY;
+    const static TSaving    UNIT_SAVING;
+    const static TSaving    UNIT_CITY_INCOME;
 
 	//first_class statistics
 	inline vector<cv::Mat>		getMilitaryMap()	 {return  MilitaryMap_		;}

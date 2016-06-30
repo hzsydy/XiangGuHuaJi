@@ -6,7 +6,15 @@
 
 namespace XGHJ 
 {
-const TRound Game::MAX_ROUND = 20;
+const TMilitary     Game::MAX_MILITARY = 255;
+const TRound        Game::MAX_ROUND = 20;
+const TSaving       Game::UNIT_SAVING = 10;
+
+#ifdef GAME_DEBUG
+const TSaving       Game::UNIT_CITY_INCOME = 100; 
+#else
+const TSaving       Game::UNIT_CITY_INCOME = 1;
+#endif
 
 Game::Game(Map& map, int playersize)
     : map(map), PlayerSize(playersize),
@@ -54,6 +62,7 @@ bool Game::Start()
 	++Round;
 
     //TODO  init the player, call each player to select their birthplace
+    for (TId i=0; i<PlayerSize; ++i) OwnershipMasks_[i].at<TMask>(i,i)=255;
 	return true;
 }
 
@@ -63,8 +72,8 @@ bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
 {
     cout << "Game: Round[" << Round << "] ";
 
-    ConstructionPhase(MilitaryCommandList);
     DiplomacyPhase(DiplomaticCommandMap);
+    ConstructionPhase(MilitaryCommandList);
     MilitaryPhase(MilitaryCommandList);
     ProducingPhase();
 
@@ -74,12 +83,6 @@ bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
     cout << "finished" << endl;
 
     return isValid_;    
-}
-
-//Construction Phase (Deal with MilitaryCommandList)
-bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
-{
-    return false; //TODO
 }
 
 //Diplomacy Phase (Deal with DiplomaticCommandMap)
@@ -114,6 +117,63 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
     return false; //TODO
 }
 
+//Construction Phase (Deal with MilitaryCommandList)
+bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
+{
+    for (TId id=0; id<PlayerSize; ++id)
+    {
+        if (PlayerInfoList_[id].Saving==0) continue;
+
+        // Check validity of MilitaryCommandList
+        cv::Mat & mat = MilitaryCommandList[id];
+        bool valid = true;
+        // check the area
+        cv::Mat control_mask = cv::Mat::zeros(map.size(), CV_TMask);
+        for (TId i=0; i<PlayerSize; ++i)
+            if (Allied==Diplomacy_[id][i]) control_mask+=OwnershipMasks_[i];
+        // check the money
+        TMilitarySummary sum = 0; 
+        for (TMapSize j=0; j<map.getRows(); ++j) 
+            for (TMapSize i=0; i<map.getCols(); ++i)
+            {
+                TMilitary& point_military = mat.at<TMilitary>(j, i);
+                if (!control_mask.at<TMask>(j, i)) point_military = 0;
+                if (point_military + MilitaryMap_[id].at<TMilitary>(j, i) > MAX_MILITARY) 
+                    point_military = MAX_MILITARY - MilitaryMap_[id].at<TMilitary>(j, i);
+                sum+=point_military;
+            }
+        if (sum * UNIT_SAVING > PlayerInfoList_[id].Saving) 
+        {
+            valid = false;
+            cout << "[Warning] Player {" << (int)id << "} tried to spend more money than he has!!! " << endl;
+            unsigned int ratio = sum * UNIT_SAVING / PlayerInfoList_[id].Saving, mult = 0;
+            while (ratio>0) { ++mult; ratio >>= 1; }
+            for (TMapSize j=0; j<map.getRows(); ++j)
+                for (TMapSize i=0; i<map.getCols(); ++i)
+                    mat.at<TMilitary>(j, i) >>= mult;
+        }
+        // summary
+        if (!valid)
+        {
+            sum = 0;
+            for (TMapSize j=0; j<map.getRows(); ++j) 
+                for (TMapSize i=0; i<map.getCols(); ++i)
+                {
+                    TMilitary& point_military = mat.at<TMilitary>(j, i);
+                    sum+=point_military;
+                }
+        }
+        if ( sum * UNIT_SAVING <= PlayerInfoList_[id].Saving)
+        {
+            PlayerInfoList_[id].Saving -= sum * UNIT_SAVING;
+            MilitaryMap_[id] += mat;
+        }
+    }
+
+
+    return true; //TODO
+}
+
 //Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
@@ -123,6 +183,21 @@ bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 //Producing Phase (Deal with MapResource, PlayerInfoList)
 bool Game::ProducingPhase()
 {
+    for (TId id=0; id<PlayerSize; ++id)
+    {
+        TSaving new_saving = 0;
+
+        // map income 
+        for (TMapSize j=0; j<map.getRows(); ++j)
+            for (TMapSize i=0; i<map.getCols(); ++i)
+                if (OwnershipMasks_[id].at<TMask>(j, i)) new_saving+=map.getMapRes().at<TMapPara>(j, i);
+        // city income
+        new_saving += UNIT_CITY_INCOME*PlayerInfoList_[id].MilitarySummary;
+
+        // TODO new_saving
+        PlayerInfoList_[id].Saving+=new_saving;
+    }
+
     return false; //TODO
 }
 
