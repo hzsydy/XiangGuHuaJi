@@ -64,7 +64,6 @@ void Player::Run(
             VisibleMask_ = cv::Mat::zeros(game.map.size(), CV_8UC1),
             ControlMask_ = cv::Mat::zeros(game.map.size(), CV_8UC1);
     vector<vector<unsigned char> >	OwnershipMask, VisibleMask, ControlMask;
-    
     OwnershipMask_ = game.OwnershipMasks_[id].clone();
     for (TId target=0; target<game.PlayerSize; ++target)
     {
@@ -74,6 +73,9 @@ void Player::Run(
         if (status==Union) 
             ControlMask_+=game.OwnershipMasks_[target];
     }
+    convertMat(OwnershipMask_, OwnershipMask);
+    convertMat(VisibleMask_, VisibleMask);
+    convertMat(ControlMask_, ControlMask);
 
     Info info(
         id,
