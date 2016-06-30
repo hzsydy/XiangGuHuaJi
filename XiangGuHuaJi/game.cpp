@@ -6,15 +6,20 @@
 
 namespace XGHJ 
 {
+
 const TMilitary     Game::MAX_MILITARY = 255;
 const TRound        Game::MAX_ROUND = 20;
 const TSaving       Game::UNIT_SAVING = 10;
+const TRound        Game::TRUCE_TIME = 5;
 
 #ifdef GAME_DEBUG
 const TSaving       Game::UNIT_CITY_INCOME = 100; 
 #else
 const TSaving       Game::UNIT_CITY_INCOME = 1;
 #endif
+
+
+
 
 Game::Game(Map& map, int playersize)
     : map(map), PlayerSize(playersize),
@@ -46,8 +51,8 @@ Game::Game(Map& map, int playersize)
     
     //Diplomacy
     resizeVector<TDiplomaticStatus>(Diplomacy_, PlayerSize, PlayerSize);
-	fillVector<TDiplomaticStatus>(Diplomacy_, TDiplomaticStatus::Undiscovered);
-
+	fillVector<TDiplomaticStatus>(Diplomacy_, Undiscovered);
+    for (TId id=0; id<PlayerSize; ++id) Diplomacy_[id][id] = Allied;
 }
 
 Game::~Game()
@@ -88,27 +93,101 @@ bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
 //Diplomacy Phase (Deal with DiplomaticCommandMap)
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
-	for (TId i=0; i<PlayerSize; i++)
 	{
-		for (TId j=0; j<PlayerSize; j++)
+		int c = TruceList.size();
+		for (int i=0; i<c; i++)
 		{
-			if (i == j)
+			TruceTreaty tt = TruceList.front();
+			TruceList.pop();
+			if (tt.lasttime == 1)
 			{
-				Diplomacy_[i][j] = Allied;
+				//end this time
+				Diplomacy_[tt.player1][tt.player2] = Neutral;
+				Diplomacy_[tt.player2][tt.player1] = Neutral;
 			}
 			else
+			{
+				Diplomacy_[tt.player1][tt.player2] = AtTruce;
+				Diplomacy_[tt.player2][tt.player1] = AtTruce;
+				tt.lasttime--;
+				TruceList.push(tt);
+			}
+		}
+	}
+
+	for (TId i=0; i<PlayerSize; i++)
+	{
+		for (TId j=0; j<i; j++)
+		{
 			{
 				switch (Diplomacy_[i][j])
 				{
 				case Neutral:
+                    if (DiplomaticCommandMap[i][j] == FormAlliance 
+						&& DiplomaticCommandMap[j][i] == FormAlliance)
+					{
+						//allied
+						Diplomacy_[i][j] = Allied;
+						Diplomacy_[j][i] = Allied;
+					}
+					else if (DiplomaticCommandMap[i][j] != DeclareWar 
+						&& DiplomaticCommandMap[j][i] != DeclareWar)
+					{
+						//neutral
+						Diplomacy_[i][j] = Neutral;
+						Diplomacy_[j][i] = Neutral;
+					}
+					else
+					{
+						//at war
+						Diplomacy_[i][j] = AtTruce;
+						Diplomacy_[j][i] = AtTruce;
+					}
 					break;
 				case AtTruce:
+					//at truce
+					//solved at begin
 					break;
 				case Undiscovered:
+					//Discovery will be solved in Military Phase
 					break;
 				case Allied:
+					if (DiplomaticCommandMap[i][j] == FormAlliance 
+						&& DiplomaticCommandMap[j][i] == FormAlliance)
+					{
+						//allied
+						;
+					}
+					else
+					{
+						//at truce
+						Diplomacy_[i][j] = AtTruce;
+						Diplomacy_[j][i] = AtTruce;
+						TruceTreaty tt;
+						tt.lasttime = TRUCE_TIME;
+						tt.player1 = i;
+						tt.player2 = j;
+						TruceList.push(tt);
+					}
 					break;
 				case AtWar:
+					if (DiplomaticCommandMap[i][j] == DeclareWar 
+						|| DiplomaticCommandMap[j][i] == DeclareWar)
+					{
+						//at war
+						;
+					}
+					else
+					{
+						//at truce
+						Diplomacy_[i][j] = AtTruce;
+						Diplomacy_[j][i] = AtTruce;
+						TruceTreaty tt;
+						tt.lasttime = TRUCE_TIME;
+						tt.player1 = i;
+						tt.player2 = j;
+						TruceList.push(tt);
+					}
 					break;
 				}
 			}
