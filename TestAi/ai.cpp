@@ -4,7 +4,20 @@
 
 #include "ai.h"
 
-void player_ai(Info& info)
+int cnt = 0;
+
+void printBasicInfo(Info& info)
+{    
+    cout << "My id: " << (int)info.id << " ; Round: "<< info.Round << "; Saving: "<< info.saving << endl;
+    cout << "MapSize: "<< (int)info.cols << " " << (int)info.rows << " PlayerSize: " << (int)info.PlayerSize << endl;
+}
+
+void checkMask(Info& info)
+{
+    
+}
+
+void executeBasicAi(Info& info)
 {
     TSaving mySaving = info.saving;
     
@@ -30,4 +43,13 @@ void player_ai(Info& info)
             info.DiplomaticCommandList[i] = DeclareWar;
     }
 
+}
+
+void player_ai(Info& info)
+{
+    cout << endl << "It's info.hpp TEST here. <" << cnt++ << ">" << endl;
+
+    printBasicInfo(info);
+
+    executeBasicAi(info);
 }

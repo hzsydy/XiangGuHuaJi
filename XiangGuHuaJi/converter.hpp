@@ -34,6 +34,18 @@ template<typename T> void resizeVector(vector<vector<T> >&vec, cv::Mat mat)
 	for (TMapSize j=0; j<mat.cols; ++j)
 		vec[j].resize(mat.rows);
 }
+template<typename T> void resizeVector(vector<vector<T> >&vec, int cols, int rows)
+{
+    vec.resize(cols);
+	for (TMapSize j=0; j<cols; ++j)
+		vec[j].resize(rows);
+}
+template<typename T> void resizeVector(vector<vector<T> >&vec, cv::Size size)
+{
+    vec.resize(size.width);
+    for (TMapSize j=0; j<size.width; ++j)
+        vec[j].resize(size.height);
+}
 
 template<typename T> bool convertVector(vector<vector<T> >& vec, cv::Mat mat)
 {
