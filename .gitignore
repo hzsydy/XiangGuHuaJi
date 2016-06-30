@@ -9,6 +9,7 @@ TestAi/
 *.suo
 *.swp
 fuck*
+test*
 
 # Compiled Object files
 *.slo

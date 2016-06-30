@@ -12,16 +12,14 @@
 
 #include"definition.h"
 
-#include"ai.h"
-#include"game.h"
+#include "ai.h"
+#include "info.hpp"
 
 namespace XGHJ {
 
 using namespace std;
 
 typedef void (*TPlayerAi)(Info& info); 
-
-class Game;
 
 class Player
 {
@@ -30,10 +28,7 @@ public:
     Player(string file_name, int id);
     ~Player();
 
-    void Run(
-        Game&                       game,
-        cv::Mat&                    MilitaryCommamd,
-        vector<TDiplomaticCommand>& DiplomaticCommandList);
+    bool Player::Run(Info &info);
 
     inline bool     isValid() { return Valid; }
 

@@ -7,21 +7,6 @@
 namespace XGHJ
 {
 
-Map::Map()
-{
-}
-
-Map::~Map()
-{
-}
-
-void Map::convertMyMat()
-{
-    convertMat<TMapPara>(MapResource_, MapResource);
-    convertMat<TMapPara>(MapDefenseRatio_, MapDefenseRatio);
-    convertMat<TMapPara>(MapAttackRatio_, MapAttackRatio);
-}
-
 bool Map::load(string file_name)
 {
 	Json::Value root;
@@ -53,7 +38,6 @@ bool Map::load(string file_name)
 			MapDefenseRatio_.at<TMapPara>(j, i) = (TMapPara)(fuck);
 		}
 	}
-	convertMyMat();
 	return true;
 }
 

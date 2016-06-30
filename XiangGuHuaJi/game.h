@@ -13,10 +13,7 @@
 #include<opencv2/opencv.hpp>
 
 #include"definition.h"
-#include"converter.hpp"
-
 #include"map.h"
-#include"player.h"
 
 
 namespace XGHJ {
@@ -28,11 +25,12 @@ class Player;
 class Game
 {
 public:
-    Game(Map& map, vector<Player>& players);
+    Game(Map& map, int playersize);
     ~Game();
 
-    bool Run();
-    bool Run_0();
+	bool Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
+		vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap);
+    //bool Run_0();
     bool Run_1(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList,
                vector<vector<TDiplomaticCommand> > &   DiplomaticCommandMap);
     bool Run_2(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
@@ -41,31 +39,37 @@ public:
     bool Run_5();
     bool Run_6();
 
-    Map&                map;
-    vector<Player>&     players;
+	bool Start();
 
-    vector<cv::Mat>     MilitaryMap_;
+    Map&                map;
+	const static TRound MAX_ROUND;
+
+	//first_class statistics
+	inline vector<cv::Mat>		getMilitaryMap()	 {return  MilitaryMap_		;}
+	inline cv::Mat/*CV_TId*/	getGlobalMap()		 {return  GlobalMap_		;}
+	inline vector<TPlayerInfo>	getPlayerInfoList()	 {return  PlayerInfoList_	;}
+	inline vector<vector<TDiplomaticStatus> >									
+								getDiplomacy()		 {return  Diplomacy_		;}
+	inline TRound				getRound()			 {return  Round  			;}
+	inline TId					getPlayerSize() 	 {return  PlayerSize		;}
+	inline bool					isValid() 			 {return  isValid_      	;}
+	//second_class statistics resolved											
+	inline vector<cv::Mat>		getOwnershipMasks()	 {return  OwnershipMasks_	;}
+	inline vector<cv::Mat>		getAttackPointsMap() {return  AttackPointsMap_	;}
+	inline cv::Mat				getDefensePointsMap(){return  DefensePointsMap_	;}
+protected:
+	//first_class statistics
+	vector<cv::Mat>     MilitaryMap_;
+	cv::Mat/*CV_TId*/	GlobalMap_;
+	vector<TPlayerInfo>	PlayerInfoList_;
+	vector<vector<TDiplomaticStatus> >	Diplomacy_;
+	TRound              Round;
+	TId                 PlayerSize;
+	bool                isValid_;
+	//second_class statistics resolved
+	vector<cv::Mat>     OwnershipMasks_;
     vector<cv::Mat>     AttackPointsMap_;
     cv::Mat             DefensePointsMap_;
-    cv::Mat/*CV_TId*/	GlobalMap_;
-
-    vector<vector<vector<TMilitary> > >	MilitaryMap;
-    vector<vector<vector<TAttack> > >	AttackPointsMap;
-    vector<vector<TDefense> >	        DefensePointsMap;
-    vector<vector<TId> >                GlobalMap;
-
-    vector<cv::Mat>     OwnershipMasks_;
-    vector<TPlayerInfo>	PlayerInfoList;
-    vector<vector<TDiplomaticStatus> >	Diplomacy;
-    TRound              Round;
-    TId                 PlayerSize;
-
-    inline bool         isValid() { return Valid; }
-
-    const static TRound MAX_ROUND;
-
-private:
-    bool                Valid;
 };
 
 }

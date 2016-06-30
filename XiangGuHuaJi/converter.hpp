@@ -13,19 +13,51 @@
 namespace XGHJ
 {
 
-using namespace std;
+using std::vector;
 
 template<typename T> void convertMat(cv::Mat mat, vector<vector<T> >& vec)
 {
     vec.resize(mat.cols);
-	for (TMapSize j=0; j<mat.cols; ++j)
+	for (int j=0; j<mat.cols; ++j)
 	{
 		vec[j].resize(mat.rows);
-		for (TMapSize i=0; i<mat.rows; ++i)
+		for (int i=0; i<mat.rows; ++i)
 		{
 			vec[j][i]=mat.at<T>(i, j);
 		}
 	}
+}
+
+template<typename T> void convertMat(vector<cv::Mat> vecmat, vector<vector<vector<T> > >& vec)
+{
+	int c = vecmat.size();
+	vec.resize(c);
+	for (int k=0; k<c; ++k)
+	{
+		vec[k].resize(vecmat[k].cols);
+		for (int j=0; j<vecmat[k].cols; ++j)
+		{
+			vec[k][j].resize(vecmat[k].rows);
+			for (int i=0; i<vecmat[k].rows; ++i)
+			{
+				vec[k][j][i]=vecmat[k].at<T>(i, j);
+			}
+		}
+	}
+}
+
+template<typename T> vector<vector<T> > getConvertedMat(cv::Mat mat)
+{
+	vector<vector<T> > vec;
+	convertMat(mat, vec);
+	return vec;
+}
+
+template<typename T> vector<vector<vector<T> > > getConvertedMat(vector<cv::Mat> vecmat)
+{
+	vector<vector<vector<T> > > vec;
+	convertMat(vecmat, vec);
+	return vec;
 }
 
 template<typename T> void resizeVector(vector<vector<T> >&vec, cv::Mat mat)
@@ -40,6 +72,44 @@ template<typename T> void resizeVector(vector<vector<T> >&vec, int cols, int row
 	for (TMapSize j=0; j<cols; ++j)
 		vec[j].resize(rows);
 }
+
+template<typename T> vector<vector<T> > getResizedVector(int cols, int rows)
+{
+	vector<vector<T> > vec;
+	resizeVector(vec, cols, rows);
+	return vec;
+}
+
+template<typename T> vector<vector<vector<T> > > getResizedVector(int cols, int rows, int count)
+{
+	vector<vector<vector<T> > > vec;
+	vec.resize(count);
+	for (int i=0; i<count; i++)
+	{
+		vec[i] = getResizedVector(cols, rows);
+	}
+	return vec;
+}
+
+template<typename T> void fillVector(vector<vector<T> > vec, T val)
+{
+	for (int i=0; i<vec.size(); i++)
+	{
+		for (int j=0; j<vec[i].size(); j++)
+		{
+			vec[i][j] = val;
+		}
+	}
+}
+
+template<typename T> void fillVector(vector<vector<vector<T> > > vec, T val)
+{
+	for (int i=0; i<vec.size(); i++)
+	{
+		fillVector(vec[i], val);
+	}
+}
+
 template<typename T> void resizeVector(vector<vector<T> >&vec, cv::Size size)
 {
     vec.resize(size.width);

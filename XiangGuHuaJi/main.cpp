@@ -7,8 +7,7 @@
 #include<string>
 #include<opencv2/opencv.hpp>
 
-#include "map.h"
-#include"player.h"
+#include "controller.h"
 
 using namespace std;
 using namespace XGHJ;
@@ -70,11 +69,13 @@ int main(int argc, char** argv)
     }
     cout <<  players.size() << " players loaded." << endl;
 
-    Game game(map, players);
+    Game game(map, players.size());
+	Controller controller(game, players);
+
     
-    while (game.isValid())
+    while (controller.isValid())
     {
-        game.Run();
+        controller.Run();
     } 
 
 #ifdef _MSC_VER

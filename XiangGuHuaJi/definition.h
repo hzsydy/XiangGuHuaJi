@@ -15,6 +15,9 @@ typedef unsigned char TMapPara;  //MapResource, MapDefenseRatio, MapAttackRatio
 #define CV_TMapPara CV_8UC1
 typedef unsigned int  TSaving;   //saving of a player
 
+typedef unsigned char TMask;
+#define CV_TMask CV_8UC1
+
 typedef unsigned char TDefense;  //DefensePoints
 #define CV_TDefense CV_8UC1
 typedef unsigned char TAttack;   //AttackPoints

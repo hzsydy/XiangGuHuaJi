@@ -36,9 +36,9 @@ public:
         TMapSize        rows,
         TMapSize        cols, 
         TId             PlayerSize,
-        vector<vector<unsigned char> >	OwnershipMask,
-        vector<vector<unsigned char> >  VisibleMask,
-        vector<vector<unsigned char> >  ControlMask,
+        vector<vector<TMask> >	OwnershipMask,
+        vector<vector<TMask> >  VisibleMask,
+        vector<vector<TMask> >  ControlMask,
         vector<vector<TId> >	        GlobalMap,
         vector<vector<TMapPara> >       MapResource,
         vector<vector<TMapPara> >       MapDefenseRatio,
@@ -48,8 +48,8 @@ public:
         vector<vector<TDefense> >	            DefensePointsMap,
         vector<TPlayerInfo>	                    PlayerInfoList,
         vector<vector<TDiplomaticStatus> >	    Diplomacy,
-        vector<vector<TMilitary> > & MilitaryCommand,
-        vector<TDiplomaticCommand> & DiplomaticCommandList)
+        vector<vector<TMilitary> > MilitaryCommand,
+        vector<TDiplomaticCommand> DiplomaticCommandList)
         :
         id(id),
         Round(Round),
@@ -80,9 +80,9 @@ public:
     const TMapSize  rows, cols;   // map
     const TId       PlayerSize;   // playersize [Caution] Do not raise OutOfRange Exception 
     
-    const vector<vector<unsigned char> >  OwnershipMask;  // your land
-    const vector<vector<unsigned char> >	VisibleMask;    // visible area
-    const vector<vector<unsigned char> >	ControlMask;    // your and your allian's land
+    const vector<vector<TMask> >  OwnershipMask;  // your land
+    const vector<vector<TMask> >	VisibleMask;    // visible area
+    const vector<vector<TMask> >	ControlMask;    // your and your allian's land
 
     const vector<vector<TDiplomaticStatus> >	Diplomacy;
     const vector<vector<TId> >	            GlobalMap;
@@ -136,8 +136,8 @@ public:
         }
     }
 
-    vector<TDiplomaticCommand> &        DiplomaticCommandList;
-    vector<vector<TMilitary> > &        MilitaryCommand;
+    vector<TDiplomaticCommand>        DiplomaticCommandList;
+    vector<vector<TMilitary> >        MilitaryCommand;
 
 private:
 // info restricted by the game

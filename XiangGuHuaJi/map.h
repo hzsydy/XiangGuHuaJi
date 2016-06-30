@@ -24,20 +24,19 @@ using namespace std;
 class Map
 {
 public:
-    Map();
-    ~Map();
-
-    TMapSize	rows, cols;
-
-    cv::Mat/*TMatMapPara*/	    MapResource_, MapDefenseRatio_, MapAttackRatio_;
-    vector<vector<TMapPara> >	MapResource, MapDefenseRatio, MapAttackRatio; //[x][y]
-
+    Map(){;}
+    ~Map(){;}
 	bool                load(string file_name);
     inline cv::Size     size() { return MapResource_.size(); }
 
+	inline TMapSize getRows(){return rows;}
+	inline TMapSize getCols(){return cols;}
+	inline cv::Mat getMapRes(){return MapResource_;}
+	inline cv::Mat getMapAtk(){return MapAttackRatio_;}
+	inline cv::Mat getMapDef(){return MapDefenseRatio_;}
 private:
-    // convert from cv::Mat to vector<vector<T> > ; remember to call it before constructor
-    void convertMyMat();
+	TMapSize	rows, cols;
+	cv::Mat/*TMatMapPara*/	    MapResource_, MapDefenseRatio_, MapAttackRatio_;
 };
 
 }
