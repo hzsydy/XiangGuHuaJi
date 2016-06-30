@@ -4,7 +4,7 @@
 
 #include "ai.h"
 
-int cnt = 0;
+int cnt = 1;
 
 void printBasicInfo(Info& info)
 {    

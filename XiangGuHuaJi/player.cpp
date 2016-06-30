@@ -58,6 +58,7 @@ bool Player::Run(Info &info)
     {
         cout << "[ERROR] Player " << id << " raised an exception." <<  endl;
         cout << e.what() << endl;
+        Valid = false;
 		return false;
     }
     return true;

@@ -16,19 +16,20 @@ namespace XGHJ
 				= getResizedVector<TDiplomaticCommand>(PlayerSize, PlayerSize);
 			for (TId id=0; id<PlayerSize; ++id)
 			{
+                Player& player = players_[id];
+                if (!player.isValid()) continue;
+
 				Info info = getInfo(id);
+
 				bool runwell = true;
-				runwell = runwell && players_[id].Run(info);
+                runwell = runwell && players_[id].Run(info);
+                if (!runwell) continue;
 				cv::Mat mat = cv::Mat::zeros(rows, cols, CV_TMilitary);
-				if (runwell)
-				{
-					runwell = runwell && convertVector<TMilitary>(info.MilitaryCommand, mat);
-					if (runwell)
-					{
-						MilitaryCommandList[id] = mat;
-						DiplomaticCommandMap[id] = info.DiplomaticCommandList;
-					}
-				}
+				runwell = runwell && convertVector<TMilitary>(info.MilitaryCommand, mat);
+                if (!runwell) continue;
+					
+				MilitaryCommandList[id] = mat;
+				DiplomaticCommandMap[id] = info.DiplomaticCommandList;				
 			}
 			game_.Run(MilitaryCommandList, DiplomaticCommandMap);
 		}

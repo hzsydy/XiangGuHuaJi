@@ -93,9 +93,9 @@ template<typename T> vector<vector<vector<T> > > getResizedVector(int cols, int 
 
 template<typename T> void fillVector(vector<vector<T> > vec, T val)
 {
-	for (int i=0; i<vec.size(); i++)
+	for (size_t i=0; i<vec.size(); i++)
 	{
-		for (int j=0; j<vec[i].size(); j++)
+		for (size_t j=0; j<vec[i].size(); j++)
 		{
 			vec[i][j] = val;
 		}
@@ -104,7 +104,7 @@ template<typename T> void fillVector(vector<vector<T> > vec, T val)
 
 template<typename T> void fillVector(vector<vector<vector<T> > > vec, T val)
 {
-	for (int i=0; i<vec.size(); i++)
+	for (size_t i=0; i<vec.size(); i++)
 	{
 		fillVector(vec[i], val);
 	}

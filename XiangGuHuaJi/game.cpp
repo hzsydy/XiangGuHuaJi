@@ -47,10 +47,13 @@ Game::~Game()
     
 }
 
+// Round<0>
 bool Game::Start()
 {
 	Round = 0;
 	++Round;
+
+    //TODO  init the player, call each player to select their birthplace
 	return true;
 }
 
@@ -68,13 +71,10 @@ bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
     ++Round;
     if (Round>=MAX_ROUND) isValid_=false;
 
-
     cout << "finished" << endl;
 
     return isValid_;    
 }
-
-
 
 //Construction Phase (Deal with MilitaryCommandList)
 bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
