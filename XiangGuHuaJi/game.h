@@ -30,14 +30,11 @@ public:
 
 	bool Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
 		vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap);
-    //bool Run_0();
-    bool Run_1(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList,
-               vector<vector<TDiplomaticCommand> > &   DiplomaticCommandMap);
-    bool Run_2(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
-    bool Run_3(vector<vector<TDiplomaticCommand> > &   DiplomaticCommandMap);
-    bool Run_4(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
-    bool Run_5();
-    bool Run_6();
+    bool ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
+    bool DiplomacyPhase(vector<vector<TDiplomaticCommand> > &   DiplomaticCommandMap);
+    bool MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
+    bool ProducingPhase();
+    bool CheckWinner();
 
 	bool Start();
 
