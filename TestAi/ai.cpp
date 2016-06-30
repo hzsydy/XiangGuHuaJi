@@ -14,7 +14,16 @@ void printBasicInfo(Info& info)
 
 void checkMask(Info& info)
 {
-    
+    TMapArea OwnershipArea = 0;
+    TMapArea VisibleArea = 0;
+
+    for (TMapSize i=0; i<info.cols; ++i)
+        for (TMapSize j=0; j<info.rows; ++j)
+        {
+            if (info.OwnershipMask[i][j]) OwnershipArea+=1;
+            if (info.VisibleMask[i][j]) VisibleArea+=1;
+        }
+    cout << "OwnershipArea: "<< OwnershipArea << " VisibleArea: "<<VisibleArea<<endl;
 }
 
 void executeBasicAi(Info& info)
@@ -31,7 +40,7 @@ void executeBasicAi(Info& info)
             { 
                 info.MilitaryCommand[i][j] += 1;
                 mySaving -= 1;
-             }
+            }
         }
     }   
 
@@ -50,6 +59,7 @@ void player_ai(Info& info)
     cout << endl << "It's info.hpp TEST here. <" << cnt++ << ">" << endl;
 
     printBasicInfo(info);
+    checkMask(info);
 
     executeBasicAi(info);
 }
