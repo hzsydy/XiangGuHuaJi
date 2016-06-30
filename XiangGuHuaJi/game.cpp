@@ -6,6 +6,7 @@
 
 namespace XGHJ 
 {
+const TRound Game::MAX_ROUND = 20;
 
 Game::Game(Map& map, vector<Player>& players)
     : map(map), players(players), PlayerSize(players.size()),
@@ -30,17 +31,23 @@ Game::Game(Map& map, vector<Player>& players)
         PlayerInfoList[id].MilitarySummary = 1; // it should be refreshed later.
     }
 
+    //OwnershipMasks_
+    OwnershipMasks_.resize(PlayerSize);
+    for (TId id=0; id<PlayerSize; ++id) OwnershipMasks_[id]=cv::Mat::zeros(map.size(), CV_8UC1);
+    
     //Diplomacy
     Diplomacy.resize(PlayerSize);
     for (TId id=0; id<PlayerSize; ++id) Diplomacy[id].resize(PlayerSize);
+
+    //GlobalMap_
+    GlobalMap_=cv::Mat(map.size(), CV_TId);
+    resizeVector(GlobalMap, map.size());
 }
 
 Game::~Game()
 {
     
 }
-
-const TRound Game::MAX_ROUND = 300;
 
 //Game Logic
 bool Game::Run()
@@ -68,23 +75,34 @@ bool Game::Run()
     return Valid;    
 }
 
-//0.Initialize MilitaryMap,AttackPointsMap,DefensePointsMap
+//0.Initialize MilitaryMap,AttackPointsMap,DefensePointsMap,GlobalMap
 bool Game::Run_0()
 {
+    //MilitaryMap
     MilitaryMap.clear();
     for (TId id=0; id<PlayerSize; ++id) {
         vector<vector<TMilitary> > sub_MilitaryMap;
         convertMat<TMilitary>(MilitaryMap_[id], sub_MilitaryMap);
         MilitaryMap.push_back(sub_MilitaryMap);
     }
+    //AttackPointsMap
     AttackPointsMap.clear();
     for (TId id=0; id<PlayerSize; ++id) {
         vector<vector<TAttack> > sub_AttackPointMap;
         convertMat<TAttack>(AttackPointsMap_[id], sub_AttackPointMap);
         AttackPointsMap.push_back(sub_AttackPointMap);
     }
+    //DefensePointsMap
     convertMat<TDefense>(DefensePointsMap_, DefensePointsMap);
-    
+    //GlobalMap
+    for (TMapSize j=0; j<map.cols; ++j)
+        for (TMapSize i=0; i<map.rows; ++i) 
+            GlobalMap[j][i]=255;
+    for (TId id=0; id<PlayerSize; ++id) 
+        for (TMapSize j=0; j<map.cols; ++j)
+            for (TMapSize i=0; i<map.rows; ++i)
+                if (OwnershipMasks_[id].at<TId>(i,j)) GlobalMap[j][i]=id;
+
     return true;
 } 
 

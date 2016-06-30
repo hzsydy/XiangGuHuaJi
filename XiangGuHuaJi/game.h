@@ -47,9 +47,12 @@ public:
     vector<cv::Mat>     MilitaryMap_;
     vector<cv::Mat>     AttackPointsMap_;
     cv::Mat             DefensePointsMap_;
+    cv::Mat/*CV_TId*/	GlobalMap_;
+
     vector<vector<vector<TMilitary> > >	MilitaryMap;
     vector<vector<vector<TAttack> > >	AttackPointsMap;
     vector<vector<TDefense> >	        DefensePointsMap;
+    vector<vector<TId> >                GlobalMap;
 
     vector<cv::Mat>     OwnershipMasks_;
     vector<TPlayerInfo>	PlayerInfoList;

@@ -55,9 +55,25 @@ void Player::Run(
 {
     if (!isValid()) return;
 
+    // MilitaryCommand
     vector<vector<TMilitary> >      MilitaryCommand;
+    resizeVector(MilitaryCommand, game.PlayerSize, game.PlayerSize);
+
+    // Mask
+    cv::Mat OwnershipMask_ = cv::Mat::zeros(game.map.size(), CV_8UC1),
+            VisibleMask_ = cv::Mat::zeros(game.map.size(), CV_8UC1),
+            ControlMask_ = cv::Mat::zeros(game.map.size(), CV_8UC1);
     vector<vector<unsigned char> >	OwnershipMask, VisibleMask, ControlMask;
-    vector<vector<TId> >	        GlobalMap;
+    
+    OwnershipMask_ = game.OwnershipMasks_[id].clone();
+    for (TId target=0; target<game.PlayerSize; ++target)
+    {
+        TDiplomaticStatus status = game.Diplomacy[id][target];
+        if (status!=Undiscovered && status!=War) 
+            VisibleMask_+=game.OwnershipMasks_[target];
+        if (status==Union) 
+            ControlMask_+=game.OwnershipMasks_[target];
+    }
 
     Info info(
         id,
@@ -68,7 +84,7 @@ void Player::Run(
         OwnershipMask,
         VisibleMask,
         ControlMask,
-        GlobalMap,
+        game.GlobalMap,
         game.map.MapResource,
         game.map.MapDefenseRatio,
         game.map.MapAttackRatio,
@@ -86,9 +102,10 @@ void Player::Run(
         player_ai(info);
         convertVector<TMilitary>(MilitaryCommand, MilitaryCommand_);
     }
-    catch(...)
+    catch(exception e)
     {
         cout << "[ERROR] Player " << id << " raised an exception." <<  endl;
+        cout << e.what() << endl;
         Valid = false;
     }
     
