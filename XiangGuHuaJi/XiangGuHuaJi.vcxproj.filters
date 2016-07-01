@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\json">
-      <UniqueIdentifier>{c3135ab7-0d35-4cd5-94f1-ad100cb6cae4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -35,41 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="lib_json.lib">
-      <Filter>资源文件</Filter>
-    </Library>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="json\assertions.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\autolink.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\config.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\features.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\forwards.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\json.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\reader.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\value.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\version.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
-    <ClInclude Include="json\writer.h">
-      <Filter>头文件\json</Filter>
-    </ClInclude>
     <ClInclude Include="map.h">
       <Filter>头文件</Filter>
     </ClInclude>
