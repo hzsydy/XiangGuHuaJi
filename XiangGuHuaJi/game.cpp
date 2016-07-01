@@ -55,6 +55,8 @@ Game::Game(Map& map, int playersize)
     resizeVector<TDiplomaticStatus>(Diplomacy_, PlayerSize, PlayerSize);
 	fillVector<TDiplomaticStatus>(Diplomacy_, Undiscovered);
     for (TId id=0; id<PlayerSize; ++id) Diplomacy_[id][id] = Allied;
+    //TruceTreaty_
+    resizeVector<unsigned char>(TruceTreaty, PlayerSize, PlayerSize);
 }
 
 Game::~Game()
@@ -98,29 +100,17 @@ bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
 //Diplomacy Phase (Deal with DiplomaticCommandMap)
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
-	{
-		int c = TruceList.size();
-		for (int i=0; i<c; i++)
-		{
-			TruceTreaty tt = TruceList.front();
-			TruceList.pop();
-			if (tt.lasttime == 1)
-			{
-				//end this time
-				Diplomacy_[tt.player1][tt.player2] = Neutral;
-				Diplomacy_[tt.player2][tt.player1] = Neutral;
-			}
-			else
-			{
-				Diplomacy_[tt.player1][tt.player2] = AtTruce;
-				Diplomacy_[tt.player2][tt.player1] = AtTruce;
-				tt.lasttime--;
-				TruceList.push(tt);
-			}
-		}
-	}
-
-	for (TId i=0; i<PlayerSize; i++)
+    for (TId i=0; i<PlayerSize; ++i)
+        for (TId j=0; j<PlayerSize; ++j)        
+            if (TruceTreaty[i][j]>0) 
+            {
+                --TruceTreaty[i][j];
+                --TruceTreaty[i][j];
+                if (0==TruceTreaty[i][j])
+                    Diplomacy_[i][j] = Diplomacy_[j][i] = Neutral;
+            }
+	
+    for (TId i=0; i<PlayerSize; i++)
 	{
 		for (TId j=0; j<i; j++)
 		{
@@ -145,12 +135,18 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 					else
 					{
 						//at war
-						Diplomacy_[i][j] = AtTruce;
-						Diplomacy_[j][i] = AtTruce;
+						Diplomacy_[i][j] = AtWar;
+                        Diplomacy_[j][i] = AtWar;
 					}
 					break;
 				case AtTruce:
-					//at truce
+					if (DiplomaticCommandMap[i][j] == FormAlliance
+                        && DiplomaticCommandMap[j][i] == FormAlliance)
+                    {
+                        Diplomacy_[i][j]  = Diplomacy_[j][i]  = Allied;
+                        TruceTreaty[i][j] = TruceTreaty[j][i] = 0;
+                    }
+                    //at truce
 					//solved at begin
 					break;
 				case Undiscovered:
@@ -166,15 +162,9 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 					else
 					{
 						//at truce
-						Diplomacy_[i][j] = AtTruce;
-						Diplomacy_[j][i] = AtTruce;
-						TruceTreaty tt;
-						tt.lasttime = TRUCE_TIME;
-						tt.player1 = i;
-						tt.player2 = j;
-						TruceList.push(tt);
+						Diplomacy_[i][j]  = Diplomacy_[j][i]  = AtTruce;
+						TruceTreaty[i][j] = TruceTreaty[j][i] = TRUCE_TIME;
 						//TODO units on the used-to-be allied islands should be destroyed
-
 					}
 					break;
 				case AtWar:
@@ -187,13 +177,8 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 					else
 					{
 						//at truce
-						Diplomacy_[i][j] = AtTruce;
-						Diplomacy_[j][i] = AtTruce;
-						TruceTreaty tt;
-						tt.lasttime = TRUCE_TIME;
-						tt.player1 = i;
-						tt.player2 = j;
-						TruceList.push(tt);
+                        Diplomacy_[i][j]  = Diplomacy_[j][i]  = AtTruce; 
+                        TruceTreaty[i][j] = TruceTreaty[j][i] = TRUCE_TIME;
 					}
 					break;
 				}

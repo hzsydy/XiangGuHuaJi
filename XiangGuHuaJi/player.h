@@ -28,7 +28,7 @@ public:
     Player(string file_name, int id);
     ~Player();
 
-    bool Player::Run(Info &info);
+    bool Run(Info &info);
 
     inline bool     isValid() { return Valid; }
 

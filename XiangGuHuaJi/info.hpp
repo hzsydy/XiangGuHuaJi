@@ -74,22 +74,22 @@ public:
         for (TId i=0; i<PlayerSize; ++i) DiplomaticCommandList[i] = KeepNeutral;
     }
     
-    const TId       id;           // your id Number
-    const TRound    Round;        // the round currently
-    const TSaving   saving;       // your resource gathered
-    const TMapSize  rows, cols;   // map
-    const TId       PlayerSize;   // playersize [Caution] Do not raise OutOfRange Exception 
+    TId       id;           // your id Number
+    TRound    Round;        // the round currently
+    TSaving   saving;       // your resource gathered
+    TMapSize  rows, cols;   // map
+    TId       PlayerSize;   // playersize [Caution] Do not raise OutOfRange Exception 
     
-    const vector<vector<TMask> >  OwnershipMask;  // your land
-    const vector<vector<TMask> >	VisibleMask;    // visible area
-    const vector<vector<TMask> >	ControlMask;    // your and your allian's land
+    vector<vector<TMask> >  OwnershipMask;  // your land
+    vector<vector<TMask> >	VisibleMask;    // visible area
+    vector<vector<TMask> >	ControlMask;    // your and your allian's land
 
-    const vector<vector<TDiplomaticStatus> >	Diplomacy;
-    const vector<vector<TId> >	            GlobalMap;
+    vector<vector<TDiplomaticStatus> >	Diplomacy;
+    vector<vector<TId> >	            GlobalMap;
 
-    const vector<vector<TMapPara> >	        MapResource, MapDefenseRatio, MapAttackRatio; // map
+    vector<vector<TMapPara> >	        MapResource, MapDefenseRatio, MapAttackRatio; // map
     
-    const PointMilitary                       getPointMilitary(int i, int j) 
+    PointMilitary                       getPointMilitary(int i, int j) 
     {
         PointMilitary point;
         
@@ -109,7 +109,7 @@ public:
         return point;
     }
     
-    const TPlayerInfo                         getPlayerInfo(TId targetId)
+    TPlayerInfo                         getPlayerInfo(TId targetId)
     {
         TPlayerInfo player;
         player.id = -1;
@@ -148,11 +148,11 @@ public:
 
 private:
 // info restricted by the game
-    const vector<vector<vector<TMilitary > > >	MilitaryMap;
-    const vector<vector<vector<TAttack > > >	    AttackPointsMap;
-    const vector<vector<TDefense> >	            DefensePointsMap;
+    vector<vector<vector<TMilitary > > >	MilitaryMap;
+    vector<vector<vector<TAttack > > >	    AttackPointsMap;
+    vector<vector<TDefense> >	            DefensePointsMap;
 
-    const vector<TPlayerInfo>	                PlayerInfoList;
+    vector<TPlayerInfo>	                PlayerInfoList;
 
 };
 

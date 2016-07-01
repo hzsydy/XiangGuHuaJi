@@ -18,7 +18,8 @@ SET(LOGIC_SRC
     ./XiangGuHuaJi/game.cpp  
     ./XiangGuHuaJi/map.cpp
     ./XiangGuHuaJi/player.cpp
-    ./XiangGuHuaJi/main.cpp 
+    ./XiangGuHuaJi/main.cpp
+    ./XiangGuHuaJi/controller.cpp 
 )
 ADD_EXECUTABLE(Logic-XGHJ
     ${LOGIC_SRC}
