@@ -139,6 +139,13 @@ public:
     vector<TDiplomaticCommand>        DiplomaticCommandList;
     vector<vector<TMilitary> >        MilitaryCommand;
 
+    //TODO move 
+	const static TRound     MAX_ROUND = 20;
+    const static TMilitary  MAX_MILITARY = 255;
+    const static TSaving    UNIT_SAVING = 10;
+    const static TSaving    UNIT_CITY_INCOME = 100;
+	const static TRound     TRUCE_TIME = 5; 
+
 private:
 // info restricted by the game
     const vector<vector<vector<TMilitary > > >	MilitaryMap;
