@@ -35,7 +35,7 @@ Game::Game(Map& map, int playersize)
         AttackPointsMap_[id] = cv::Mat::zeros(map.size(), CV_TAttack);        
     }
     DefensePointsMap_ = cv::Mat::zeros(map.size(), CV_TDefense);
-	GlobalMap_ = cv::Mat::zeros(map.size(), CV_TId);
+    GlobalMap_ = cv::Mat(map.size(), CV_TId, cv::Scalar::all(255));
 
     //PlayerInfoList
     PlayerInfoList_.resize(PlayerSize);
@@ -69,7 +69,14 @@ bool Game::Start()
 	++Round;
 
     //TODO  init the player, call each player to select their birthplace
-    for (TId i=0; i<PlayerSize; ++i) OwnershipMasks_[i].at<TMask>(i,i)=255;
+    for (TId i=0; i<PlayerSize; ++i) 
+        if (0==i%2) OwnershipMasks_[i].at<TMask>(i,i)=255;
+        else OwnershipMasks_[i].at<TMask>(map.getRows()-1-i,map.getCols()-1-i)=255;
+    for (TId id=0; id<PlayerSize; ++id)
+        for (TMapSize j=0; j<map.getRows(); ++j)
+            for (TMapSize i=0; i<map.getCols(); ++i)
+                if (OwnershipMasks_[id].at<TMask>(j,i)) GlobalMap_.at<TId>(j,i)=id;
+
 	return true;
 }
 
@@ -258,8 +265,8 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
 //Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
+
     // refresh OwnershipMask_
-	// refresh GlobalMap
 	
 	/*
 	for (TId id=0; id<PlayerSize; ++id)
@@ -270,6 +277,15 @@ bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 		cv::findContours(mat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 	}
 	*/
+    
+    
+    
+    // refresh GlobalMap
+    for (TId id=0; id<PlayerSize; ++id)
+        for (TMapSize j=0; j<map.getRows(); ++j)
+            for (TMapSize i=0; i<map.getCols(); ++i)
+                if (OwnershipMasks_[id].at<TMask>(j,i)) GlobalMap_.at<TId>(j,i)=id;
+
     return false; //TODO
 }
 
