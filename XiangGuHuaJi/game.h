@@ -11,7 +11,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <queue>
 #include <opencv2/opencv.hpp>
 
 #include "definition.h"
@@ -19,7 +18,6 @@
 #include "converter.hpp"
 
 using std::vector;
-using std::queue;
 
 namespace XGHJ {
 class Game
@@ -75,13 +73,7 @@ protected:
     vector<cv::Mat>     AttackPointsMap_;
     cv::Mat             DefensePointsMap_;
 private:
-	struct TruceTreaty 
-	{
-		TId player1;
-		TId player2;
-		TRound lasttime;
-	};
-	queue<TruceTreaty> TruceList;
+    vector<vector<unsigned char> >  TruceTreaty;
 };
 
 }
