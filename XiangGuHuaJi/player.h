@@ -8,8 +8,6 @@
 
 #include<string>
 
-#include<opencv2/opencv.hpp>
-
 #include"definition.h"
 
 #include "ai.h"

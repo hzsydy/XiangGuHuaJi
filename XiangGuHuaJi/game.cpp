@@ -242,37 +242,30 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
             MilitaryMap_[id] += mat;
         }
     }
-
-
     return true; //TODO
 }
 
 //Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
-
+	
     // refresh OwnershipMask_
 	cv::Mat mat;
-	vector<vector<cv::Point> > contours;
-	vector<cv::Vec4i> hierarchy;
 	for (TId id=0; id<PlayerSize; ++id)
 	{
-		mat = MilitaryMap_[id];
-		if (!mat.empty())
-		{
-			cv::findContours(mat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-		}
+		mat = MilitaryMap_[id].clone();
+		vector<vector<cv::Point> > contours;
+		vector<cv::Vec4i> hierarchy;
+		cv::findContours(mat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+		
 	}
-	
-    
-    
-    
+
     // refresh GlobalMap
     for (TId id=0; id<PlayerSize; ++id)
         for (TMapSize j=0; j<map.getRows(); ++j)
             for (TMapSize i=0; i<map.getCols(); ++i)
                 if (OwnershipMasks_[id].at<TMask>(j,i)) GlobalMap_.at<TId>(j,i)=id;
-
+	
     return false; //TODO
 }
 
@@ -282,7 +275,8 @@ bool Game::ProducingPhase()
     for (TId id=0; id<PlayerSize; ++id)
 	{
 		// lowest income
-        TSaving new_saving = 1;
+
+		TSaving new_saving = 1;
 
         // map income 
         for (TMapSize j=0; j<map.getRows(); ++j)
