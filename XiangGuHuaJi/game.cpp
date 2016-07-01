@@ -77,8 +77,6 @@ bool Game::Start()
 bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
 			   vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
-    cout << "Game: Round[" << Round << "] ";
-
     DiplomacyPhase(DiplomaticCommandMap);
     ConstructionPhase(MilitaryCommandList);
     MilitaryPhase(MilitaryCommandList);
@@ -86,8 +84,6 @@ bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
 
     ++Round;
     if (Round>=MAX_ROUND) isValid_=false;
-
-    cout << "finished" << endl;
 
     return isValid_;    
 }
@@ -227,6 +223,7 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
             }
         if (sum * UNIT_SAVING > PlayerInfoList_[id].Saving) 
         {
+            // spend too much money
             valid = false;
             cout << "[Warning] Player {" << (int)id << "} tried to spend more money than he has!!! " << endl;
             unsigned int ratio = sum * UNIT_SAVING / PlayerInfoList_[id].Saving, mult = 0;
@@ -235,7 +232,7 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
                 for (TMapSize i=0; i<map.getCols(); ++i)
                     mat.at<TMilitary>(j, i) >>= mult;
         }
-        // summary
+        // sum 
         if (!valid)
         {
             sum = 0;
@@ -246,6 +243,7 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
                     sum+=point_military;
                 }
         }
+        // execute
         if ( sum * UNIT_SAVING <= PlayerInfoList_[id].Saving)
         {
             PlayerInfoList_[id].Saving -= sum * UNIT_SAVING;
@@ -260,6 +258,15 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
 //Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
+    // refresh OwnershipMask_
+	// refresh GlobalMap
+	for (TId id=0; id<PlayerSize; ++id)
+	{
+
+	}
+	vector<vector<cv::Point> > contours;
+	vector<cv::Vec4i> hierarchy;
+	cv::findContours(mat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
     return false; //TODO
 }
 
@@ -267,8 +274,9 @@ bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 bool Game::ProducingPhase()
 {
     for (TId id=0; id<PlayerSize; ++id)
-    {
-        TSaving new_saving = 0;
+	{
+		// lowest income
+        TSaving new_saving = 1;
 
         // map income 
         for (TMapSize j=0; j<map.getRows(); ++j)
@@ -278,7 +286,8 @@ bool Game::ProducingPhase()
         new_saving += UNIT_CITY_INCOME*PlayerInfoList_[id].MilitarySummary;
 
         // corruption 
-        PlayerInfoList_[id].Saving+=new_saving*(1-PlayerInfoList_[id].MapArea*CORRUPTION_COEF);
+        PlayerInfoList_[id].Saving+=
+			(TSaving)((1-(float)(PlayerInfoList_[id].MapArea)*CORRUPTION_COEF) * (float)new_saving);
     }
 
     return false; //TODO
@@ -287,6 +296,8 @@ bool Game::ProducingPhase()
 //Check the winner and the loser (Deal with PlayerInfoList)
 bool Game::CheckWinner()
 {
+    // refresh PlayerInfoList
+
     return false; //TODO
 }
 

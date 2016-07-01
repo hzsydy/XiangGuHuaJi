@@ -28,18 +28,18 @@ public:
     Game(Map& map, int playersize);
     ~Game();
 
-	bool Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
-		vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap);
-    bool ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
+    bool Start();
+	bool Run(vector<cv::Mat/*TMilitary*/> &         MilitaryCommandList,
+		vector<vector<TDiplomaticCommand> > &       DiplomaticCommandMap);
+    bool ConstructionPhase(vector<cv::Mat/*TMilitary*/> &       MilitaryCommandList);
     bool DiplomacyPhase(vector<vector<TDiplomaticCommand> > &   DiplomaticCommandMap);
-    bool MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> &       MilitaryCommandList);
+    bool MilitaryPhase(vector<cv::Mat/*TMilitary*/> &           MilitaryCommandList);
     bool ProducingPhase();
     bool CheckWinner();
 
-	bool Start();
+    Map& map;
 
-    Map&                map;
-
+    //TODO move these constant to somewhere else
 	const static TRound     MAX_ROUND;
     const static TMilitary  MAX_MILITARY;
     const static TSaving    UNIT_SAVING;
