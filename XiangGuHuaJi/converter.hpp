@@ -87,7 +87,7 @@ template<typename T> vector<vector<vector<T> > > getResizedVector(int cols, int 
 	vec.resize(count);
 	for (int i=0; i<count; i++)
 	{
-		vec[i] = getResizedVector(cols, rows);
+		vec[i] = getResizedVector<T>(cols, rows);
 	}
 	return vec;
 }
