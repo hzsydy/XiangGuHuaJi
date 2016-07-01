@@ -260,13 +260,16 @@ bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
     // refresh OwnershipMask_
 	// refresh GlobalMap
+	
+	/*
 	for (TId id=0; id<PlayerSize; ++id)
 	{
-
+		cv::Mat mat = MilitaryCommandList[id];
+		vector<vector<cv::Point> > contours;
+		vector<cv::Vec4i> hierarchy;
+		cv::findContours(mat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 	}
-	vector<vector<cv::Point> > contours;
-	vector<cv::Vec4i> hierarchy;
-	cv::findContours(mat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	*/
     return false; //TODO
 }
 
