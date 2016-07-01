@@ -46,13 +46,14 @@ template<typename T> void convertMat(vector<cv::Mat> vecmat, vector<vector<vecto
 	}
 }
 
+// convert cv::Mat to vector<vector<T> >
 template<typename T> vector<vector<T> > getConvertedMat(cv::Mat mat)
 {
 	vector<vector<T> > vec;
 	convertMat(mat, vec);
 	return vec;
 }
-
+// convert vector<cv::Mat> to vector<vector<vector<T> > >
 template<typename T> vector<vector<vector<T> > > getConvertedMat(vector<cv::Mat> vecmat)
 {
 	vector<vector<vector<T> > > vec;

@@ -53,16 +53,21 @@ namespace XGHJ
 		vector<vector<TMapPara> > MapAtk;
 
 		//first_class statistics
-		vector<cv::Mat>     MilitaryMap;
-		cv::Mat/*CV_TId*/	GlobalMap;
+		vector<cv::Mat>     MilitaryMap_;
+		cv::Mat/*CV_TId*/	GlobalMap_;
 		vector<TPlayerInfo>	PlayerInfoList;
 		vector<vector<TDiplomaticStatus> >	Diplomacy;
 		TRound              Round;
 		TId                 PlayerSize;
 		//second_class statistics resolved
-		vector<cv::Mat>     OwnershipMasks;
-		vector<cv::Mat>     AttackPointsMap;
-		cv::Mat             DefensePointsMap;
+		vector<cv::Mat>     OwnershipMasks_;
+		vector<cv::Mat>     AttackPointsMap_;
+		cv::Mat             DefensePointsMap_;
+        //cached vectors
+        vector<vector<vector<TMilitary> > > MilitaryMap;
+        vector<vector<TId> >                GlobalMap;
+        vector<vector<vector<TAttack> > >   AttackPointsMap;
+        vector<vector<TDefense> >           DefensePointsMap;
 	};
 }
 

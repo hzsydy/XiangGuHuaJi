@@ -8,49 +8,21 @@ namespace XGHJ
 {
 	void Controller::Run()
 	{
-		Round			 = 	game_.getRound()			;
-		if (Round != 0)
-		{
-			vector<cv::Mat/*cv_Military*/> MilitaryCommandList(PlayerSize);
-			vector<vector<TDiplomaticCommand> > DiplomaticCommandMap 
-				= getResizedVector<TDiplomaticCommand>(PlayerSize, PlayerSize);
-			for (TId id=0; id<PlayerSize; ++id)
-			{
-                Player& player = players_[id];
-                if (!player.isValid()) continue;
+        Round			  = 	game_.getRound()			;
+		MilitaryMap_	  = 	game_.getMilitaryMap()		;
+		GlobalMap_		  = 	game_.getGlobalMap()		;
+		PlayerInfoList	  = 	game_.getPlayerInfoList()	;
+		Diplomacy		  = 	game_.getDiplomacy()		;	
+		OwnershipMasks_	  = 	game_.getOwnershipMasks()	;
+		AttackPointsMap_  = 	game_.getAttackPointsMap()	;
+		DefensePointsMap_ = 	game_.getDefensePointsMap()	;
 
-				Info info = getInfo(id);
+        GlobalMap       = getConvertedMat<TId>(GlobalMap_);
+        MilitaryMap     = getConvertedMat<TMilitary>(MilitaryMap_);
+        AttackPointsMap = getConvertedMat<TAttack>(AttackPointsMap_);
+        DefensePointsMap= getConvertedMat<TDefense>(DefensePointsMap_);
 
-				bool runwell = true;
-                runwell = runwell && players_[id].Run(info);
-                if (!runwell) continue;
-				cv::Mat mat = cv::Mat::zeros(rows, cols, CV_TMilitary);
-				runwell = runwell && convertVector<TMilitary>(info.MilitaryCommand, mat);
-                if (!runwell) continue;
-					
-				MilitaryCommandList[id] = mat;
-				DiplomaticCommandMap[id] = info.DiplomaticCommandList;				
-			}
-			game_.Run(MilitaryCommandList, DiplomaticCommandMap);
-		}
-		else
-		{
-			//choose start pos
-
-			game_.Start();
-		}
-
-		isValid_ = game_.isValid();	
-		if (!isValid_) return;
-
-		Round			 = 	game_.getRound()			;
-		MilitaryMap		 = 	game_.getMilitaryMap()		;
-		GlobalMap		 = 	game_.getGlobalMap()		;
-		PlayerInfoList	 = 	game_.getPlayerInfoList()	;
-		Diplomacy		 = 	game_.getDiplomacy()		;	
-		OwnershipMasks	 = 	game_.getOwnershipMasks()	;
-		AttackPointsMap	 = 	game_.getAttackPointsMap()	;
-		DefensePointsMap = 	game_.getDefensePointsMap()	;
+        cout << "-=-=-=-=-=-=-=-=-=-=-= Controller: Round[" << Round << "] =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
 
 		infos_.clear();
 		for (TId i=0; i<PlayerSize; i++)
@@ -59,11 +31,44 @@ namespace XGHJ
 			infos_.push_back(info);
 		}
 
+		Round = game_.getRound();
+		if (Round != 0)
+		{
+			vector<cv::Mat/*cv_Military*/> MilitaryCommandList(PlayerSize);
+			vector<vector<TDiplomaticCommand> > DiplomaticCommandMap 
+				= getResizedVector<TDiplomaticCommand>(PlayerSize, PlayerSize);
+            // each player run 
+			for (TId id=0; id<PlayerSize; ++id)
+			{
+                Player& player = players_[id];
+                Info info = getInfo(id);
+                cv::Mat mat = cv::Mat::zeros(rows, cols, CV_TMilitary);
+                
+                bool runwell=true;
+
+                if (!player.isValid()) runwell = false;
+                if (runwell) runwell = players_[id].Run(info);
+                if (runwell) runwell = convertVector<TMilitary>(info.MilitaryCommand, mat);
+				
+				MilitaryCommandList[id] = mat;
+				DiplomaticCommandMap[id] = info.DiplomaticCommandList;				
+			}
+			game_.Run(MilitaryCommandList, DiplomaticCommandMap);
+		}
+		else
+		{
+			//choose start pos
+			game_.Start();
+		}
+
+		isValid_ = game_.isValid();	
+		if (!isValid_) return;
+
 #ifdef GAME_DEBUG
-        cv::Mat m = MilitaryMap[0].clone();
+        cv::Mat m = MilitaryMap_[0].clone();
         cv::resize(m, m, cv::Size(), 20.0, 20.0);
         cv::imshow("status of Player{0}", m);
-        cout<<"mm: " << (int)MilitaryMap[0].at<TMask>(0,0) << endl;;
+        cout<<"mm: " << (int)MilitaryMap_[0].at<TMask>(0,0) << endl;;
         cv::waitKey(0);
 #endif
 
@@ -76,19 +81,19 @@ namespace XGHJ
 		resizeVector(MilitaryCommand, PlayerSize, PlayerSize);
 
 		// Mask
-		cv::Mat OwnershipMask_ = cv::Mat::zeros(rows, cols, CV_8UC1),
-			VisibleMask_ = cv::Mat::zeros(rows, cols, CV_8UC1),
-			ControlMask_ = cv::Mat::zeros(rows, cols, CV_8UC1);
+        cv::Mat OwnershipMask_ = cv::Mat::zeros(rows, cols, CV_TMask),
+			VisibleMask_ = cv::Mat::zeros(rows, cols, CV_TMask),
+			ControlMask_ = cv::Mat::zeros(rows, cols, CV_TMask);
 		vector<vector<unsigned char> >	OwnershipMask, VisibleMask, ControlMask;
 
-		OwnershipMask_ = OwnershipMasks[playerid].clone();
+		OwnershipMask_ = OwnershipMasks_[playerid].clone();
 		for (TId target=0; target<PlayerSize; ++target)
 		{
 			TDiplomaticStatus status = Diplomacy[playerid][target];
 			if (status!=Undiscovered && status!=AtWar) 
-				VisibleMask_ += OwnershipMasks[target];
+				VisibleMask_ += OwnershipMasks_[target];
 			if (status==Allied) 
-				ControlMask_ += OwnershipMasks[target];
+				ControlMask_ += OwnershipMasks_[target];
 		}
 		return Info(
 			playerid,
@@ -99,13 +104,13 @@ namespace XGHJ
 			getConvertedMat<TMask>(OwnershipMask_),
 			getConvertedMat<TMask>(VisibleMask_),
 			getConvertedMat<TMask>(ControlMask_),
-			getConvertedMat<TId>(GlobalMap),
+            GlobalMap,
 			MapRes,
 			MapDef,
 			MapAtk,
-			getConvertedMat<TMilitary>(MilitaryMap),
-			getConvertedMat<TAttack>(AttackPointsMap),
-			getConvertedMat<TDefense>(DefensePointsMap),
+			MilitaryMap,
+			AttackPointsMap,
+			DefensePointsMap,
 			PlayerInfoList,
 			Diplomacy,
 			getResizedVector<TMilitary>(cols, rows),

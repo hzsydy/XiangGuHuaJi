@@ -75,8 +75,6 @@ bool Game::Start()
 bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
 			   vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
-    cout << "Game: Round[" << Round << "] ";
-
     DiplomacyPhase(DiplomaticCommandMap);
     ConstructionPhase(MilitaryCommandList);
     MilitaryPhase(MilitaryCommandList);
@@ -84,8 +82,6 @@ bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
 
     ++Round;
     if (Round>=MAX_ROUND) isValid_=false;
-
-    cout << "finished" << endl;
 
     return isValid_;    
 }
@@ -223,6 +219,7 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
             }
         if (sum * UNIT_SAVING > PlayerInfoList_[id].Saving) 
         {
+            // spend too much money
             valid = false;
             cout << "[Warning] Player {" << (int)id << "} tried to spend more money than he has!!! " << endl;
             unsigned int ratio = sum * UNIT_SAVING / PlayerInfoList_[id].Saving, mult = 0;
@@ -231,7 +228,7 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
                 for (TMapSize i=0; i<map.getCols(); ++i)
                     mat.at<TMilitary>(j, i) >>= mult;
         }
-        // summary
+        // sum 
         if (!valid)
         {
             sum = 0;
@@ -242,6 +239,7 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
                     sum+=point_military;
                 }
         }
+        // execute
         if ( sum * UNIT_SAVING <= PlayerInfoList_[id].Saving)
         {
             PlayerInfoList_[id].Saving -= sum * UNIT_SAVING;
@@ -256,6 +254,9 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
 //Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
+    // refresh OwnershipMask_
+    // refresh GlobalMap
+
     return false; //TODO
 }
 
@@ -283,6 +284,8 @@ bool Game::ProducingPhase()
 //Check the winner and the loser (Deal with PlayerInfoList)
 bool Game::CheckWinner()
 {
+    // refresh PlayerInfoList
+
     return false; //TODO
 }
 
