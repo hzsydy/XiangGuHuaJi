@@ -45,6 +45,8 @@ public:
     const static TSaving    UNIT_SAVING;
     const static TSaving    UNIT_CITY_INCOME;
 	const static TRound     TRUCE_TIME;
+	const static float		CORRUPTION_COEF;
+	const static float		DEPRECIATION_COEF;
 
 	//first_class statistics
 	inline vector<cv::Mat>		getMilitaryMap()	 {return  MilitaryMap_		;}

@@ -11,6 +11,8 @@ const TMilitary     Game::MAX_MILITARY = 255;
 const TRound        Game::MAX_ROUND = 20;
 const TSaving       Game::UNIT_SAVING = 10;
 const TRound        Game::TRUCE_TIME = 5;
+const float			Game::CORRUPTION_COEF = 0.001f;
+const float			Game::DEPRECIATION_COEF = 0.3f;
 
 #ifdef GAME_DEBUG
 const TSaving       Game::UNIT_CITY_INCOME = 100; 
@@ -168,6 +170,8 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 						tt.player1 = i;
 						tt.player2 = j;
 						TruceList.push(tt);
+						//TODO units on the used-to-be allied islands should be destroyed
+
 					}
 					break;
 				case AtWar:
@@ -273,8 +277,8 @@ bool Game::ProducingPhase()
         // city income
         new_saving += UNIT_CITY_INCOME*PlayerInfoList_[id].MilitarySummary;
 
-        // TODO new_saving
-        PlayerInfoList_[id].Saving+=new_saving;
+        // corruption 
+        PlayerInfoList_[id].Saving+=new_saving*(1-PlayerInfoList_[id].MapArea*CORRUPTION_COEF);
     }
 
     return false; //TODO
