@@ -8,8 +8,10 @@
 #define GAME_DEBUG
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
+#include <cmath>
 #include <vector>
 #include <opencv2/opencv.hpp>
 
@@ -43,8 +45,12 @@ public:
     const static TSaving    UNIT_SAVING;
     const static TSaving    UNIT_CITY_INCOME;
 	const static TRound     TRUCE_TIME;
-	const static float		CORRUPTION_COEF;
-	const static float		DEPRECIATION_COEF;
+	const static float		CORRUPTION_COEF;//收获资源的腐败系数
+	const static float		DEPRECIATION_COEF;//撤回盟友投资的折旧系数
+	const static int		MILITARY_KERNEL_SIZE;//影响力核心的大小
+	const static float		MILITARY_KERNEL_SIGMA_2;//影响力核心的高斯函数的系数sigma的平方
+	const static float		MILITARY_KERNEL_GAUSS_COEF;//影响力核心的高斯函数前面的系数
+	const static float		MILITARY_KERNEL_BASE_EFF;//基础影响力
 
 	//first_class statistics
 	inline vector<cv::Mat>		getMilitaryMap()	 {return  MilitaryMap_		;}
@@ -73,7 +79,8 @@ protected:
     vector<cv::Mat>     AttackPointsMap_;
     cv::Mat             DefensePointsMap_;
 private:
-    vector<vector<unsigned char> >  TruceTreaty;
+    vector<vector<TId> >  TruceTreaty;
+	cv::Mat MilitaryKernel;
 };
 
 }

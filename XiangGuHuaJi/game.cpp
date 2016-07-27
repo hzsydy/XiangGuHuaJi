@@ -13,6 +13,10 @@ const TSaving       Game::UNIT_SAVING = 10;
 const TRound        Game::TRUCE_TIME = 5;
 const float			Game::CORRUPTION_COEF = 0.001f;
 const float			Game::DEPRECIATION_COEF = 0.3f;
+const int			Game::MILITARY_KERNEL_SIZE = 5;
+const float			Game::MILITARY_KERNEL_SIGMA_2 = 2.25f;
+const float			Game::MILITARY_KERNEL_GAUSS_COEF = 100.0f;
+const float			Game::MILITARY_KERNEL_BASE_EFF = 1.0f;
 
 #ifdef GAME_DEBUG
 const TSaving       Game::UNIT_CITY_INCOME = 100; 
@@ -20,7 +24,40 @@ const TSaving       Game::UNIT_CITY_INCOME = 100;
 const TSaving       Game::UNIT_CITY_INCOME = 1;
 #endif
 
+//肮脏的辅助函数 用来打印一个矩阵
+template<typename T> void printElement(T t)
+{
+	const static char separator  = ' ';
+	cout << left << std::setw(6) << std::setfill(separator) << t;
+}
 
+template<> void printElement<float>(float t)
+{
+	const static char separator  = ' ';
+	cout << left << std::setw(6) << std::setprecision(2) << std::setfill(separator) << t;
+}
+
+template<> void printElement<unsigned char>(unsigned char t)
+{
+	const static char separator  = ' ';
+	cout << left << std::setw(6) << std::setfill(separator) << (int)t;
+}
+
+template <typename T>
+void printMat(cv::Mat m, string name)
+{
+#ifdef GAME_DEBUG
+	cout<<name<<endl;
+	for (int i=0; i<m.rows; i++)
+	{
+		for (int j=0; j<m.cols; j++)
+		{
+			printElement<T>(m.at<T>(i, j));
+		}
+		cout<<endl;
+	}
+#endif
+}
 
 
 Game::Game(Map& map, int playersize)
@@ -57,6 +94,25 @@ Game::Game(Map& map, int playersize)
     for (TId id=0; id<PlayerSize; ++id) Diplomacy_[id][id] = Allied;
     //TruceTreaty_
     resizeVector<unsigned char>(TruceTreaty, PlayerSize, PlayerSize);
+	//init MilitaryKernel
+	MilitaryKernel = cv::Mat::zeros(
+		2*MILITARY_KERNEL_SIZE+1, 
+		2*MILITARY_KERNEL_SIZE+1, 
+		CV_32FC1
+	);
+	for (int i=0; i<MILITARY_KERNEL_SIZE+1; i++)
+	{
+		for (int j=0; j<MILITARY_KERNEL_SIZE+1; j++)
+		{
+			float f = exp(-(float)(i^2+j^2)/2/MILITARY_KERNEL_SIGMA_2);
+			f /= 2*MILITARY_KERNEL_SIGMA_2*3.1416;
+			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE+i, MILITARY_KERNEL_SIZE+j) = f;
+			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE+i, MILITARY_KERNEL_SIZE-j) = f;
+			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE-i, MILITARY_KERNEL_SIZE+j) = f;
+			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE-i, MILITARY_KERNEL_SIZE-j) = f;
+		}
+	}
+	printMat<float>(MilitaryKernel, "MilitaryKernel");
 }
 
 Game::~Game()
@@ -250,14 +306,35 @@ bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
 	
     // refresh OwnershipMask_
-	cv::Mat mat;
 	for (TId id=0; id<PlayerSize; ++id)
 	{
+		cv::Mat mat, mat_dilate, mat_erode;
+		cv::Mat mat_ownermask;
 		mat = MilitaryMap_[id].clone();
-		vector<vector<cv::Point> > contours;
-		vector<cv::Vec4i> hierarchy;
-		cv::findContours(mat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-		
+		cv::dilate(mat, mat_dilate, cv::Mat());
+		cv::erode(mat, mat_erode, cv::Mat());
+		cv::threshold(mat, mat_ownermask, 0, 255, cv::THRESH_BINARY);
+		cv::threshold(mat_dilate, mat_dilate, 0, 255, cv::THRESH_BINARY);
+		cv::threshold(mat_erode, mat_erode, 0, 255, cv::THRESH_BINARY);
+		cv::Mat mat_inner_contour = cv::Mat::zeros(map.size(), CV_TMask);
+		cv::Mat mat_outer_contour = cv::Mat::zeros(map.size(), CV_TMask);
+		for (int i=0; i<mat.rows; i++)
+		{
+			for (int j=0; j<mat.cols; j++)
+			{
+				if (mat_erode.at<TMask>(i, j) == 0 && mat_ownermask.at<TMask>(i, j) == 255)
+				{
+					mat_inner_contour.at<TMask>(i, j) = 255;
+				}
+				else if (mat_dilate.at<TMask>(i, j) == 255 && mat_ownermask.at<TMask>(i, j) == 0)
+				{
+					mat_outer_contour	.at<TMask>(i, j) = 255;
+				}
+			}
+		}
+		printMat<TMask>(mat_ownermask, "mat_ownermask");
+		printMat<TMask>(mat_inner_contour, "mat_inner_contour");
+		printMat<TMask>(mat_outer_contour, "mat_outer_contour");
 	}
 
     // refresh GlobalMap
