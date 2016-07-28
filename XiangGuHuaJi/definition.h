@@ -5,6 +5,9 @@
 #ifndef _XIANGGUHUAJI_DEFINITION_H__
 #define _XIANGGUHUAJI_DEFINITION_H__
 
+
+#include "debug.hpp"
+
 typedef unsigned char TId;       //PlayerId
 #define CV_TId CV_8UC1
 typedef unsigned char TMapSize;  //x,y

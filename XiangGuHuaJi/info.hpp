@@ -22,7 +22,7 @@ struct PointMilitary
     vector<TMilitary> Military; // everyone's Military on this point
 
     TDefense DefensePoints;       // DefensePoints currently
-    vector<TAttack> AttackPoints; // everyone's AttackPoints to this point
+    vector<TAttack> AttackProc; // everyone's AttackProc to this point
 };
 
 
@@ -44,7 +44,7 @@ public:
         vector<vector<TMapPara> >       MapDefenseRatio,
         vector<vector<TMapPara> >       MapAttackRatio,
         vector<vector<vector<TMilitary > > >	MilitaryMap,
-        vector<vector<vector<TAttack > > >	    AttackPointsMap,
+        vector<vector<vector<TAttack > > >	    AttackProcMap,
         vector<vector<TDefense> >	            DefensePointsMap,
         vector<TPlayerInfo>	                    PlayerInfoList,
         vector<vector<TDiplomaticStatus> >	    Diplomacy,
@@ -63,7 +63,7 @@ public:
         MapAttackRatio(MapAttackRatio),
         GlobalMap(GlobalMap),
         MilitaryMap(MilitaryMap),
-        AttackPointsMap(AttackPointsMap),
+        AttackProcMap(AttackProcMap),
         DefensePointsMap(DefensePointsMap),
         PlayerInfoList(PlayerInfoList),
         Diplomacy(Diplomacy),
@@ -102,7 +102,7 @@ public:
         for (TId t=0; t<PlayerSize; ++t)
         {
             point.Military.push_back(MilitaryMap[t][i][j]);
-            point.AttackPoints.push_back(AttackPointsMap[t][i][j]);
+            point.AttackProc.push_back(AttackProcMap[t][i][j]);
         }
         point.DefensePoints = DefensePointsMap[i][j];
 
@@ -149,7 +149,7 @@ public:
 private:
 // info restricted by the game
     vector<vector<vector<TMilitary > > >	MilitaryMap;
-    vector<vector<vector<TAttack > > >	    AttackPointsMap;
+    vector<vector<vector<TAttack > > >	    AttackProcMap;
     vector<vector<TDefense> >	            DefensePointsMap;
 
     vector<TPlayerInfo>	                PlayerInfoList;

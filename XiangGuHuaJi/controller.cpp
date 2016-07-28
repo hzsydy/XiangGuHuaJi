@@ -4,6 +4,7 @@
 
 #include "controller.h"
 
+
 namespace XGHJ
 {
 	void Controller::Run()
@@ -14,12 +15,12 @@ namespace XGHJ
 		PlayerInfoList	  = 	game_.getPlayerInfoList()	;
 		Diplomacy		  = 	game_.getDiplomacy()		;	
 		OwnershipMasks_	  = 	game_.getOwnershipMasks()	;
-		AttackPointsMap_  = 	game_.getAttackPointsMap()	;
+		AttackProcMap_  = 	game_.getAttackProcMap()	;
 		DefensePointsMap_ = 	game_.getDefensePointsMap()	;
 
         GlobalMap       = getConvertedMat<TId>(GlobalMap_);
         MilitaryMap     = getConvertedMat<TMilitary>(MilitaryMap_);
-        AttackPointsMap = getConvertedMat<TAttack>(AttackPointsMap_);
+        AttackProcMap = getConvertedMat<TAttack>(AttackProcMap_);
         DefensePointsMap= getConvertedMat<TDefense>(DefensePointsMap_);
 
         cout << "-=-=-=-=-=-=-=-=-=-=-= Controller: Round[" << Round << "] =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
@@ -64,14 +65,6 @@ namespace XGHJ
 		isValid_ = game_.isValid();	
 		if (!isValid_) return;
 
-#ifdef GAME_DEBUG
-        cv::Mat m = MilitaryMap_[0].clone();
-        cv::resize(m, m, cv::Size(), 20.0, 20.0);
-        cv::imshow("status of Player{0}", m);
-        cout<<"mm: " << (int)MilitaryMap_[0].at<TMask>(0,0) << endl;;
-        cv::waitKey(0);
-#endif
-
 	}
 
 	Info Controller::generateInfo(TId playerid)
@@ -85,7 +78,6 @@ namespace XGHJ
 			VisibleMask_ = cv::Mat::zeros(rows, cols, CV_TMask),
 			ControlMask_ = cv::Mat::zeros(rows, cols, CV_TMask);
 		vector<vector<unsigned char> >	OwnershipMask, VisibleMask, ControlMask;
-
 		OwnershipMask_ = OwnershipMasks_[playerid].clone();
 		for (TId target=0; target<PlayerSize; ++target)
 		{
@@ -109,7 +101,7 @@ namespace XGHJ
 			MapDef,
 			MapAtk,
 			MilitaryMap,
-			AttackPointsMap,
+			AttackProcMap,
 			DefensePointsMap,
 			PlayerInfoList,
 			Diplomacy,

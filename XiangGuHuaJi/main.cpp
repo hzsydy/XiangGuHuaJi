@@ -13,7 +13,7 @@ using namespace std;
 using namespace XGHJ;
 
 
-string  config_filename =
+const string  config_filename =
 #ifdef _MSC_VER
     "../config_msvc.ini";
 #endif
@@ -23,31 +23,47 @@ string  config_filename =
 
 int main(int argc, char** argv) 
 {
-    if (argc>=2) 
+	vector<Player>  players;
+	string          map_filename; 
+	vector<string>  players_filename;
+	if (argc == 1) 
     {
-        config_filename = argv[1];
+		try 
+		{ 
+			ifstream ifs(config_filename.c_str());    
+			ifs >> map_filename;        
+			while (!ifs.eof())         
+			{
+				string player_filename;
+				ifs >> player_filename; 
+				if (!player_filename.empty()) players_filename.push_back(player_filename);
+			}
+		}
+		catch(...) 
+		{
+			cout<<"Failed to load \""<< config_filename << "\". Aborted. " << endl;
+			return -1;
+		}
     }
+	else if(argc >= 3)
+	{
+		map_filename = string(argv[1]);
+		for (int i=2; i<argc; i++)
+		{
+			string player_filename;
+			player_filename = string(argv[argc]);
+			players_filename.push_back(player_filename);
+		}
+	}
+	else
+	{
+		cout<<"usage:												"<<endl
+			<<"XiangGuHuaji						Load config file	"<<endl
+			<<"XiangGuHuaji	map	dll1 dll2 ...	assign file to load	"<<endl
+		;
+	}
 
-    string          map_filename; 
-    vector<string>  players_filename;
-    vector<Player>  players;
-
-    try 
-    { 
-        ifstream ifs(config_filename.c_str());    
-        ifs >> map_filename;        
-        while (!ifs.eof())         
-        {
-            string player_filename;
-            ifs >> player_filename; 
-            if (!player_filename.empty()) players_filename.push_back(player_filename);
-        }
-    }
-    catch(...) 
-    {
-        cout<<"Failed to load \""<< config_filename << "\". Aborted. " << endl;
-        return -1;
-    }
+    
     if (players_filename.size()==0) 
     {
         cout << "No player ai file's names inputed. Aborted. " << endl;

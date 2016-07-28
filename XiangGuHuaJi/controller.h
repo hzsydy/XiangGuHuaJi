@@ -61,12 +61,12 @@ namespace XGHJ
 		TId                 PlayerSize;
 		//second_class statistics resolved
 		vector<cv::Mat>     OwnershipMasks_;
-		vector<cv::Mat>     AttackPointsMap_;
+		vector<cv::Mat>     AttackProcMap_;
 		cv::Mat             DefensePointsMap_;
         //cached vectors
         vector<vector<vector<TMilitary> > > MilitaryMap;
         vector<vector<TId> >                GlobalMap;
-        vector<vector<vector<TAttack> > >   AttackPointsMap;
+        vector<vector<vector<TAttack> > >   AttackProcMap;
         vector<vector<TDefense> >           DefensePointsMap;
 	};
 }

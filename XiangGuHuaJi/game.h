@@ -5,11 +5,9 @@
 #ifndef _XIANGGUHUAJI_GAME_H__
 #define _XIANGGUHUAJI_GAME_H__
 
-#define GAME_DEBUG
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
+
+
 #include <string>
 #include <cmath>
 #include <vector>
@@ -18,6 +16,7 @@
 #include "definition.h"
 #include "map.h"
 #include "converter.hpp"
+
 
 using std::vector;
 
@@ -61,9 +60,8 @@ public:
 	inline TRound				getRound()			 {return  Round  			;}
 	inline TId					getPlayerSize() 	 {return  PlayerSize		;}
 	inline bool					isValid() 			 {return  isValid_      	;}
-	//second_class statistics resolved											
 	inline vector<cv::Mat>		getOwnershipMasks()	 {return  OwnershipMasks_	;}
-	inline vector<cv::Mat>		getAttackPointsMap() {return  AttackPointsMap_	;}
+	inline vector<cv::Mat>		getAttackProcMap() {return  AttackProcMap_	;}
 	inline cv::Mat				getDefensePointsMap(){return  DefensePointsMap_	;}
 protected:
 	//first_class statistics
@@ -74,10 +72,9 @@ protected:
 	TRound              Round;
 	TId                 PlayerSize;
 	bool                isValid_;
-	//second_class statistics resolved
 	vector<cv::Mat>     OwnershipMasks_;
-    vector<cv::Mat>     AttackPointsMap_;
-    cv::Mat             DefensePointsMap_;
+    vector<cv::Mat>     AttackProcMap_;	//额 这并不是这个点攻击力的值的意思 而是攻击进程的意思
+    cv::Mat             DefensePointsMap_;	//是这个点防御力的值
 private:
     vector<vector<TId> >  TruceTreaty;
 	cv::Mat MilitaryKernel;

@@ -94,6 +94,7 @@
   <ItemGroup>
     <ClInclude Include="controller.h" />
     <ClInclude Include="converter.hpp" />
+    <ClInclude Include="debug.hpp" />
     <ClInclude Include="definition.h" />
     <ClInclude Include="ai.h" />
     <ClInclude Include="game.h" />

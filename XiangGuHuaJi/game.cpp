@@ -2,7 +2,7 @@
  * 
  */
 
-#include"game.h"
+#include "game.h"
 
 namespace XGHJ 
 {
@@ -24,52 +24,17 @@ const TSaving       Game::UNIT_CITY_INCOME = 100;
 const TSaving       Game::UNIT_CITY_INCOME = 1;
 #endif
 
-//肮脏的辅助函数 用来打印一个矩阵
-template<typename T> void printElement(T t)
-{
-	const static char separator  = ' ';
-	cout << left << std::setw(6) << std::setfill(separator) << t;
-}
-
-template<> void printElement<float>(float t)
-{
-	const static char separator  = ' ';
-	cout << left << std::setw(6) << std::setprecision(2) << std::setfill(separator) << t;
-}
-
-template<> void printElement<unsigned char>(unsigned char t)
-{
-	const static char separator  = ' ';
-	cout << left << std::setw(6) << std::setfill(separator) << (int)t;
-}
-
-template <typename T>
-void printMat(cv::Mat m, string name)
-{
-#ifdef GAME_DEBUG
-	cout<<name<<endl;
-	for (int i=0; i<m.rows; i++)
-	{
-		for (int j=0; j<m.cols; j++)
-		{
-			printElement<T>(m.at<T>(i, j));
-		}
-		cout<<endl;
-	}
-#endif
-}
-
 
 Game::Game(Map& map, int playersize)
     : map(map), PlayerSize(playersize),
       Round(0), isValid_(true)
 {
     MilitaryMap_.resize(PlayerSize);
-    AttackPointsMap_.resize(PlayerSize);
+    AttackProcMap_.resize(PlayerSize);
     for (TId id=0; id<PlayerSize; ++id)
     {
         MilitaryMap_[id] = cv::Mat::zeros(map.size(), CV_TMilitary);
-        AttackPointsMap_[id] = cv::Mat::zeros(map.size(), CV_TAttack);        
+        AttackProcMap_[id] = cv::Mat::zeros(map.size(), CV_TAttack);        
     }
     DefensePointsMap_ = cv::Mat::zeros(map.size(), CV_TDefense);
     GlobalMap_ = cv::Mat(map.size(), CV_TId, cv::Scalar::all(255));
@@ -95,6 +60,7 @@ Game::Game(Map& map, int playersize)
     //TruceTreaty_
     resizeVector<unsigned char>(TruceTreaty, PlayerSize, PlayerSize);
 	//init MilitaryKernel
+	const float pi = 3.1416;
 	MilitaryKernel = cv::Mat::zeros(
 		2*MILITARY_KERNEL_SIZE+1, 
 		2*MILITARY_KERNEL_SIZE+1, 
@@ -105,14 +71,13 @@ Game::Game(Map& map, int playersize)
 		for (int j=0; j<MILITARY_KERNEL_SIZE+1; j++)
 		{
 			float f = exp(-(float)(i^2+j^2)/2/MILITARY_KERNEL_SIGMA_2);
-			f /= 2*MILITARY_KERNEL_SIGMA_2*3.1416;
+			f /= 2*MILITARY_KERNEL_SIGMA_2*pi;
 			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE+i, MILITARY_KERNEL_SIZE+j) = f;
 			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE+i, MILITARY_KERNEL_SIZE-j) = f;
 			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE-i, MILITARY_KERNEL_SIZE+j) = f;
 			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE-i, MILITARY_KERNEL_SIZE-j) = f;
 		}
 	}
-	printMat<float>(MilitaryKernel, "MilitaryKernel");
 }
 
 Game::~Game()
@@ -298,14 +263,17 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
             MilitaryMap_[id] += mat;
         }
     }
+
+	cout <<"now in Game::ConstructionPhase, for id "<< 1<<endl;
+	printMat<TMilitary>(MilitaryMap_[1], "MilitaryMap_[1]");
+
     return true; //TODO
 }
 
 //Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
-	
-    // refresh OwnershipMask_
+	//load MilitaryMap_
 	for (TId id=0; id<PlayerSize; ++id)
 	{
 		cv::Mat mat, mat_dilate, mat_erode;
@@ -332,16 +300,24 @@ bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 				}
 			}
 		}
-		printMat<TMask>(mat_ownermask, "mat_ownermask");
-		printMat<TMask>(mat_inner_contour, "mat_inner_contour");
-		printMat<TMask>(mat_outer_contour, "mat_outer_contour");
 	}
 
+	/*
+	// refresh OwnershipMask_
+	for (TId id=0; id<PlayerSize; ++id)
+	{
+		cv::Mat mat, mat_ownermask;
+		mat = MilitaryMap_[id].clone();
+		cv::threshold(mat, mat_ownermask, 0, 255, cv::THRESH_BINARY);
+		OwnershipMasks_[id] = mat_ownermask.clone();
+	}
+	*/
     // refresh GlobalMap
     for (TId id=0; id<PlayerSize; ++id)
         for (TMapSize j=0; j<map.getRows(); ++j)
             for (TMapSize i=0; i<map.getCols(); ++i)
-                if (OwnershipMasks_[id].at<TMask>(j,i)) GlobalMap_.at<TId>(j,i)=id;
+                if (OwnershipMasks_[id].at<TMask>(j,i)) 
+					GlobalMap_.at<TId>(j,i)=id;
 	
     return false; //TODO
 }
