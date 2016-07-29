@@ -21,10 +21,15 @@ typedef unsigned int  TSaving;   //saving of a player
 typedef unsigned char TMask;
 #define CV_TMask CV_8UC1
 
-typedef unsigned char TDefense;  //DefensePoints
-#define CV_TDefense CV_8UC1
-typedef unsigned char TAttack;   //AttackPoints
-#define CV_TAttack CV_8UC1
+typedef float TDefense;  //DefensePoints
+#define CV_TDefense CV_32FC1
+typedef float TAttack;   //AttackPoints
+#define CV_TAttack CV_32FC1
+
+typedef float TInfluence;   //AttackPoints
+#define CV_TInfluence CV_32FC1
+#define CV_TInfluenceDepth CV_32F
+
 
 typedef unsigned char TMilitary; //Military(Building)
 #define CV_TMilitary CV_8UC1

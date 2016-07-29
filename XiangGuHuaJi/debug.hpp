@@ -36,7 +36,14 @@ template<>
 inline void printElement<float>(float t)
 {
 	const static char separator  = ' ';
-	cout << std::left << std::setw(6) << std::setprecision(2) << std::setfill(separator) << t;
+	if (t < 0.01)
+	{
+		cout << std::left << std::setw(6) << std::setprecision(2) << std::setfill(separator) << "<0.01";
+	}
+	else
+	{
+		cout << std::left << std::setw(6) << std::setprecision(2) << std::setfill(separator) << t;
+	}
 }
 
 template<> 

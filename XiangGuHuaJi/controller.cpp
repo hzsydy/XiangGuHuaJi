@@ -77,7 +77,7 @@ namespace XGHJ
         cv::Mat OwnershipMask_ = cv::Mat::zeros(rows, cols, CV_TMask),
 			VisibleMask_ = cv::Mat::zeros(rows, cols, CV_TMask),
 			ControlMask_ = cv::Mat::zeros(rows, cols, CV_TMask);
-		vector<vector<unsigned char> >	OwnershipMask, VisibleMask, ControlMask;
+		vector<vector<TMask> >	OwnershipMask, VisibleMask, ControlMask;
 		OwnershipMask_ = OwnershipMasks_[playerid].clone();
 		for (TId target=0; target<PlayerSize; ++target)
 		{

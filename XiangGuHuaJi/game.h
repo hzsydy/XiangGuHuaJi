@@ -49,7 +49,8 @@ public:
 	const static int		MILITARY_KERNEL_SIZE;//影响力核心的大小
 	const static float		MILITARY_KERNEL_SIGMA_2;//影响力核心的高斯函数的系数sigma的平方
 	const static float		MILITARY_KERNEL_GAUSS_COEF;//影响力核心的高斯函数前面的系数
-	const static float		MILITARY_KERNEL_BASE_EFF;//基础影响力
+	const static float		MILITARY_KERNEL_DELTA;//基础影响力
+	const static TAttack	SUPPESS_LIMIT;//压制上限，超过压制上限之后就会破城。“压制”这个词语灵感来自FPS。  
 
 	//first_class statistics
 	inline vector<cv::Mat>		getMilitaryMap()	 {return  MilitaryMap_		;}

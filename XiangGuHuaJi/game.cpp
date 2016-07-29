@@ -16,13 +16,16 @@ const float			Game::DEPRECIATION_COEF = 0.3f;
 const int			Game::MILITARY_KERNEL_SIZE = 5;
 const float			Game::MILITARY_KERNEL_SIGMA_2 = 2.25f;
 const float			Game::MILITARY_KERNEL_GAUSS_COEF = 100.0f;
-const float			Game::MILITARY_KERNEL_BASE_EFF = 1.0f;
+const float			Game::MILITARY_KERNEL_DELTA = 1.0f;
+const TAttack		Game::SUPPESS_LIMIT = 20;
 
 #ifdef GAME_DEBUG
 const TSaving       Game::UNIT_CITY_INCOME = 100; 
 #else
 const TSaving       Game::UNIT_CITY_INCOME = 1;
 #endif
+
+inline float x2plusy2(float x, float y){return x*x+y*y;}
 
 
 Game::Game(Map& map, int playersize)
@@ -58,26 +61,26 @@ Game::Game(Map& map, int playersize)
 	fillVector<TDiplomaticStatus>(Diplomacy_, Undiscovered);
     for (TId id=0; id<PlayerSize; ++id) Diplomacy_[id][id] = Allied;
     //TruceTreaty_
-    resizeVector<unsigned char>(TruceTreaty, PlayerSize, PlayerSize);
+    resizeVector<TId>(TruceTreaty, PlayerSize, PlayerSize);
 	//init MilitaryKernel
-	const float pi = 3.1416;
+	const float pi = 3.1416f;
 	MilitaryKernel = cv::Mat::zeros(
-		2*MILITARY_KERNEL_SIZE+1, 
-		2*MILITARY_KERNEL_SIZE+1, 
+		2*MILITARY_KERNEL_SIZE-1, 
+		2*MILITARY_KERNEL_SIZE-1, 
 		CV_32FC1
 	);
-	for (int i=0; i<MILITARY_KERNEL_SIZE+1; i++)
+	for (int i=0; i<2*MILITARY_KERNEL_SIZE-1; i++)
 	{
-		for (int j=0; j<MILITARY_KERNEL_SIZE+1; j++)
+		for (int j=0; j<2*MILITARY_KERNEL_SIZE-1; j++)
 		{
-			float f = exp(-(float)(i^2+j^2)/2/MILITARY_KERNEL_SIGMA_2);
+			float f = x2plusy2((float)(i-MILITARY_KERNEL_SIZE+1),(float)(j-MILITARY_KERNEL_SIZE+1));
+			f /= -2*MILITARY_KERNEL_SIGMA_2;
+			f = (float)exp(f);
 			f /= 2*MILITARY_KERNEL_SIGMA_2*pi;
-			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE+i, MILITARY_KERNEL_SIZE+j) = f;
-			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE+i, MILITARY_KERNEL_SIZE-j) = f;
-			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE-i, MILITARY_KERNEL_SIZE+j) = f;
-			MilitaryKernel.at<float>(MILITARY_KERNEL_SIZE-i, MILITARY_KERNEL_SIZE-j) = f;
+			MilitaryKernel.at<float>(i, j) = f;
 		}
 	}
+	printMat<float>(MilitaryKernel, "MilitaryKernel");
 }
 
 Game::~Game()
@@ -86,19 +89,18 @@ Game::~Game()
 }
 
 // Round<0>
+//TODO  init the player, call each player to select their birthplace
 bool Game::Start()
 {
 	Round = 0;
 	++Round;
 
-    //TODO  init the player, call each player to select their birthplace
-    for (TId i=0; i<PlayerSize; ++i) 
-        if (0==i%2) OwnershipMasks_[i].at<TMask>(i,i)=255;
-        else OwnershipMasks_[i].at<TMask>(map.getRows()-1-i,map.getCols()-1-i)=255;
-    for (TId id=0; id<PlayerSize; ++id)
-        for (TMapSize j=0; j<map.getRows(); ++j)
-            for (TMapSize i=0; i<map.getCols(); ++i)
-                if (OwnershipMasks_[id].at<TMask>(j,i)) GlobalMap_.at<TId>(j,i)=id;
+	//«’µ„¡©Œª÷√
+	assert(PlayerSize == 2);
+	OwnershipMasks_[0].at<TMask>(1, 1) = 255;
+	OwnershipMasks_[1].at<TMask>(8, 8) = 255;
+	MilitaryMap_[0].at<TMilitary>(1, 1) = 1;
+	MilitaryMap_[1].at<TMilitary>(8, 8) = 1;
 
 	return true;
 }
@@ -264,8 +266,6 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
         }
     }
 
-	cout <<"now in Game::ConstructionPhase, for id "<< 1<<endl;
-	printMat<TMilitary>(MilitaryMap_[1], "MilitaryMap_[1]");
 
     return true; //TODO
 }
@@ -273,7 +273,28 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
 //Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 {
-	//load MilitaryMap_
+	//calc influence
+	vector<cv::Mat> InfluenceMap;
+	InfluenceMap.resize(PlayerSize);
+	for (TId id=0; id<PlayerSize; ++id)
+	{
+		cv::Mat conv;
+		cv::filter2D(
+			MilitaryMap_[id], 
+			conv, 
+			CV_TInfluenceDepth, 
+			MilitaryKernel, 
+			cv::Point(-1,-1), 
+			0, 
+			cv::BORDER_CONSTANT
+		);
+		InfluenceMap[id] = conv;
+	}
+	cout <<"now in Game::MilitaryPhase, for id "<< 1<<endl;
+	printMat<TMilitary>(MilitaryMap_[1], "MilitaryMap_[1]");
+	printMat<TInfluence>(InfluenceMap[1], "InfluenceMap[1]");
+	
+	//load MilitaryMap_ and process
 	for (TId id=0; id<PlayerSize; ++id)
 	{
 		cv::Mat mat, mat_dilate, mat_erode;
@@ -301,17 +322,19 @@ bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 			}
 		}
 	}
-
-	/*
+	//cout <<"now in Game::MilitaryPhase, for id "<< 1<<endl;
+	//printMat<TMilitary>(MilitaryMap_[1], "MilitaryMap_[1]");
+	//printMat<TMilitary>(OwnershipMasks_[1], "OwnershipMasks_[1]");
+	
 	// refresh OwnershipMask_
 	for (TId id=0; id<PlayerSize; ++id)
 	{
 		cv::Mat mat, mat_ownermask;
 		mat = MilitaryMap_[id].clone();
 		cv::threshold(mat, mat_ownermask, 0, 255, cv::THRESH_BINARY);
-		OwnershipMasks_[id] = mat_ownermask.clone();
+		OwnershipMasks_[id] = mat_ownermask;
 	}
-	*/
+	
     // refresh GlobalMap
     for (TId id=0; id<PlayerSize; ++id)
         for (TMapSize j=0; j<map.getRows(); ++j)
