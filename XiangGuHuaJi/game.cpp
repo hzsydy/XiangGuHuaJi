@@ -7,80 +7,31 @@
 namespace XGHJ 
 {
 
-const TMilitary     Game::MAX_MILITARY = 255;
-const TRound        Game::MAX_ROUND = 20;
-const TSaving       Game::UNIT_SAVING = 10;
-const TRound        Game::TRUCE_TIME = 5;
-const float			Game::CORRUPTION_COEF = 0.001f;
-const float			Game::DEPRECIATION_COEF = 0.3f;
-const int			Game::MILITARY_KERNEL_SIZE = 5;
-const float			Game::MILITARY_KERNEL_SIGMA_2 = 2.25f;
-const float			Game::MILITARY_KERNEL_GAUSS_COEF = 100.0f;
-const float			Game::MILITARY_KERNEL_DELTA = 1.0f;
-const TAttack		Game::SUPPESS_LIMIT = 20;
-
-#ifdef GAME_DEBUG
-const TSaving       Game::UNIT_CITY_INCOME = 100; 
-#else
-const TSaving       Game::UNIT_CITY_INCOME = 1;
-#endif
-
 inline float x2plusy2(float x, float y){return x*x+y*y;}
 
 
 Game::Game(Map& map, int playersize)
-    : map(map), PlayerSize(playersize),
-      Round(0), isValid_(true)
+    : map(map), playerSize(playersize),
+      round(0), isValid(true)
 {
-    MilitaryMap_.resize(PlayerSize);
-    AttackProcMap_.resize(PlayerSize);
-    for (TId id=0; id<PlayerSize; ++id)
-    {
-        MilitaryMap_[id] = cv::Mat::zeros(map.size(), CV_TMilitary);
-        AttackProcMap_[id] = cv::Mat::zeros(map.size(), CV_TAttack);        
-    }
-    DefensePointsMap_ = cv::Mat::zeros(map.size(), CV_TDefense);
-    GlobalMap_ = cv::Mat(map.size(), CV_TId, cv::Scalar::all(255));
+	//TODO
+	//init all the vectors using vector::resize
 
-    //PlayerInfoList
-    PlayerInfoList_.resize(PlayerSize);
-    for (TId id=0; id<PlayerSize; ++id)     
-    {
-        PlayerInfoList_[id].id = id;
-        PlayerInfoList_[id].MapArea = 1;
-        PlayerInfoList_[id].MilitarySummary = 1; // it should be refreshed later.
-    }
-
-    //OwnershipMasks_
-    OwnershipMasks_.resize(PlayerSize);
-    for (TId id=0; id<PlayerSize; ++id) 
-		OwnershipMasks_[id]=cv::Mat::zeros(map.size(), CV_8UC1);
-    
-    //Diplomacy
-    resizeVector<TDiplomaticStatus>(Diplomacy_, PlayerSize, PlayerSize);
-	fillVector<TDiplomaticStatus>(Diplomacy_, Undiscovered);
-    for (TId id=0; id<PlayerSize; ++id) Diplomacy_[id][id] = Allied;
-    //TruceTreaty_
-    resizeVector<TId>(TruceTreaty, PlayerSize, PlayerSize);
-	//init MilitaryKernel
 	const float pi = 3.1416f;
-	MilitaryKernel = cv::Mat::zeros(
-		2*MILITARY_KERNEL_SIZE-1, 
-		2*MILITARY_KERNEL_SIZE-1, 
-		CV_32FC1
-	);
+	MilitaryKernel.resize(2*MILITARY_KERNEL_SIZE-1);
 	for (int i=0; i<2*MILITARY_KERNEL_SIZE-1; i++)
 	{
+		MilitaryKernel[i].resize(2*MILITARY_KERNEL_SIZE-1);
 		for (int j=0; j<2*MILITARY_KERNEL_SIZE-1; j++)
 		{
 			float f = x2plusy2((float)(i-MILITARY_KERNEL_SIZE+1),(float)(j-MILITARY_KERNEL_SIZE+1));
 			f /= -2*MILITARY_KERNEL_SIGMA_2;
 			f = (float)exp(f);
 			f /= 2*MILITARY_KERNEL_SIGMA_2*pi;
-			MilitaryKernel.at<float>(i, j) = f;
+			MilitaryKernel[i][j] = f;
 		}
 	}
-	printMat<float>(MilitaryKernel, "MilitaryKernel");
+	printVecMat<float>(MilitaryKernel, "MilitaryKernel");
 }
 
 Game::~Game()
@@ -92,37 +43,36 @@ Game::~Game()
 //TODO  init the player, call each player to select their birthplace
 bool Game::Start()
 {
-	Round = 0;
-	++Round;
+	round = 0;
+	++round;
 
-	//钦点俩位置
-	assert(PlayerSize == 2);
-	OwnershipMasks_[0].at<TMask>(1, 1) = 255;
-	OwnershipMasks_[1].at<TMask>(8, 8) = 255;
-	MilitaryMap_[0].at<TMilitary>(1, 1) = 1;
-	MilitaryMap_[1].at<TMilitary>(8, 8) = 1;
+	//TODO
+	//选择出生点
 
 	return true;
 }
 
 //Game Logic
-bool Game::Run(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList,
-			   vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
+bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
+	vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
     DiplomacyPhase(DiplomaticCommandMap);
-    ConstructionPhase(MilitaryCommandList);
-    MilitaryPhase(MilitaryCommandList);
+    MilitaryPhase(MilitaryCommandMap);
     ProducingPhase();
 
-    ++Round;
-    if (Round>=MAX_ROUND) isValid_=false;
+    ++round;
+    if (round>=MAX_ROUND) isValid=false;
 
-    return isValid_;    
+    return isValid;    
 }
 
 //Diplomacy Phase (Deal with DiplomaticCommandMap)
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
+	//TODO
+	//外交
+	//下面的狗比代码可能可以复用，皮埃尔你可以研究一下有没有软用
+	/*
     for (TId i=0; i<PlayerSize; ++i)
         for (TId j=0; j<PlayerSize; ++j)        
             if (TruceTreaty[i][j]>0) 
@@ -208,11 +158,15 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 			}
 		}
 	}
+	*/
     return false; //TODO
 }
 
+//TODO
+//这一段所代表的阶段已经不复存在了 大概没有用了把 记得删掉
+/*
 //Construction Phase (Deal with MilitaryCommandList)
-bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
+bool Game::ConstructionPhase(vector<cv::Mat> & MilitaryCommandList)
 {
     for (TId id=0; id<PlayerSize; ++id)
     {
@@ -269,78 +223,12 @@ bool Game::ConstructionPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandLi
 
     return true; //TODO
 }
-
+*/
 //Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
-bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
+bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList)
 {
-	//calc influence
-	vector<cv::Mat> InfluenceMap;
-	InfluenceMap.resize(PlayerSize);
-	for (TId id=0; id<PlayerSize; ++id)
-	{
-		cv::Mat conv;
-		cv::filter2D(
-			MilitaryMap_[id], 
-			conv, 
-			CV_TInfluenceDepth, 
-			MilitaryKernel, 
-			cv::Point(-1,-1), 
-			0, 
-			cv::BORDER_CONSTANT
-		);
-		InfluenceMap[id] = conv;
-	}
-	cout <<"now in Game::MilitaryPhase, for id "<< 1<<endl;
-	printMat<TMilitary>(MilitaryMap_[1], "MilitaryMap_[1]");
-	printMat<TInfluence>(InfluenceMap[1], "InfluenceMap[1]");
-	
-	//load MilitaryMap_ and process
-	for (TId id=0; id<PlayerSize; ++id)
-	{
-		cv::Mat mat, mat_dilate, mat_erode;
-		cv::Mat mat_ownermask;
-		mat = MilitaryMap_[id].clone();
-		cv::dilate(mat, mat_dilate, cv::Mat());
-		cv::erode(mat, mat_erode, cv::Mat());
-		cv::threshold(mat, mat_ownermask, 0, 255, cv::THRESH_BINARY);
-		cv::threshold(mat_dilate, mat_dilate, 0, 255, cv::THRESH_BINARY);
-		cv::threshold(mat_erode, mat_erode, 0, 255, cv::THRESH_BINARY);
-		cv::Mat mat_inner_contour = cv::Mat::zeros(map.size(), CV_TMask);
-		cv::Mat mat_outer_contour = cv::Mat::zeros(map.size(), CV_TMask);
-		for (int i=0; i<mat.rows; i++)
-		{
-			for (int j=0; j<mat.cols; j++)
-			{
-				if (mat_erode.at<TMask>(i, j) == 0 && mat_ownermask.at<TMask>(i, j) == 255)
-				{
-					mat_inner_contour.at<TMask>(i, j) = 255;
-				}
-				else if (mat_dilate.at<TMask>(i, j) == 255 && mat_ownermask.at<TMask>(i, j) == 0)
-				{
-					mat_outer_contour	.at<TMask>(i, j) = 255;
-				}
-			}
-		}
-	}
-	//cout <<"now in Game::MilitaryPhase, for id "<< 1<<endl;
-	//printMat<TMilitary>(MilitaryMap_[1], "MilitaryMap_[1]");
-	//printMat<TMilitary>(OwnershipMasks_[1], "OwnershipMasks_[1]");
-	
-	// refresh OwnershipMask_
-	for (TId id=0; id<PlayerSize; ++id)
-	{
-		cv::Mat mat, mat_ownermask;
-		mat = MilitaryMap_[id].clone();
-		cv::threshold(mat, mat_ownermask, 0, 255, cv::THRESH_BINARY);
-		OwnershipMasks_[id] = mat_ownermask;
-	}
-	
-    // refresh GlobalMap
-    for (TId id=0; id<PlayerSize; ++id)
-        for (TMapSize j=0; j<map.getRows(); ++j)
-            for (TMapSize i=0; i<map.getCols(); ++i)
-                if (OwnershipMasks_[id].at<TMask>(j,i)) 
-					GlobalMap_.at<TId>(j,i)=id;
+	//TODO
+	//全是opencv代码，一点都没法复用，星宇你就老老实实写好了
 	
     return false; //TODO
 }
@@ -348,22 +236,30 @@ bool Game::MilitaryPhase(vector<cv::Mat/*TMatMilitary*/> & MilitaryCommandList)
 //Producing Phase (Deal with MapResource, PlayerInfoList)
 bool Game::ProducingPhase()
 {
-    for (TId id=0; id<PlayerSize; ++id)
-	{
-		// lowest income
+	//TODO
+	//谁来写个首都和判定包围的部分
 
-		TSaving new_saving = 1;
+	
+    for (TId id=0; id<playerSize; ++id)
+	{
+		playerArea[id] = 0;
+		// lowest income
+		TMoney new_saving = 1;
 
         // map income 
-        for (TMapSize j=0; j<map.getRows(); ++j)
-            for (TMapSize i=0; i<map.getCols(); ++i)
-                if (OwnershipMasks_[id].at<TMask>(j, i)) new_saving+=map.getMapRes().at<TMapPara>(j, i);
+        for (TMap j=0; j<map.getRows(); ++j)
+            for (TMap i=0; i<map.getCols(); ++i)
+                if (globalMap[i][j] == id) 
+				{
+					new_saving+=map.getMapRes()[i][j];
+					playerArea[id]++;
+				}
         // city income
-        new_saving += UNIT_CITY_INCOME*PlayerInfoList_[id].MilitarySummary;
+        new_saving += (TMoney)(UNIT_CITY_INCOME * (float)round);
 
         // corruption 
-        PlayerInfoList_[id].Saving+=
-			(TSaving)((1-(float)(PlayerInfoList_[id].MapArea)*CORRUPTION_COEF) * (float)new_saving);
+        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
+		playerSaving[id] += new_saving;
     }
 
     return false; //TODO
@@ -372,9 +268,29 @@ bool Game::ProducingPhase()
 //Check the winner and the loser (Deal with PlayerInfoList)
 bool Game::CheckWinner()
 {
-    // refresh PlayerInfoList
-
+	//TODO
+	//检查胜负
     return false; //TODO
+}
+
+PlayerInfo Game::getPlayerInfo(TId id) const
+{
+	//TODO
+	PlayerInfo p;
+	return p;
+}
+MapPointInfo Game::getMapPointInfo(TPosition pos) const
+{
+	//TODO
+	MapPointInfo mp;
+	return mp;
+}
+
+Info Game::generateInfo(TId id) const
+{
+	//TODO
+	Info i;
+	return i;
 }
 
 }

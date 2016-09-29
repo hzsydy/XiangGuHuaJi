@@ -44,19 +44,16 @@
     <ClInclude Include="ai.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="info.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="definition.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="converter.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="controller.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="debug.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="info.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,7 +8,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <opencv2/opencv.hpp>
 #include <cassert>
 
 #include "definition.h"
@@ -26,16 +25,16 @@ public:
     Map(){;}
     ~Map(){;}
 	bool                load(string file_name);
-    inline cv::Size     size() { return MapResource_.size(); }
-
-	inline TMapSize getRows(){return rows;}
-	inline TMapSize getCols(){return cols;}
-	inline cv::Mat getMapRes(){return MapResource_;}
-	inline cv::Mat getMapAtk(){return MapAttackRatio_;}
-	inline cv::Mat getMapDef(){return MapDefenseRatio_;}
+    
+	inline TMap getRows(){return rows;}
+	inline TMap getCols(){return cols;}
+	inline vector<vector<TMoney> > getMapRes(){return MapResource_;}
+	inline vector<vector<TMilitary> > getMapAtk(){return MapAttackRatio_;}
+	inline vector<vector<TMilitary> > getMapDef(){return MapDefenseRatio_;}
 private:
-	TMapSize	rows, cols;
-	cv::Mat/*TMatMapPara*/	    MapResource_, MapDefenseRatio_, MapAttackRatio_;
+	TMap	rows, cols;
+	vector<vector<TMoney> >  MapResource_;
+	vector<vector<TMilitary> > MapDefenseRatio_, MapAttackRatio_;
 };
 
 }

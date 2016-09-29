@@ -34,11 +34,9 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="OpenCV_debug_property.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="OpenCV_release_property.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -93,12 +91,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="controller.h" />
-    <ClInclude Include="converter.hpp" />
     <ClInclude Include="debug.hpp" />
     <ClInclude Include="definition.h" />
     <ClInclude Include="ai.h" />
     <ClInclude Include="game.h" />
-    <ClInclude Include="info.hpp" />
+    <ClInclude Include="info.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="player.h" />
   </ItemGroup>

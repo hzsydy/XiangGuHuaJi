@@ -21,21 +21,17 @@ bool Map::load(string file_name)
 	cols = root["cols"].asInt();
 	rows = root["rows"].asInt();
 
-	MapResource_ = cv::Mat(rows, cols, CV_TMapPara);
-	MapAttackRatio_  = cv::Mat(rows, cols, CV_TMapPara);
-	MapDefenseRatio_ = cv::Mat(rows, cols, CV_TMapPara);
-
 	for (int i=0; i<cols; i++)
 	{
 		for (int j=0; j<rows; j++)
 		{
 			int fuck;
 			fuck = (root["resources"][i][j]).asInt();
-			MapResource_.at<TMapPara>(j, i) = (TMapPara)(fuck);
+			MapResource_[i][j] = (TMoney)(fuck);
 			fuck = (root["landscape"][i][j]["Attack"]).asInt();
-			MapAttackRatio_.at<TMapPara>(j, i) = (TMapPara)(fuck);
+			MapAttackRatio_[i][j] = (TMilitary)(fuck);
 			fuck = (root["landscape"][i][j]["Defense"]).asInt();
-			MapDefenseRatio_.at<TMapPara>(j, i) = (TMapPara)(fuck);
+			MapDefenseRatio_[i][j] = (TMilitary)(fuck);
 		}
 	}
 	return true;
