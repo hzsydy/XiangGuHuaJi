@@ -11,7 +11,6 @@
 #include"definition.h"
 
 #include "ai.h"
-#include "info.h"
 
 namespace XGHJ {
 

@@ -12,7 +12,6 @@
 
 #include "definition.h"
 #include "map.h"
-#include "info.h"
 
 
 using std::vector;
@@ -44,7 +43,8 @@ public:
 protected:
 	TRound              round;
 	TId                 playerSize;
-	vector<vector<TId> > globalMap;
+	TMap				rows,cols;
+	vector<vector<TId> > globalMap;//ownership of the lands
 	vector<TMoney>		playerSaving;
 	vector<int>			playerArea;
 	vector<vector<TDiplomaticStatus> >	diplomacy;

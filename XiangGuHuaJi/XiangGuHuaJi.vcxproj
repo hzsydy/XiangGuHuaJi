@@ -95,7 +95,6 @@
     <ClInclude Include="definition.h" />
     <ClInclude Include="ai.h" />
     <ClInclude Include="game.h" />
-    <ClInclude Include="info.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="player.h" />
   </ItemGroup>

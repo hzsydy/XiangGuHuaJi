@@ -56,6 +56,40 @@ const static float		MILITARY_KERNEL_SIGMA_2 = 2.25f;//影响力核心的高斯函数的系数
 const static float		MILITARY_KERNEL_GAUSS_COEF = 100.0f;//影响力核心的高斯函数前面的系数
 const static float		MILITARY_KERNEL_DELTA;//基础影响力
 const static TMilitary	SUPPESS_LIMIT = 3;//压制上限，超过压制上限之后就会破城。“压制”这个词语灵感来自FPS。
+const static TId		NEUTRAL_PLAYER_ID = 233;
+const static TMoney     INITIAL_PLAYER_MONEY = 10;
 
+
+struct PlayerInfo
+{    
+	TDiplomaticStatus dipStatus;
+	bool isVisible; // this player is visible to you ; you two share basic info.
+	bool isUnion;   // this player has reached an alliance with you ; you two share all info.
+	//basic info
+	int mapArea; // area size of this player's land
+	vector<TId> warList;//player at war
+	//all info
+	TMoney saving; // resource of this player
+	TPosition capital;//capital
+};
+
+struct MapPointInfo
+{
+	TMilitary attackRatio, defenseRatio;
+	TMoney resource;
+	TMask isVisible;
+	TId owner;
+};
+
+struct Info
+{
+	TId id;
+	TId playerSize;
+	TRound round;
+	PlayerInfo (*getPlayerInfo)(TId id);
+	MapPointInfo (*getMapPointInfo)(TPosition pos);
+	vector<TMilitaryCommand> MilitaryCommandList;
+	vector<TDiplomaticCommand> DiplomaticCommandList;
+};
 
 #endif

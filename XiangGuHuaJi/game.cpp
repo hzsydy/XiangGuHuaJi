@@ -11,11 +11,38 @@ inline float x2plusy2(float x, float y){return x*x+y*y;}
 
 
 Game::Game(Map& map, int playersize)
-    : map(map), playerSize(playersize),
-      round(0), isValid(true)
+	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
+      playerArea(playersize, 0), round(0), isValid(true)
 {
+	rows = map.getRows();
+	cols = map.getCols();
 	//TODO
 	//init all the vectors using vector::resize
+	globalMap.resize(cols);
+	for (int i=0; i<cols; i++)
+	{
+		globalMap[i].resize(rows);
+		for (int j=0; j<rows; j++)
+		{
+			globalMap[i][j] = NEUTRAL_PLAYER_ID;
+		}
+	}
+	diplomacy.resize(playerSize);
+	for (TId i=0; i<playersize; i++)
+	{
+		diplomacy[i].resize(playerSize);
+		for (TId j=0; j<playersize; j++)
+		{
+			if (i == j)
+			{
+				diplomacy[i][j] = Allied;
+			}
+			else
+			{
+				diplomacy[i][j] = Undiscovered;
+			}
+		}
+	}
 
 	const float pi = 3.1416f;
 	MilitaryKernel.resize(2*MILITARY_KERNEL_SIZE-1);

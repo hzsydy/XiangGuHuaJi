@@ -5,7 +5,7 @@
 #ifndef _XIANGGUHUAJI_AI_H__
 #define _XIANGGUHUAJI_AI_H__
 
-#include "info.h"
+#include "definition.h"
 
 //AI需要实现的函数
 #ifdef _MSC_VER

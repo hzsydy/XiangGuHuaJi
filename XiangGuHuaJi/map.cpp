@@ -21,8 +21,14 @@ bool Map::load(string file_name)
 	cols = root["cols"].asInt();
 	rows = root["rows"].asInt();
 
+	MapResource_.resize(cols);
+	MapAttackRatio_.resize(cols);
+	MapDefenseRatio_.resize(cols);
 	for (int i=0; i<cols; i++)
 	{
+		MapResource_[i].resize(rows);
+		MapAttackRatio_[i].resize(rows);
+		MapDefenseRatio_[i].resize(rows);
 		for (int j=0; j<rows; j++)
 		{
 			int fuck;

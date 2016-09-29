@@ -9,7 +9,6 @@
 #include <iostream>
 #include "definition.h"
 #include "game.h"
-#include "info.h"
 #include "player.h"
 
 using std::vector;
