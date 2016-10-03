@@ -7,6 +7,7 @@
 
 #include "debug.hpp"
 
+
 typedef unsigned char TId;       //PlayerId
 typedef unsigned char TMap;  //x,y
 typedef unsigned int  TRound;    //round 
@@ -48,6 +49,22 @@ struct TMilitaryCommand
 	TMilitary bomb_size;
 };
 
+class BaseMap
+{
+public:
+	BaseMap(){;}
+	inline TMap getRows() const {return rows;}
+	inline TMap getCols() const {return cols;}
+	inline vector<vector<TMoney> > getMapRes() const {return MapResource_;}
+	inline vector<vector<TMilitary> > getMapAtk() const {return MapAttackRatio_;}
+	inline vector<vector<TMilitary> > getMapDef() const {return MapDefenseRatio_;}
+protected:
+	TMap	rows, cols;
+	vector<vector<TMoney> >  MapResource_;
+	vector<vector<TMilitary> > MapDefenseRatio_, MapAttackRatio_;
+};
+
+
 //CONSTANTS
 const static TRound     MAX_ROUND = 50;//ÂÖÊýÏÞ¶î
 const static TMoney     UNIT_BOMB_COST = 1;
@@ -82,8 +99,6 @@ struct PlayerInfo
 
 struct MapPointInfo
 {
-	TMilitary attackRatio, defenseRatio;
-	TMoney resource;
 	TMask isVisible;
 	TId owner;
 	TMask isSieged;
@@ -96,6 +111,8 @@ struct Info
 	TMap rows;
 	TMap cols;
 	TRound round;
+
+	BaseMap* map;
 
 	vector<PlayerInfo> playerInfo;
 	vector<vector<MapPointInfo> > mapPointInfo;

@@ -1,4 +1,4 @@
-/* XiangGuHuaJi 2016, map.h
+/* XiangGuHuaJi 2016, basemap.h
  *
  */
 
@@ -17,24 +17,11 @@
 
 namespace XGHJ {
 
-using namespace std;
-
-class Map
+class Map : public BaseMap
 {
 public:
-    Map(){;}
-    ~Map(){;}
-	bool                load(string file_name);
-    
-	inline TMap getRows(){return rows;}
-	inline TMap getCols(){return cols;}
-	inline vector<vector<TMoney> > getMapRes(){return MapResource_;}
-	inline vector<vector<TMilitary> > getMapAtk(){return MapAttackRatio_;}
-	inline vector<vector<TMilitary> > getMapDef(){return MapDefenseRatio_;}
-private:
-	TMap	rows, cols;
-	vector<vector<TMoney> >  MapResource_;
-	vector<vector<TMilitary> > MapDefenseRatio_, MapAttackRatio_;
+	Map(){;}
+	bool load(string file_name);
 };
 
 }

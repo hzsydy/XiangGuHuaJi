@@ -314,9 +314,6 @@ TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 MapPointInfo Game::getMapPointInfo(TMap x, TMap y, TId playerId) const
 {
 	MapPointInfo mp;
-	mp.attackRatio = map.getMapAtk()[x][y];
-	mp.defenseRatio = map.getMapDef()[x][y];
-	mp.resource = map.getMapRes()[x][y];
 	mp.isVisible = isPointVisible(x, y, playerId);
 	if (mp.isVisible)
 	{
@@ -340,6 +337,7 @@ Info Game::generateInfo(TId playerid) const
 	info.playerSize = playerSize;
 	info.round = round;
 	info.newCapital = invalidPos;
+	info.map = &map;
 	info.rows = rows;
 	info.cols = cols;
 	info.playerInfo = vector<PlayerInfo>(playerSize);
