@@ -12,27 +12,30 @@ inline float x2plusy2(float x, float y){return x*x+y*y;}
 
 Game::Game(Map& map, int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
-      playerArea(playersize, 0), round(0), isValid(true)
+      round(0), isValid(true)
 {
 	rows = map.getRows();
 	cols = map.getCols();
 	//init all the vectors using vector::resize
 	globalMap.resize(cols);
 	isSieged.resize(cols);
-	for (int i=0; i<cols; i++)
+	for (TMap i=0; i<cols; i++)
 	{
 		globalMap[i].resize(rows);
 		isSieged[i].resize(rows);
-		for (int j=0; j<rows; j++)
+		for (TMap j=0; j<rows; j++)
 		{
 			globalMap[i][j] = NEUTRAL_PLAYER_ID;
 			isSieged[i][j] = false;
 		}
 	}
+	playerCapital.resize(playerSize);
+	playerArea.resize(playerSize);
 	diplomacy.resize(playerSize);
 	for (TId i=0; i<playersize; i++)
 	{
 		diplomacy[i].resize(playerSize);
+		playerArea[i] = 0;
 		for (TId j=0; j<playersize; j++)
 		{
 			if (i == j)
@@ -105,6 +108,8 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 	//读取DiplomaticCommandMap
 	//更新Diplomacy（记得战争需要造WAR_JUSTIFY_TIME回合，不要忘了维护列表）
 	//记得扣钱（造借口要扣WAR_JUSTIFY_PRICE的钱）
+
+	//实现次要函数Game::getWarList
 
 	//下面的狗比代码可能可以复用，皮埃尔你可以研究一下有没有软用
 	/*
@@ -197,6 +202,13 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
     return false; //TODO
 }
 
+vector<TId> Game::getWarList(TId id) const
+{
+	vector<TId> wl;
+	//TODO
+	return wl;
+}
+
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList)
 {
 	//TODO
@@ -228,13 +240,18 @@ bool Game::ProducingPhase()
 		TMoney new_saving = 1;
 
         // map income 
-        for (TMap j=0; j<map.getRows(); ++j)
-            for (TMap i=0; i<map.getCols(); ++i)
-                if (globalMap[i][j] == id) 
+		for (TMap i=0; i<cols; i++)
+		{
+			for (TMap j=0; j<rows; j++)
+			{
+				if (globalMap[i][j] == id) 
 				{
 					new_saving+=map.getMapRes()[i][j];
 					playerArea[id]++;
 				}
+			}
+		}
+
         // city income
 		if (isPosValid(playerCapital[id]))
 		{
@@ -257,24 +274,89 @@ bool Game::CheckWinner()
     return false; //TODO
 }
 
-PlayerInfo Game::getPlayerInfo(TId id) const
+PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
 {
-	//TODO
 	PlayerInfo p;
+	p.dipStatus = diplomacy[playerId][id];
+	if (p.dipStatus == Allied)
+	{
+		p.isUnion = true;
+		p.saving = playerSaving[id];
+		p.capital = playerCapital[id];
+	}
+	else
+	{
+		p.isUnion = false;
+		p.saving = 0;
+		p.capital = invalidPos;
+	}
+	if (p.dipStatus != Undiscovered)
+	{
+		p.isVisible = true;
+		p.warList = getWarList(id);
+		p.mapArea = playerArea[id];
+	} 
+	else
+	{
+		p.isVisible = true;
+		p.warList = vector<TId>();
+		p.mapArea = -1;
+	}
 	return p;
 }
-MapPointInfo Game::getMapPointInfo(TPosition pos) const
+
+TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 {
 	//TODO
+	return true;
+}
+
+MapPointInfo Game::getMapPointInfo(TMap x, TMap y, TId playerId) const
+{
 	MapPointInfo mp;
+	mp.attackRatio = map.getMapAtk()[x][y];
+	mp.defenseRatio = map.getMapDef()[x][y];
+	mp.resource = map.getMapRes()[x][y];
+	mp.isVisible = isPointVisible(x, y, playerId);
+	if (mp.isVisible)
+	{
+		mp.owner = globalMap[x][y];
+		mp.isSieged = isSieged[x][y];
+	}
+	else
+	{
+		mp.owner = UNKNOWN_PLAYER_ID;
+		mp.isSieged = false;
+	}
 	return mp;
 }
 
-Info Game::generateInfo(TId id) const
+Info Game::generateInfo(TId playerid) const
 {
-	//TODO
-	Info i;
-	return i;
+	Info info;
+	info.DiplomaticCommandList = vector<TDiplomaticCommand>();
+	info.MilitaryCommandList = vector<TMilitaryCommand>();
+	info.id = playerid;
+	info.playerSize = playerSize;
+	info.round = round;
+	info.newCapital = invalidPos;
+	info.rows = rows;
+	info.cols = cols;
+	info.playerInfo = vector<PlayerInfo>(playerSize);
+	for (TId id=0; id<playerSize; id++)
+	{
+		info.playerInfo[id] = getPlayerInfo(id, playerid);
+	}
+	info.mapPointInfo = vector<vector<MapPointInfo> >(cols);
+	for (TMap i=0; i<cols; i++)
+	{
+		info.mapPointInfo[i] = vector<MapPointInfo>(rows);
+		for (TMap j=0; j<rows; j++)
+		{
+			info.mapPointInfo[i][j] = getMapPointInfo(i, j, playerid);
+		}
+	}
+	return info;
 }
 
 }

@@ -33,9 +33,9 @@ public:
 
     Map& map;  
 
-	PlayerInfo getPlayerInfo(TId id) const;
-	MapPointInfo getMapPointInfo(TPosition pos) const;
-	Info generateInfo(TId id) const;
+	PlayerInfo getPlayerInfo(TId id, TId playerId) const;
+	MapPointInfo getMapPointInfo(TMap x, TMap y, TId playerId) const;
+	Info generateInfo(TId playerid) const;
 
 	inline TRound getRound() {return round ;}
 	inline TId getPlayerSize() {return playerSize ;}
@@ -46,12 +46,16 @@ protected:
 	//需要保存到下回合的中间变量
 	TRound              round;
 	vector<vector<TId> > globalMap;//ownership of the lands
-	vector<vector<bool> > isSieged;
+	vector<vector<TMask> > isSieged;
 	vector<TPosition>	playerCapital;
 	vector<TMoney>		playerSaving;
 	vector<int>			playerArea;
 	vector<vector<TDiplomaticStatus> >	diplomacy;
 	//你们还需要一个变量来实现justify war，我就懒的写了@pierre
+
+	//一些次要函数
+	vector<TId> getWarList(TId id) const;
+	TMask isPointVisible(TMap x, TMap y, TId playerId) const;
 private:
 	//供军事部分使用的高斯核
 	vector<vector<float> > MilitaryKernel;

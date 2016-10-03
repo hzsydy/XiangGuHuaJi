@@ -33,6 +33,7 @@ namespace XGHJ
 				DiplomaticCommandMap[id] = info.DiplomaticCommandList;				
 			}
 			game_.Run(MilitaryCommandMap, DiplomaticCommandMap);
+			isValid_ = game_.isValid;
 		}
 		else
 		{
@@ -40,6 +41,5 @@ namespace XGHJ
 			game_.Start();
 		}
 
-		if (!game_.isValid) return;
 	}
 }

@@ -5,7 +5,6 @@
 #ifndef _XIANGGUHUAJI_DEFINITION_H__
 #define _XIANGGUHUAJI_DEFINITION_H__
 
-
 #include "debug.hpp"
 
 typedef unsigned char TId;       //PlayerId
@@ -60,9 +59,12 @@ const static float		MILITARY_KERNEL_SIGMA_2 = 2.25f;//影响力核心的高斯函数的系数
 const static float		MILITARY_KERNEL_GAUSS_COEF = 100.0f;//影响力核心的高斯函数前面的系数
 const static float		MILITARY_KERNEL_DELTA;//基础影响力
 const static TMilitary	SUPPESS_LIMIT = 3;//压制上限，超过压制上限之后就会破城。“压制”这个词语灵感来自FPS。
-const static TId		NEUTRAL_PLAYER_ID = 233;
 const static TMoney     INITIAL_PLAYER_MONEY = 10;
 const static TMoney     WAR_JUSTIFY_PRICE = 1;
+
+
+const static TId		NEUTRAL_PLAYER_ID = 233;
+const static TId		UNKNOWN_PLAYER_ID = 66;
 
 
 struct PlayerInfo
@@ -84,15 +86,19 @@ struct MapPointInfo
 	TMoney resource;
 	TMask isVisible;
 	TId owner;
+	TMask isSieged;
 };
 
 struct Info
 {
 	TId id;
 	TId playerSize;
+	TMap rows;
+	TMap cols;
 	TRound round;
-	PlayerInfo (*getPlayerInfo)(TId id);
-	MapPointInfo (*getMapPointInfo)(TPosition pos);
+
+	vector<PlayerInfo> playerInfo;
+	vector<vector<MapPointInfo> > mapPointInfo;
 	vector<TMilitaryCommand> MilitaryCommandList;
 	vector<TDiplomaticCommand> DiplomaticCommandList;
 	TPosition newCapital;
