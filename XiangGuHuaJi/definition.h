@@ -24,6 +24,10 @@ struct TPosition
 	TMap y;
 };
 
+const static TPosition invalidPos = {255, 255};
+
+inline bool isPosValid(TPosition p){return (p.x!=255) && (p.y!=255);}
+
 enum TDiplomaticStatus
 {
     Undiscovered,   // a country that has never appeared in your visible area
@@ -49,7 +53,7 @@ struct TMilitaryCommand
 const static TRound     MAX_ROUND = 50;//轮数限额
 const static TMoney     UNIT_BOMB_COST = 1;
 const static float		UNIT_CITY_INCOME = 1.0f;//低保的比例系数
-const static TRound     WAR_JUSTIFICE_TIME = 3;//从战争合理化到宣战的时间
+const static TRound     WAR_JUSTIFY_TIME = 3;//从战争合理化到宣战的时间
 const static float		CORRUPTION_COEF = 0.001f;//收获资源的腐败系数
 const static int		MILITARY_KERNEL_SIZE = 5;//影响力核心的大小
 const static float		MILITARY_KERNEL_SIGMA_2 = 2.25f;//影响力核心的高斯函数的系数sigma的平方
@@ -58,6 +62,7 @@ const static float		MILITARY_KERNEL_DELTA;//基础影响力
 const static TMilitary	SUPPESS_LIMIT = 3;//压制上限，超过压制上限之后就会破城。“压制”这个词语灵感来自FPS。
 const static TId		NEUTRAL_PLAYER_ID = 233;
 const static TMoney     INITIAL_PLAYER_MONEY = 10;
+const static TMoney     WAR_JUSTIFY_PRICE = 1;
 
 
 struct PlayerInfo
@@ -90,6 +95,7 @@ struct Info
 	MapPointInfo (*getMapPointInfo)(TPosition pos);
 	vector<TMilitaryCommand> MilitaryCommandList;
 	vector<TDiplomaticCommand> DiplomaticCommandList;
+	TPosition newCapital;
 };
 
 #endif

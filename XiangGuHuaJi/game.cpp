@@ -16,15 +16,17 @@ Game::Game(Map& map, int playersize)
 {
 	rows = map.getRows();
 	cols = map.getCols();
-	//TODO
 	//init all the vectors using vector::resize
 	globalMap.resize(cols);
+	isSieged.resize(cols);
 	for (int i=0; i<cols; i++)
 	{
 		globalMap[i].resize(rows);
+		isSieged[i].resize(rows);
 		for (int j=0; j<rows; j++)
 		{
 			globalMap[i][j] = NEUTRAL_PLAYER_ID;
+			isSieged[i][j] = false;
 		}
 	}
 	diplomacy.resize(playerSize);
@@ -75,6 +77,7 @@ bool Game::Start()
 
 	//TODO
 	//选择出生点
+	//设置首都为默认出生点
 
 	return true;
 }
@@ -98,6 +101,11 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 {
 	//TODO
 	//外交
+
+	//读取DiplomaticCommandMap
+	//更新Diplomacy（记得战争需要造WAR_JUSTIFY_TIME回合，不要忘了维护列表）
+	//记得扣钱（造借口要扣WAR_JUSTIFY_PRICE的钱）
+
 	//下面的狗比代码可能可以复用，皮埃尔你可以研究一下有没有软用
 	/*
     for (TId i=0; i<PlayerSize; ++i)
@@ -189,73 +197,22 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
     return false; //TODO
 }
 
-//TODO
-//这一段所代表的阶段已经不复存在了 大概没有用了把 记得删掉
-/*
-//Construction Phase (Deal with MilitaryCommandList)
-bool Game::ConstructionPhase(vector<cv::Mat> & MilitaryCommandList)
-{
-    for (TId id=0; id<PlayerSize; ++id)
-    {
-        if (PlayerInfoList_[id].Saving==0) continue;
-
-        // Check validity of MilitaryCommandList
-        cv::Mat & mat = MilitaryCommandList[id];
-        bool valid = true;
-        // check the area
-        cv::Mat control_mask = cv::Mat::zeros(map.size(), CV_TMask);
-        for (TId i=0; i<PlayerSize; ++i)
-            if (Allied==Diplomacy_[id][i]) control_mask+=OwnershipMasks_[i];
-        // check the money
-        TMilitarySummary sum = 0; 
-        for (TMapSize j=0; j<map.getRows(); ++j) 
-            for (TMapSize i=0; i<map.getCols(); ++i)
-            {
-                TMilitary& point_military = mat.at<TMilitary>(j, i);
-                if (!control_mask.at<TMask>(j, i)) point_military = 0;
-                if (point_military + MilitaryMap_[id].at<TMilitary>(j, i) > MAX_MILITARY) 
-                    point_military = MAX_MILITARY - MilitaryMap_[id].at<TMilitary>(j, i);
-                sum+=point_military;
-            }
-        if (sum * UNIT_SAVING > PlayerInfoList_[id].Saving) 
-        {
-            // spend too much money
-            valid = false;
-            cout << "[Warning] Player {" << (int)id << "} tried to spend more money than he has!!! " << endl;
-            unsigned int ratio = sum * UNIT_SAVING / PlayerInfoList_[id].Saving, mult = 0;
-            while (ratio>0) { ++mult; ratio >>= 1; }
-            for (TMapSize j=0; j<map.getRows(); ++j)
-                for (TMapSize i=0; i<map.getCols(); ++i)
-                    mat.at<TMilitary>(j, i) >>= mult;
-        }
-        // sum 
-        if (!valid)
-        {
-            sum = 0;
-            for (TMapSize j=0; j<map.getRows(); ++j) 
-                for (TMapSize i=0; i<map.getCols(); ++i)
-                {
-                    TMilitary& point_military = mat.at<TMilitary>(j, i);
-                    sum+=point_military;
-                }
-        }
-        // execute
-        if ( sum * UNIT_SAVING <= PlayerInfoList_[id].Saving)
-        {
-            PlayerInfoList_[id].Saving -= sum * UNIT_SAVING;
-            MilitaryMap_[id] += mat;
-        }
-    }
-
-
-    return true; //TODO
-}
-*/
-//Military Phase (Deal with DefensePointsMap ,AttackPointsMap)
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList)
 {
 	//TODO
 	//全是opencv代码，一点都没法复用，星宇你就老老实实写好了
+
+	//读取MilitaryCommandList并且扣UNIT_BOMB_COST的钱
+
+	//更新GlobalMap，使用MilitaryKernel
+
+	//阈值取SUPPESS_LIMIT，如果两边一样就强行把地打成中立
+
+	//检查新首都
+	//要是无法放置新首都，就把新首都的位置设定为invalidPos
+
+	//检查包围
+	//更新isSieged
 	
     return false; //TODO
 }
@@ -263,9 +220,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 //Producing Phase (Deal with MapResource, PlayerInfoList)
 bool Game::ProducingPhase()
 {
-	//TODO
-	//谁来写个首都和判定包围的部分
-
 	
     for (TId id=0; id<playerSize; ++id)
 	{
@@ -282,7 +236,10 @@ bool Game::ProducingPhase()
 					playerArea[id]++;
 				}
         // city income
-        new_saving += (TMoney)(UNIT_CITY_INCOME * (float)round);
+		if (isPosValid(playerCapital[id]))
+		{
+			new_saving += (TMoney)(UNIT_CITY_INCOME * (float)round);
+		}
 
         // corruption 
         playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);

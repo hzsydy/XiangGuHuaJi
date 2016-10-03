@@ -41,16 +41,21 @@ public:
 	inline TId getPlayerSize() {return playerSize ;}
 	bool                isValid;
 protected:
-	TRound              round;
-	TId                 playerSize;
 	TMap				rows,cols;
+	TId                 playerSize;
+	//需要保存到下回合的中间变量
+	TRound              round;
 	vector<vector<TId> > globalMap;//ownership of the lands
+	vector<vector<bool> > isSieged;
+	vector<TPosition>	playerCapital;
 	vector<TMoney>		playerSaving;
 	vector<int>			playerArea;
 	vector<vector<TDiplomaticStatus> >	diplomacy;
-	//你们还需要一个变量来实现justify war，我就懒的写了
+	//你们还需要一个变量来实现justify war，我就懒的写了@pierre
 private:
+	//供军事部分使用的高斯核
 	vector<vector<float> > MilitaryKernel;
+	//你们自己添加的小函数请写在这里
 };
 
 }
