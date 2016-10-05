@@ -40,7 +40,7 @@ enum TDiplomaticCommand
     KeepNeutral, 
     FormAlliance, 
     JustifyWar,
-	Backstap
+	Backstab
 };
 
 struct TMilitaryCommand
@@ -78,6 +78,7 @@ const static float		MILITARY_KERNEL_DELTA;//基础影响力
 const static TMilitary	SUPPESS_LIMIT = 3;//压制上限，超过压制上限之后就会破城。“压制”这个词语灵感来自FPS。
 const static TMoney     INITIAL_PLAYER_MONEY = 10;
 const static TMoney     WAR_JUSTIFY_PRICE = 1;
+const static int		FIELD_BOUNDARY = 2;//一块领土的视野范围
 
 
 const static TId		NEUTRAL_PLAYER_ID = 233;
