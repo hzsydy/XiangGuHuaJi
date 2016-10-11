@@ -4,6 +4,121 @@
 > 规则：Du <br>
 > 鸣谢：Pierre ;Starlight 
 
+## Getting Started——三分钟教你学会香菇滑稽！
+
+TODO
+
+谁来背一下这个锅
+
+## 选手接口（或曰definition.h简介）
+
+每回合开始的时候，选手的ai会收到一个信息结构info。其定义如下：
+
+```C++
+//definition.h
+struct Info
+{
+	TId id;//选手的编号
+	TId playerSize;//总的选手数目（包括死亡的数目）
+	TMap rows;//地图的行数（高度）
+	TMap cols;//地图的列数（宽度）
+	TRound round;//当前的轮数（从第一轮开始。第0轮是选择出生点的虚拟轮次）
+    
+    //地图。注意地图传的是一个指针。请使用->符来调用地图。
+    //示例：vector<vector<TMoney> > mapRes = map->getMapRes()；
+	BaseMap* map;
+
+    //以下使用了C++ STL库Vector.大家当一维/二维数组使用它就可以了，可以把它当成一个动态数组来用
+    //示例：MapPointInfo mpi = mapPointInfo[x][y]；表示第(x,y)点的MapPointInfo
+	vector<PlayerInfo> playerInfo;//玩家信息列表
+	vector<vector<MapPointInfo> > mapPointInfo;//地图信息列表
+  
+    //这三个是你填充在info里面，回传给程序的部分
+	vector<TMilitaryCommand> MilitaryCommandList;//军事指令列表
+	vector<TDiplomaticCommand> DiplomaticCommandList;//外交态度指令列表
+	TPosition newCapital;//下回合的新首都
+};
+```
+
+在上面的信息中使用了两个结构PlayerInfo和MapPointInfo，以及一个类BaseMap，其分别定义如下：
+
+```C++
+//definition.h
+struct PlayerInfo
+{    
+	TDiplomaticStatus dipStatus; //你和该AI的外交状态
+	bool isVisible; // this player is visible to you ; you two share basic info.
+	bool isUnion;   // this player has reached an alliance with you ; you two share all info.
+	//以下四个是你至少isVisible才能知道的信息
+	int mapArea; // area size of this player's land
+	vector<TId> warList;//player at war
+	//以下两个是你至少isUnion才能知道的信息
+	TMoney saving; // resource of this player
+	TPosition capital;//capital
+};
+
+struct MapPointInfo
+{
+	TMask isVisible; //这个点你看不看得见
+    //如果你看得见的话，以下两个信息是确切的；不然以下两个信息没有意义
+	TId owner;//这个点的归属
+	TMask isSieged;//这个点是否已经处于被包围(isSieged)状态
+};
+
+//这是一个C++中的类。类其实是结构（Struct）中比较高级的一种（你就姑且这么认为吧），完全不用在意区别。没什么区别的
+//类可以有所谓“方法”.事实上你可以把“方法”全部理解成结构中的函数指针。调用起来和调用结构中的函数指针一模一样。
+//调用示例：vector<vector<TMoney> > mapRes = map->getMapRes()；
+class BaseMap
+{
+public:
+	BaseMap(){;}
+	inline TMap getRows() const {return rows;}
+	inline TMap getCols() const {return cols;}
+	inline vector<vector<TMoney> > getMapRes() const {return MapResource_;}//获得地图各点资源的二维数组表
+	inline vector<vector<TMilitary> > getMapAtk() const {return MapAttackRatio_;}//获得地图各点攻击的二维数组表
+	inline vector<vector<TMilitary> > getMapDef() const {return MapDefenseRatio_;}//获得地图各点防御的二维数组表
+protected:
+     //这些元素你也访问不了 就不用关心了。
+     //所以说类比较高级嘛
+	TMap	rows, cols;
+	vector<vector<TMoney> >  MapResource_;
+	vector<vector<TMilitary> > MapDefenseRatio_, MapAttackRatio_;
+};
+```
+
+另外，游戏中使用一些自解释的枚举和小结构，我这里就不用多解释了：
+
+```C
+enum TDiplomaticStatus
+{
+    Undiscovered,   // a country that has never appeared in your visible area
+    Neutral,        // default status of a newly discovered country
+    Allied,          
+    AtWar
+};
+enum TDiplomaticCommand
+{
+    KeepNeutral, 
+    FormAlliance, 
+    JustifyWar,
+	Backstab
+};
+
+struct TMilitaryCommand
+{
+	TPosition place; //your goal place
+	TMilitary bomb_size;
+};
+
+struct TPosition
+{
+	TMap x;
+	TMap y;
+};
+```
+
+最后是一大波常数：由于常数有许多，这里就不一一注释了，参见definition.h。
+
 ## 剧本简介
 
 参见https://github.com/hzsydy/XiangGuHuaJi/blob/dev-3.0/Scenarios/
@@ -12,7 +127,7 @@
 
 参见同目录下project.md
 
-## 游戏规则
+## （按照时序的）游戏文档（供写代码的时候查阅）
 
 ### 概述
 
@@ -189,10 +304,6 @@
   - 流亡政府：在本国领土即将被攻占，感觉无力回天时，立即将首都部署到自己最强的一个同盟国领土中。原则上说，你的命运从此就掌握在大哥手中了（大哥一旦取消同盟，回合结束的时候你可能就没有首都了）；不过，因为你对大哥只有益处（联防）没有害处，大哥可能不会劝退你。
     - ~~友情提示：这样虽然可以苟活很久，但是如果你到最后一回合还没有获得自己的领土的话，大哥是很有动机在最后一回合劝退你的~~
 
-
-## 选手接口
-
-TODO
 
 ## 比赛形式
 
