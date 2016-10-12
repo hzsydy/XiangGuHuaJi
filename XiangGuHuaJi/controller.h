@@ -10,6 +10,8 @@
 #include "definition.h"
 #include "game.h"
 #include "player.h"
+#include <tuple>
+#include <algorithm>
 
 using std::vector;
 
@@ -25,7 +27,7 @@ namespace XGHJ
 			playerSize_ = game_.getPlayerSize();
 		}
 
-		void Run();
+		void run();
 		inline bool isValid(){return isValid_;}
 
 	protected:
