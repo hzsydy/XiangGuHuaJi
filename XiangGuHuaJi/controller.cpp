@@ -18,6 +18,7 @@ namespace XGHJ
 		{
 			vector<vector<TMilitaryCommand> > MilitaryCommandMap(playerSize);
 			vector<vector<TDiplomaticCommand> > DiplomaticCommandMap(playerSize);
+			vector<TPosition > NewCapitalList(playerSize);
 
             // each player run 
 			for (TId id=0; id<playerSize; ++id)
@@ -30,9 +31,10 @@ namespace XGHJ
                 if (runwell) runwell = players_[id].Run(info);
 				
 				MilitaryCommandMap[id] = info.MilitaryCommandList;
-				DiplomaticCommandMap[id] = info.DiplomaticCommandList;				
+				DiplomaticCommandMap[id] = info.DiplomaticCommandList;	
+				NewCapitalList[id] = info.newCapital;
 			}
-			game_.Run(MilitaryCommandMap, DiplomaticCommandMap);
+			game_.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList);
 			isValid_ = game_.isValid;
 		}
 		else

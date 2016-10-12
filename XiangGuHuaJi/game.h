@@ -25,9 +25,10 @@ public:
 
     bool Start();
 	bool Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
-		vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap);
+		vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap,
+		vector<TPosition > &NewCapitalList);
     bool DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap);
-    bool MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList);
+    bool MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList);
     bool ProducingPhase();
     bool CheckWinner();
 
