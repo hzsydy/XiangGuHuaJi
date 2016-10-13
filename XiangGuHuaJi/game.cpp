@@ -287,7 +287,7 @@ vector<TId> Game::getWarList(TId id) const
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList)
 {
 	//读取MilitaryCommandList并且扣UNIT_BOMB_COST的钱
-	
+	/*
 	TMoney bombSumCost = 0;
 
 	//静态数组，用于构造bfs的栈
@@ -612,7 +612,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
 	//检查包围
 	//更新isSieged
-	
+	*/
     return false; //TODO
 }
 
