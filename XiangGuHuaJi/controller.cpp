@@ -28,7 +28,7 @@ namespace XGHJ
                 Info info = game_.generateInfo(id);
                 if (player.isValid())
                 {
-                    cout << "Calling Player" << id << "'s Run() method" << endl;
+                    cout << "Calling Player" << (int)id << "'s Run() method" << endl;
                     players_[id].run(info);
                 }
                 else
@@ -54,7 +54,7 @@ namespace XGHJ
                 TMoney price = 0;
                 if (player.isValid())
                 {
-                    cout << "Calling Player" << id << "'s birthplacePrice() method" << endl;
+                    cout << "Calling Player" << (int)id << "'s birthplacePrice() method" << endl;
                     players_[id].run(price);
                 }
                 else
@@ -84,7 +84,7 @@ namespace XGHJ
                 TPosition pos = invalidPos;
                 if (player.isValid())
                 {
-                    cout << "Calling Player" << id << "'s birthplacePrice() method" << endl;
+                    cout << "Calling Player" << (int)id << "'s birthplacePrice() method" << endl;
                     players_[id].run(pos, posChoosed);
                 }
                 else

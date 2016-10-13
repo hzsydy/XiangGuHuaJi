@@ -29,8 +29,7 @@ Game::Game(Map& map, int playersize)
 			isSieged[i][j] = false;
 		}
 	}
-    //capital是自己选择的 所以直接发vector就可以了
-	//playerCapital.resize(playerSize);
+	playerCapital.resize(playerSize);
 	playerArea.resize(playerSize);
 	diplomacy.resize(playerSize);
 	roundToJusifyWar.resize(playerSize);
@@ -428,8 +427,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				{
 					if(tmpGlobalMap[i][j] == NEUTRAL_PLAYER_ID)
 					{
-						globalMap[i][j] == NEUTRAL_PLAYER_ID;
-						changeMap[i][j] == false;
+						globalMap[i][j] = NEUTRAL_PLAYER_ID;
+						changeMap[i][j] = false;
 					}
 					else//bfs,按照x-1，x+1, y-1, y+1顺序如队列
 					{
@@ -799,6 +798,7 @@ TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
         return JustifyWar;
         break;
     }
+    return KeepNeutral;
 }
 
 bool Game::setGlobalMapPos(TPosition pos, TId id)
