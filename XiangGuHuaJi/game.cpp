@@ -78,14 +78,23 @@ Game::~Game()
 
 // Round<0>
 //TODO  init the player, call each player to select their birthplace
-bool Game::Start()
+bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
 {
 	round = 0;
 	++round;
 
-	//TODO
-	//选择出生点
-	//设置首都为默认出生点
+    for (TId i=0; i<playerSize; i++)
+    {
+        playerArea[i] = 1;
+        TPosition capital = posChoosed[i];
+        if (!setGlobalMapPos(capital, i))
+        {
+            //TODO
+            //如果capital位置不合法的话 根本没有措施制裁
+            playerCapital[i] = capital;
+        }
+        playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
+    }
 
 	return true;
 }
@@ -294,7 +303,7 @@ TMap Game::sup(TMap pos, TMap max)
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList)
 {
 	//读取MilitaryCommandList并且扣UNIT_BOMB_COST的钱
-	
+	/*
 	TMoney bombSumCost = 0;
 
 	//静态数组，用于构造bfs的栈
@@ -520,6 +529,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
 		//更新首都
 			for(TMap i = 0; i < playerSize; ++i)
+
 		{
 			TPosition tmpPos = NewCapitalList[i];
 			if(diplomacy[i][globalMap[tmpPos.x][tmpPos.y]])
@@ -530,6 +540,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
 		//检测包围
 		for(TMap i = 0; i < playerCapital.size(); ++i)
+
 		{
 			if(playerCapital[i].x != invalidPos.x)
 			{
@@ -616,7 +627,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
 	//检查包围
 	//更新isSieged
-	
+	*/
     return false; //TODO
 }
 
@@ -739,7 +750,7 @@ MapPointInfo Game::getMapPointInfo(TMap x, TMap y, TId playerId) const
 Info Game::generateInfo(TId playerid) const
 {
 	Info info;
-	info.DiplomaticCommandList = vector<TDiplomaticCommand>();
+	info.DiplomaticCommandList = vector<TDiplomaticCommand>(playerSize);
 	info.MilitaryCommandList = vector<TMilitaryCommand>();
 	info.id = playerid;
 	info.playerSize = playerSize;
@@ -752,6 +763,7 @@ Info Game::generateInfo(TId playerid) const
 	for (TId id=0; id<playerSize; id++)
 	{
 		info.playerInfo[id] = getPlayerInfo(id, playerid);
+        info.DiplomaticCommandList[id] = getDefaultCommand(diplomacy[playerid][id]);
 	}
 	info.mapPointInfo = vector<vector<MapPointInfo> >(cols);
 	for (TMap i=0; i<cols; i++)
@@ -774,7 +786,7 @@ void Game::DiscoverCountry()
 					for (int k = 1; k <= FIELD_BOUNDARY; ++k)
 						for (int pi = 0; pi <= k; ++pi)
 						{
-							int pj = FIELD_BOUNDARY - pi;
+							int pj = k - pi;
 							int si = i + fi * pi;
 							int sj = j + fj * pj;
 							if (si >= 0 && si < cols && sj >= 0 && sj < rows)
@@ -782,6 +794,36 @@ void Game::DiscoverCountry()
 									if (diplomacy[globalMap[i][j]][globalMap[si][sj]] == Undiscovered)
 										diplomacy[globalMap[i][j]][globalMap[si][sj]] = Neutral;
 						}
+}
+
+TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
+{
+    switch (ds)
+    {
+    case Undiscovered:
+        return KeepNeutral;
+        break;
+    case Neutral:
+        return KeepNeutral;
+        break;
+    case Allied:
+        return FormAlliance;
+        break;
+    case AtWar:
+        return JustifyWar;
+        break;
+    }
+    return KeepNeutral;
+}
+
+bool Game::setGlobalMapPos(TPosition pos, TId id)
+{
+    //if (pos.x<0) return false;
+    if (pos.x>cols-1) return false;
+    //if (pos.y<0) return false;
+    if (pos.y>rows-1) return false;
+    globalMap[pos.x][pos.y] = id;
+    return true;
 }
 
 }

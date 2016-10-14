@@ -90,7 +90,7 @@ int main(int argc, char** argv)
     
     while (controller.isValid())
     {
-        controller.Run();
+        controller.run();
     } 
 
 #ifdef _MSC_VER

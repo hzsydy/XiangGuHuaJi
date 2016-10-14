@@ -23,7 +23,7 @@ public:
     Game(Map& map, int playersize);
     ~Game();
 
-    bool Start();
+    bool Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed);
 	bool Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
 		vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap,
 		vector<TPosition > &NewCapitalList);
@@ -57,15 +57,17 @@ protected:
 
 	//一些次要函数
 	vector<TId> getWarList(TId id) const;
-	TMask isPointVisible(TMap x, TMap y, TId playerId) const;
+    TMask isPointVisible(TMap x, TMap y, TId playerId) const;
+    void DiscoverCountry() ;
+    TDiplomaticCommand getDefaultCommand(TDiplomaticStatus ds) const;
 private:
 	//供军事部分使用的高斯核
 	vector<vector<float> > MilitaryKernel;
 	
 	//你们自己添加的小函数请写在这里
-	void DiscoverCountry() ;
 	TMap inf(TMap pos);
 	TMap sup(TMap pos, TMap max);
+    bool setGlobalMapPos(TPosition pos, TId id);
 };
 
 }

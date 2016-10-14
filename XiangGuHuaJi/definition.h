@@ -26,7 +26,9 @@ struct TPosition
 
 const static TPosition invalidPos = {255, 255};
 
-inline bool isPosValid(TPosition p){return (p.x!=255) && (p.y!=255);}
+
+inline bool isPosEqual(TPosition a, TPosition b){return (a.x==b.x) && (a.y==b.y);}
+inline bool isPosValid(TPosition p){return !isPosEqual(p, invalidPos);}
 
 enum TDiplomaticStatus
 {
@@ -82,7 +84,8 @@ const static int		FIELD_BOUNDARY = 2;//一块领土的视野范围
 
 
 const static TId		NEUTRAL_PLAYER_ID = 233;
-const static TId		UNKNOWN_PLAYER_ID = 66;
+const static TId		UNKNOWN_PLAYER_ID = 213;
+const static TId		PEKING_UNIVERSITY_ID = 66;
 
 
 struct PlayerInfo
