@@ -64,6 +64,8 @@ private:
 	
 	//你们自己添加的小函数请写在这里
 	void DiscoverCountry() ;
+	TMap inf(TMap pos);
+	TMap sup(TMap pos, TMap max);
 };
 
 }

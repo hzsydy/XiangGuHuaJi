@@ -275,6 +275,22 @@ vector<TId> Game::getWarList(TId id) const
 	return wl;
 }
 
+TMap Game::inf(TMap pos)
+{
+	if(pos >= MILITARY_KERNEL_SIZE - 1)
+		return (pos + 1 - MILITARY_KERNEL_SIZE);
+	else
+		return 0;
+}
+
+TMap Game::sup(TMap pos, TMap max)
+{
+	if(pos + MILITARY_KERNEL_SIZE <= max)
+		return (pos + MILITARY_KERNEL_SIZE);
+	else
+		return max;
+}
+
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList)
 {
 	//读取MilitaryCommandList并且扣UNIT_BOMB_COST的钱
@@ -288,53 +304,50 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	int list_length = 0;
 
 	//basemap类对象，用于调用函数
-	BaseMap bMap;
-	TMap col = bMap.getCols();
-	TMap row = bMap.getRows();
 
 	//存储钱是否够的数组
-	vector<TMask> moneyEnough(MilitaryCommandList.size());
+	vector<TMask> moneyEnough(playerSize);
 
 	//收入的数组
-	vector<TMoney> playerIncome(MilitaryCommandList.size());
+	vector<TMoney> playerIncome(playerSize);
 
 	//防御力的数组
-	vector<vector<float>> defPower(bMap.getCols());
-	for(int i = 0; i < bMap.getCols(); ++i)
+	vector<vector<float>> defPower(cols);
+	for(TMap i = 0; i < cols; ++i)
 	{
-		defPower[i].resize(bMap.getRows(), 0);
+		defPower[i].resize(rows, 0);
 	}
 
 	//攻击力的数组
-	vector<vector<vector<float>>> atkPower(MilitaryCommandList.size());
-	for(int i = 0; i < MilitaryCommandList.size(); ++i)
+	vector<vector<vector<float>>> atkPower(playerSize);
+	for(TMilitary i = 0; i <playerSize; ++i)
 	{
-		atkPower[i].resize(bMap.getCols());
-		for(int j = 0; j < bMap.getCols(); ++j)
+		atkPower[i].resize(cols);
+		for(TMilitary j = 0; j < cols; ++j)
 		{
-			atkPower[i][j].resize(bMap.getRows(), 0);
+			atkPower[i][j].resize(rows, 0);
 		}
 	}
 
 	//本局战争结果地图
-	vector<vector<TId>> tmpGlobalMap(bMap.getCols());
-	for(int i = 0; i < bMap.getCols(); ++i)
-		tmpGlobalMap[i].resize(bMap.getRows(), UNKNOWN_PLAYER_ID);
+	vector<vector<TId>> tmpGlobalMap(cols);
+	for(TId i = 0; i < cols; ++i)
+		tmpGlobalMap[i].resize(rows, UNKNOWN_PLAYER_ID);
 
-	vector<vector<TMask>> changeMap(bMap.getCols());
-	for(int i = 0; i < bMap.getRows(); ++i)
-		changeMap[i].resize(bMap.getRows(), false);
+	vector<vector<TMask>> changeMap(cols);
+	for(TMap i = 0; i < cols; ++i)
+		changeMap[i].resize(rows, false);
 
 	//判断连通性用到的
-	vector<vector<TMask>> newIsSieged(bMap.getCols());
-	for(int i = 0; i < bMap.getCols(); ++i)
-		newIsSieged[i].resize(bMap.getRows(), true);
+	vector<vector<TMask>> newIsSieged(cols);
+	for(int i = 0; i < cols; ++i)
+		newIsSieged[i].resize(rows, true);
 
 	//开始执行命令队列的内容
-	for(int i = 0; i < MilitaryCommandList.size();++i)
+	for(TMilitary i = 0; i < playerSize;++i)
 	{
 		//判断钱是否够用
-		for(int j = 0; j < MilitaryCommandList[i].size(); ++j)
+		for(TMilitary j = 0; j < MilitaryCommandList[i].size(); ++j)
 		{
 			bombSumCost += MilitaryCommandList[i][j].bomb_size*UNIT_BOMB_COST;
 		}
@@ -344,7 +357,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			moneyEnough[i] = true;
 		bombSumCost = 0;
 		//攻击力和防御力
-		for(int j = 0; j <= MilitaryCommandList[i].size(); ++j)
+		for(TMilitary j = 0; j <= MilitaryCommandList[i].size(); ++j)
 		{
 			//单独计算首都
 			if(j == MilitaryCommandList[i].size() && isPosValid(playerCapital[i]))
@@ -352,23 +365,23 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				TMap capXPos, capYPos;
 				capXPos = playerCapital[i].x;
 				capYPos = playerCapital[i].y;
-				for(int k = (capXPos - 4)<0?(capXPos - 4):0, m = 0; k <= (capXPos + 4)>(col - 1)?(capXPos + 4):(col - 1); ++k, ++m)
+				for(TMap k = inf(capXPos), m = 0; k < sup(capXPos, cols); ++k, ++m)
 				{
-					for(int l = (capYPos - 4)<0?(capYPos - 4):0, n = 0; l <= (capYPos + 4)>(row - 1)?(capYPos + 4):(row - 1); ++l, ++n)
+					for(TMap l = inf(capXPos), n = 0; l < sup(capYPos, rows); ++l, ++n)
 					{
 						if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
-							defPower[k][l] += playerIncome[i]*0.3*MilitaryKernel[m][n];//感觉最好给0.3一个define
+							defPower[k][l] += playerIncome[i]*0.3f*MilitaryKernel[m][n];//感觉最好给0.3一个define
 						else if(diplomacy[i][globalMap[k][l]] == AtWar)
-							atkPower[i][k][l] = playerIncome[i]*0.3*MilitaryKernel[m][n];
+							atkPower[i][k][l] = playerIncome[i]*0.3f*MilitaryKernel[m][n];
 					}	
 				}
 			}
 			TMap xPos, yPos;
 			xPos = MilitaryCommandList[i][j].place.x;
 			yPos = MilitaryCommandList[i][j].place.y;
-			for(int k = (xPos - 4)<0?(xPos - 4):0, m = 0; k <= (xPos + 4)>(col - 1)?(xPos + 4):(col - 1); ++k, ++m)
+			for(TMap k = inf(xPos), m = 0; k < sup(xPos, cols); ++k, ++m)
 			{
-				for(int l = (yPos - 4)<0?(yPos - 4):0, n = 0; l <= (yPos + 4)>(row - 1)?(yPos + 4):(row - 1); ++l, ++n)
+				for(TMap l = inf(yPos), n = 0; l < sup(yPos, rows); ++l, ++n)
 				{
 					if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
 						defPower[k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n];
@@ -378,13 +391,13 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			}
 		}
 		//计算战争结果
-		for(int i = 0; i < bMap.getCols(); ++i)
-			for(int j = 0; j < bMap.getRows(); ++j)
+		for(TMap i = 0; i <cols; ++i)
+			for(TMap j = 0; j < rows; ++j)
 			{
 				float maxAtk = 0;
-				int equalCount = 0;
+				TMilitary equalCount = 0;
 				TId maxAtkId = UNKNOWN_PLAYER_ID;
-				for(int k = 0; k < MilitaryCommandList.size(); ++k)
+				for(TMilitary k = 0; k < playerSize; ++k)
 				{
 					if(atkPower[k][i][j] > maxAtk)
 					{
@@ -395,7 +408,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					else if(atkPower[k][i][j] == maxAtk)
 						equalCount += 1;
 				}
-				if(maxAtk*(bMap.getMapAtk())[i][j] - defPower[i][j]*(bMap.getMapDef())[i][j] > SUPPESS_LIMIT)
+				if(maxAtk*(map.getMapAtk())[i][j] > defPower[i][j]*(map.getMapDef())[i][j] + SUPPESS_LIMIT)
 					if(equalCount == 1)
 					{
 						tmpGlobalMap[i][j] = maxAtkId;
@@ -409,8 +422,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			}
 
 		//计算连通性,并更新GlobalMap
-		for(int i = 0; i < bMap.getCols(); ++i)
-			for(int j = 0; j < bMap.getRows(); ++j)
+		for(TMap i = 0; i <cols; ++i)
+			for(TMap j = 0; j < rows; ++j)
 			{
 				TMask connection = false;
 				TPosition curPos = {i, j};
@@ -418,8 +431,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				{
 					if(tmpGlobalMap[i][j] == NEUTRAL_PLAYER_ID)
 					{
-						globalMap[i][j] == NEUTRAL_PLAYER_ID;
-						changeMap[i][j] == false;
+						globalMap[i][j] = NEUTRAL_PLAYER_ID;
+						changeMap[i][j] = false;
 					}
 					else//bfs,按照x-1，x+1, y-1, y+1顺序如队列
 					{
@@ -431,7 +444,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							bfs_queue[tail].y = j;
 							tail++;
 						}
-						if(i < bMap.getCols() - 1)
+						if(i + 1 < cols)
 						{
 							bfs_queue[tail].x = i + 1;
 							bfs_queue[tail].y = j;
@@ -443,7 +456,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							bfs_queue[tail].y = j - 1;
 							tail++;
 						}
-						if(j < bMap.getRows() - 1)
+						if(j + 1 < rows)
 						{
 							bfs_queue[tail].x = i;
 							bfs_queue[tail].y = j + 1;
@@ -472,7 +485,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 									bfs_queue[tail].y = n;
 									tail++;
 								}
-								if(m < bMap.getCols() - 1 && changeMap[m + 1][n])
+								if(m + 1< cols && changeMap[m + 1][n])
 								{
 									bfs_queue[tail].x = m + 1;
 									bfs_queue[tail].y = n;
@@ -484,7 +497,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 									bfs_queue[tail].y = n - 1;
 									tail++;
 								}
-								if(n < bMap.getRows() - 1 && changeMap[m][n + 1])
+								if(n + 1< rows && changeMap[m][n + 1])
 								{
 									bfs_queue[tail].x = m;
 									bfs_queue[tail].y = n + 1;
@@ -499,14 +512,14 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
 					//将检测到的点加上
 					if(connection)
-						for(int k = 0; k < list_length; ++k)
+						for(TMap k = 0; k < list_length; ++k)
 							globalMap[list[k].x][list[k].y] = tmpGlobalMap[i][j];
 					list_length = 0;
 				}
 			}
 
 		//更新首都
-		for(int i = 0; i < NewCapitalList.size(); ++i)
+			for(TMap i = 0; i < playerSize; ++i)
 		{
 			TPosition tmpPos = NewCapitalList[i];
 			if(diplomacy[i][globalMap[tmpPos.x][tmpPos.y]])
@@ -516,7 +529,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 		}
 
 		//检测包围
-		for(int i = 0; i < playerCapital.size(); ++i)
+		for(TMap i = 0; i < playerCapital.size(); ++i)
 		{
 			if(playerCapital[i].x != invalidPos.x)
 			{
@@ -530,7 +543,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					bfs_queue[tail].y = yPos;
 					tail++;
 				}
-				if(xPos < bMap.getCols() - 1 && newIsSieged[xPos + 1][yPos])
+				if(xPos + 1 < cols && newIsSieged[xPos + 1][yPos])
 				{
 					bfs_queue[tail].x = xPos + 1;
 					bfs_queue[tail].y = yPos;
@@ -542,7 +555,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					bfs_queue[tail].y = yPos - 1;
 					tail++;
 				}
-				if(yPos < bMap.getRows() - 1 && newIsSieged[xPos][yPos + 1])
+				if(yPos + 1 < rows && newIsSieged[xPos][yPos + 1])
 				{
 					bfs_queue[tail].x = xPos;
 					bfs_queue[tail].y = yPos + 1;
@@ -560,7 +573,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							bfs_queue[tail].y = y_pos;
 							tail++;
 						}
-						if(x_pos < bMap.getCols() - 1 && newIsSieged[x_pos + 1][y_pos])
+						if(x_pos + 1< cols && newIsSieged[x_pos + 1][y_pos])
 						{
 							bfs_queue[tail].x = x_pos + 1;
 							bfs_queue[tail].y = y_pos;
@@ -572,7 +585,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							bfs_queue[tail].y = y_pos - 1;
 							tail++;
 						}
-						if(y_pos < bMap.getRows() - 1 && newIsSieged[x_pos][y_pos + 1])
+						if(y_pos + 1 < rows && newIsSieged[x_pos][y_pos + 1])
 						{
 							bfs_queue[tail].x = x_pos;
 							bfs_queue[tail].y = y_pos + 1;
@@ -584,8 +597,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			}
 		}
 		//上面一部分是把所有的包括同盟的连通全部算上了，下面单独减去首都不合法的
-		for(int i = 0; i < bMap.getCols(); ++i)
-			for(int j = 0; j < bMap.getRows(); ++j)
+		for(TMap i = 0; i < cols; ++i)
+			for(TMap j = 0; j < rows; ++j)
 			{
 				if(playerCapital[globalMap[i][j]].x != invalidPos.x)
 					isSieged[i][j] = newIsSieged[i][j];
