@@ -85,7 +85,7 @@ const static int		FIELD_BOUNDARY = 2;//一块领土的视野范围
 
 const static TId		NEUTRAL_PLAYER_ID = 233;
 const static TId		UNKNOWN_PLAYER_ID = 213;
-const static TId		PEKING_UNIVERSITY_ID = 66;
+const static TId		PEKING_UNIVERSITY_ID = 0;
 
 
 struct PlayerInfo

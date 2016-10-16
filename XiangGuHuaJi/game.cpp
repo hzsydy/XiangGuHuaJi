@@ -12,7 +12,7 @@ inline float x2plusy2(float x, float y){return x*x+y*y;}
 
 Game::Game(Map& map, int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
-      round(0), isValid(true)
+      round(0), isValid(true), isPlayerAlive(playersize)
 {
 	rows = map.getRows();
 	cols = map.getCols();
@@ -38,6 +38,7 @@ Game::Game(Map& map, int playersize)
 	{
 		diplomacy[i].resize(playerSize);
 		roundToJusifyWar[i].resize(playerSize);
+        isPlayerAlive[i] = true;
 		playerArea[i] = 0;
 		backstabUsed[i] = false;
 		for (TId j=0; j<playersize; j++)
@@ -87,11 +88,16 @@ bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
     {
         playerArea[i] = 1;
         TPosition capital = posChoosed[i];
-        if (!setGlobalMapPos(capital, i))
+        if (canSetGlobalMapPos(capital, i))
         {
-            //TODO
-            //如果capital位置不合法的话 根本没有措施制裁
+            globalMap[capital.x][capital.y] = i;
             playerCapital[i] = capital;
+        }
+        else
+        {
+            playerCapital[i] = invalidPos;
+            //那就直接干死吧 滑稽咯
+            isPlayerAlive[i] = false;
         }
         playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
     }
@@ -109,7 +115,8 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
     ProducingPhase();
 
     ++round;
-    if (round>=MAX_ROUND) isValid=false;
+    if (CheckWinner()) 
+        isValid=false;
 
     return isValid;    
 }
@@ -672,9 +679,40 @@ bool Game::ProducingPhase()
 //Check the winner and the loser (Deal with PlayerInfoList)
 bool Game::CheckWinner()
 {
-	//TODO
-	//检查胜负
-    return false; //TODO
+	if (round == MAX_ROUND)
+	{
+        return true;
+	}
+    else
+    {
+        TId aliveCnt=0;
+        for (TId id=0; id<playerSize; id++)
+        {
+            if (isPlayerAlive[id])
+            {
+                if (playerArea[id] == 0 && !isPosValid(playerCapital[id]))
+                {
+                    //welcome death
+                    isPlayerAlive[id] = false;
+                    for (TId playerid=0; playerid<playerSize; playerid++)
+                    {
+                        diplomacy[id][playerid] = Undiscovered;
+                        diplomacy[playerid][id] = Undiscovered;
+                    }
+                    diplomacy[id][id] = Allied;
+                }
+                else
+                {
+                    aliveCnt++;
+                }
+            }
+        }
+        if (aliveCnt == 1)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
@@ -816,13 +854,16 @@ TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
     return KeepNeutral;
 }
 
-bool Game::setGlobalMapPos(TPosition pos, TId id)
+bool Game::canSetGlobalMapPos(TPosition pos, TId id)
 {
     //if (pos.x<0) return false;
     if (pos.x>cols-1) return false;
     //if (pos.y<0) return false;
     if (pos.y>rows-1) return false;
-    globalMap[pos.x][pos.y] = id;
+    if (globalMap[pos.x][pos.y] != NEUTRAL_PLAYER_ID)
+    {
+        return false;
+    }
     return true;
 }
 

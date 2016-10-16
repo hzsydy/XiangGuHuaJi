@@ -48,7 +48,9 @@ public:
 
     bool load();
 
-    inline bool     isValid() { return Valid; }
+    inline void kill() {Valid = false;}
+
+    inline bool isValid() { return Valid; }
 
 private:
     TPlayerAi        player_ai;

@@ -11,6 +11,8 @@ TestAi/
 fuck*
 test*
 
+*.ini
+
 # Compiled Object files
 *.slo
 *.lo

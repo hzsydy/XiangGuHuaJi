@@ -39,7 +39,11 @@ namespace XGHJ
                 DiplomaticCommandMap[id] = info.DiplomaticCommandList;	
                 NewCapitalList[id] = info.newCapital;
 			}
-			game_.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList);
+			if (!game_.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList))
+			{
+                cout << "-=-=-=-=-=-=-=-=-=-=-= GAME ENDS ! =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+                //TODO:GET WINNER
+			}
 			isValid_ = game_.isValid;
 		}
 		else
@@ -97,6 +101,15 @@ namespace XGHJ
 			// choose start pos
 			game_.Start(bidPrice, posChoosed);
 		}
+
+        //check if killed
+        for (TId i=0; i<playerSize; ++i)
+        {
+            if (!game_.isPlayerAlive[i])
+            {
+                players_[i].kill();
+            }
+        }
 
 	}
 }
