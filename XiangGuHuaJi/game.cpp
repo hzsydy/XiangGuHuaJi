@@ -776,7 +776,7 @@ void Game::DiscoverCountry()
 					for (int k = 1; k <= FIELD_BOUNDARY; ++k)
 						for (int pi = 0; pi <= k; ++pi)
 						{
-							int pj = FIELD_BOUNDARY - pi;
+							int pj = k - pi;
 							int si = i + fi * pi;
 							int sj = j + fj * pj;
 							if (si >= 0 && si < cols && sj >= 0 && sj < rows)
