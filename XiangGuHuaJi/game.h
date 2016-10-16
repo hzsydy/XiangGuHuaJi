@@ -66,7 +66,7 @@ private:
 	vector<vector<float> > MilitaryKernel;
 	
 	//你们自己添加的小函数请写在这里
-    bool setGlobalMapPos(TPosition pos, TId id);
+    bool canSetGlobalMapPos(TPosition pos, TId id);
 };
 
 }

@@ -39,7 +39,11 @@ namespace XGHJ
                 DiplomaticCommandMap[id] = info.DiplomaticCommandList;	
                 NewCapitalList[id] = info.newCapital;
 			}
-			game_.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList);
+			if (!game_.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList))
+			{
+                cout << "-=-=-=-=-=-=-=-=-=-=-= GAME ENDS ! =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+                //TODO:GET WINNER
+			}
 			isValid_ = game_.isValid;
 		}
 		else

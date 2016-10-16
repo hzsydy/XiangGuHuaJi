@@ -88,8 +88,9 @@ bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
     {
         playerArea[i] = 1;
         TPosition capital = posChoosed[i];
-        if (setGlobalMapPos(capital, i))
+        if (canSetGlobalMapPos(capital, i))
         {
+            globalMap[capital.x][capital.y] = i;
             playerCapital[i] = capital;
         }
         else
@@ -114,7 +115,8 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
     ProducingPhase();
 
     ++round;
-    if (round>=MAX_ROUND) isValid=false;
+    if (CheckWinner()) 
+        isValid=false;
 
     return isValid;    
 }
@@ -662,9 +664,40 @@ bool Game::ProducingPhase()
 //Check the winner and the loser (Deal with PlayerInfoList)
 bool Game::CheckWinner()
 {
-	//TODO
-	//ºÏ≤È §∏∫
-    return false; //TODO
+	if (round == MAX_ROUND)
+	{
+        return true;
+	}
+    else
+    {
+        TId aliveCnt=0;
+        for (TId id=0; id<playerSize; id++)
+        {
+            if (isPlayerAlive[id])
+            {
+                if (playerArea[id] == 0 && !isPosValid(playerCapital[id]))
+                {
+                    //welcome death
+                    isPlayerAlive[id] = false;
+                    for (TId playerid=0; playerid<playerSize; playerid++)
+                    {
+                        diplomacy[id][playerid] = Undiscovered;
+                        diplomacy[playerid][id] = Undiscovered;
+                    }
+                    diplomacy[id][id] = Allied;
+                }
+                else
+                {
+                    aliveCnt++;
+                }
+            }
+        }
+        if (aliveCnt == 1)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
@@ -806,13 +839,16 @@ TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
     return KeepNeutral;
 }
 
-bool Game::setGlobalMapPos(TPosition pos, TId id)
+bool Game::canSetGlobalMapPos(TPosition pos, TId id)
 {
     //if (pos.x<0) return false;
     if (pos.x>cols-1) return false;
     //if (pos.y<0) return false;
     if (pos.y>rows-1) return false;
-    globalMap[pos.x][pos.y] = id;
+    if (globalMap[pos.x][pos.y] != NEUTRAL_PLAYER_ID)
+    {
+        return false;
+    }
     return true;
 }
 
