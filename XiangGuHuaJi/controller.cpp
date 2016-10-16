@@ -98,5 +98,14 @@ namespace XGHJ
 			game_.Start(bidPrice, posChoosed);
 		}
 
+        //check if killed
+        for (TId i=0; i<playerSize; ++i)
+        {
+            if (!game_.isPlayerAlive[i])
+            {
+                players_[i].kill();
+            }
+        }
+
 	}
 }

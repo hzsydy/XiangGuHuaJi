@@ -12,7 +12,7 @@ inline float x2plusy2(float x, float y){return x*x+y*y;}
 
 Game::Game(Map& map, int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
-      round(0), isValid(true)
+      round(0), isValid(true), isPlayerAlive(playersize)
 {
 	rows = map.getRows();
 	cols = map.getCols();
@@ -38,6 +38,7 @@ Game::Game(Map& map, int playersize)
 	{
 		diplomacy[i].resize(playerSize);
 		roundToJusifyWar[i].resize(playerSize);
+        isPlayerAlive[i] = true;
 		playerArea[i] = 0;
 		backstabUsed[i] = false;
 		for (TId j=0; j<playersize; j++)
@@ -87,11 +88,15 @@ bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
     {
         playerArea[i] = 1;
         TPosition capital = posChoosed[i];
-        if (!setGlobalMapPos(capital, i))
+        if (setGlobalMapPos(capital, i))
         {
-            //TODO
-            //如果capital位置不合法的话 根本没有措施制裁
             playerCapital[i] = capital;
+        }
+        else
+        {
+            playerCapital[i] = invalidPos;
+            //那就直接干死吧 滑稽咯
+            isPlayerAlive[i] = false;
         }
         playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
     }

@@ -31,6 +31,7 @@ public:
     bool MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList);
     bool ProducingPhase();
     bool CheckWinner();
+    vector<bool> isPlayerAlive;
 
     Map& map;  
 
