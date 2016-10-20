@@ -70,7 +70,7 @@ protected:
 //CONSTANTS
 const static TRound     MAX_ROUND = 50;//轮数限额
 const static TMoney     UNIT_BOMB_COST = 1;
-const static float		UNIT_CITY_INCOME = 1.0f;//低保的比例系数
+const static float		UNIT_CITY_INCOME = 0.5f;//低保的比例系数
 const static TRound     WAR_JUSTIFY_TIME = 3;//从战争合理化到宣战的时间
 const static float		CORRUPTION_COEF = 0.001f;//收获资源的腐败系数
 const static int		MILITARY_KERNEL_SIZE = 5;//影响力核心的大小
