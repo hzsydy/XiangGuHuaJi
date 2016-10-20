@@ -385,11 +385,11 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 						for(TMap l = inf(capYPos), n = (MILITARY_KERNEL_SIZE - 1)-(capYPos - l); l < sup(capYPos, rows); ++l, ++n)
 						{
 							if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
-								atkPower[i][k][l] = playerIncome[i]*0.3f*MilitaryKernel[m][n]*atk;
+								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
 							else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
-								defPower[k][l] += playerIncome[i]*0.3f*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);//感觉最好给0.3一个define
+								defPower[k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);
 							else if(diplomacy[i][globalMap[k][l]] == AtWar)
-								atkPower[i][k][l] = playerIncome[i]*0.3f*MilitaryKernel[m][n]*atk;
+								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
 						}	
 					}
 				}
@@ -407,11 +407,11 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					{
 		
 						if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
-							atkPower[i][k][l] = MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*atk;
+							atkPower[i][k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*atk;
 						else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
 							defPower[k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);
 						else if(diplomacy[i][globalMap[k][l]] == AtWar)
-							atkPower[i][k][l] = MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*atk;
+							atkPower[i][k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*atk;
 					}
 				}
 			}
@@ -562,9 +562,9 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	//检测包围
 	for(TMap i = 0; i < playerCapital.size(); ++i)
 	{
-		if(playerCapital[i].x != invalidPos.x)
+		if(isPosValid(playerCapital[i]))
 		{
-			TMap xPos = playerCapital[i].x, yPos = playerCapital[i].x;
+			TMap xPos = playerCapital[i].x, yPos = playerCapital[i].y;
 			newIsSieged[xPos][yPos] = false;
 			//再做一次bfs，利用静态的bfs数组
 			head = tail = 0;
