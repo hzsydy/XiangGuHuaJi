@@ -53,9 +53,9 @@ bool Player::load()
     else 
         cout << "Succeed to load \"" << file_name << "\". ";
     if (isValid())
-        cout << "Player{" << id << "} has been loaded. " << endl;
+        cout << "Player{" <<  (int)id << "} has been loaded. " << endl;
     else
-        cout << "[ERROR] failed to load Player{"<< id << "} !" << endl;
+        cout << "[ERROR] failed to load Player{"<<  (int)id << "} !" << endl;
 
     return Valid;
 }
@@ -68,7 +68,7 @@ bool Player::run(Info &info)
     }
     catch(exception e)
     {
-        cout << "[ERROR] Player " << id << " raised an exception in run()." <<  endl;
+        cout << "[ERROR] Player " <<  (int)id << " raised an exception in run()." <<  endl;
         cout << e.what() << endl;
         Valid = false;
 		return false;
@@ -84,7 +84,7 @@ bool Player::run(TMoney &price)
     }
     catch(exception e)
     {
-        cout << "[ERROR] Player " << id << " raised an exception in birthplacePrice()." <<  endl;
+        cout << "[ERROR] Player " <<  (int)id << " raised an exception in birthplacePrice()." <<  endl;
         cout << e.what() << endl;
         Valid = false;
         return false;
@@ -100,7 +100,7 @@ bool Player::run(TPosition &pos, vector<TPosition> &posSelected)
     }
     catch(exception e)
     {
-        cout << "[ERROR] Player " << id << " raised an exception in birthplace()." <<  endl;
+        cout << "[ERROR] Player " <<  (int)id << " raised an exception in birthplace()." <<  endl;
         cout << e.what() << endl;
         Valid = false;
         return false;

@@ -55,6 +55,7 @@ protected:
 	vector<vector<TDiplomaticStatus> >	diplomacy;
 	vector<vector<int>>					roundToJusifyWar;
 	vector<bool>						backstabUsed;
+    vector<TMoney>                      playerIncome;
 
 	//一些次要函数
 	vector<TId> getWarList(TId id) const;

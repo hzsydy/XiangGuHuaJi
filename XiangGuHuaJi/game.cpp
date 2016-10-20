@@ -12,7 +12,7 @@ inline float x2plusy2(float x, float y){return x*x+y*y;}
 
 Game::Game(Map& map, int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
-      round(0), isValid(true), isPlayerAlive(playersize)
+      round(0), isValid(true), isPlayerAlive(playersize), playerIncome(playersize, 0)
 {
 	rows = map.getRows();
 	cols = map.getCols();
@@ -309,14 +309,6 @@ TMap Game::sup(TMap pos, TMap max)
 
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList)
 {
-	//打印攻击力矩阵，测试用
-	printVecMat<TMilitary>(map.getMapAtk(), "MapATK");
-	//打印防御力矩阵，测试用
-	printVecMat<TMilitary>(map.getMapDef(), "MapDEF");
-	//打印外交关系矩阵，测试用
-	printVecMat<TDiplomaticStatus>(diplomacy, "diplomacy");
-	//打印globalmap，测试用，最终提交删掉
-	printVecMat<TId>(globalMap, "globalMap");
 	//读取MilitaryCommandList并且扣UNIT_BOMB_COST的钱
 	TMoney bombSumCost = 0;
 
@@ -330,9 +322,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
 	//存储钱是否够的数组
 	vector<TMask> moneyEnough(playerSize);
-
-	//收入的数组
-	vector<TMoney> playerIncome(playerSize, 100);
 
 	//防御力的数组
 	vector<vector<float> > defPower(cols);
@@ -458,8 +447,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					changeMap[i][j] = true;
 				}
 		}
-	printVecMat<TId>(tmpGlobalMap, "tmpGlobalMap");
-	printVecMat<TMask>(changeMap, "changeMap");
 	//计算连通性,并更新GlobalMap
 	for(TMap i = 0; i <cols; ++i)
 		for(TMap j = 0; j < rows; ++j)
@@ -555,9 +542,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				if(connection){
 					for(TMap k = 0; k < list_length; ++k)
 						globalMap[list[k].x][list[k].y] = tmpGlobalMap[i][j];
-					
-					//打印globalmap，测试用，最终提交删掉
-					//printVecMat<TId>(globalMap, "globalMap");
 				}
 				list_length = 0;
 			}
@@ -643,7 +627,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					}
 				}
 				head++;
-				//printVecMat<TMask>(newIsSieged, "newIsSieged");
 			}
 		}
 	}
@@ -658,10 +641,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			else
 				isSieged[i][j] = false;
 		}
-	printVecMat<TMask>(newIsSieged, "newIsSieged");
-	printVecMat<TMask>(isSieged, "isSieged");
-	//打印globalmap，测试用，最终提交删掉
-	printVecMat<TId>(globalMap, "globalmap");
     return false; //TODO
 }
 
@@ -696,7 +675,10 @@ bool Game::ProducingPhase()
 
         // corruption 
         playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
+
+        // refresh
 		playerSaving[id] += new_saving;
+        playerIncome[id] = new_saving;
     }
 	DiscoverCountry();
 

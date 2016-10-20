@@ -39,7 +39,7 @@ void player_ai(Info& info)
     {
         if (id != info.id)
         {
-            cout << "dip status towards player " << (int)id <<":" << info.playerInfo[id].dipStatus << endl;
+            cout << "your dip status towards player " << (int)id <<"is :" << info.playerInfo[id].dipStatus << endl;
             cout << "your attitude towards player " << (int)id <<":"<<endl
                 <<"(KeepNeutral=0, FormAlliance=1, JustifyWar=2, Backstab=3)" << endl;
             int input;
@@ -49,6 +49,37 @@ void player_ai(Info& info)
                 info.DiplomaticCommandList[id] = (TDiplomaticCommand)input;
             }
         }
+    }
+    //military status test
+    cout << "the map you get:" << endl;
+    for (TMap x=0; x<info.cols; x++)
+    {
+        for (TMap y=0; y<info.rows; y++)
+        {
+            MapPointInfo mpi = info.mapPointInfo[x][y];
+            string owner;
+            if(mpi.isVisible)
+            {
+                if (mpi.owner == NEUTRAL_PLAYER_ID)
+                {
+                    owner = "-";
+                }
+                else
+                {
+                    owner = std::to_string((int)mpi.owner);
+                }
+                if (mpi.isSieged)
+                {
+                    owner += "*";
+                }
+            }
+            else
+            {
+                owner = "?";
+            }
+            cout << std::left << std::setw(4) << std::setfill(' ') <<owner;
+        }
+        cout<<endl;
     }
     return;
 }
