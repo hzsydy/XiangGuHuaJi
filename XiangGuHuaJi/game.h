@@ -31,6 +31,7 @@ public:
     bool MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList);
     bool ProducingPhase();
     bool CheckWinner();
+    vector<bool> isPlayerAlive;
 
     Map& map;  
 
@@ -67,7 +68,7 @@ private:
 	//你们自己添加的小函数请写在这里
 	TMap inf(TMap pos);
 	TMap sup(TMap pos, TMap max);
-    bool setGlobalMapPos(TPosition pos, TId id);
+    bool canSetGlobalMapPos(TPosition pos, TId id);
 };
 
 }

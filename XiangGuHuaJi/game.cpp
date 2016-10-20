@@ -309,8 +309,15 @@ TMap Game::sup(TMap pos, TMap max)
 
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList)
 {
+	//打印攻击力矩阵，测试用
+	printVecMat<TMilitary>(map.getMapAtk(), "MapATK");
+	//打印防御力矩阵，测试用
+	printVecMat<TMilitary>(map.getMapDef(), "MapDEF");
+	//打印外交关系矩阵，测试用
+	printVecMat<TDiplomaticStatus>(diplomacy, "diplomacy");
+	//打印globalmap，测试用，最终提交删掉
+	printVecMat<TId>(globalMap, "globalMap");
 	//读取MilitaryCommandList并且扣UNIT_BOMB_COST的钱
-	/*
 	TMoney bombSumCost = 0;
 
 	//静态数组，用于构造bfs的栈
@@ -325,17 +332,17 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	vector<TMask> moneyEnough(playerSize);
 
 	//收入的数组
-	vector<TMoney> playerIncome(playerSize);
+	vector<TMoney> playerIncome(playerSize, 100);
 
 	//防御力的数组
-	vector<vector<float>> defPower(cols);
+	vector<vector<float> > defPower(cols);
 	for(TMap i = 0; i < cols; ++i)
 	{
 		defPower[i].resize(rows, 0);
 	}
 
 	//攻击力的数组
-	vector<vector<vector<float>>> atkPower(playerSize);
+	vector<vector<vector<float> > > atkPower(playerSize);
 	for(TMilitary i = 0; i <playerSize; ++i)
 	{
 		atkPower[i].resize(cols);
@@ -376,212 +383,236 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 		for(TMilitary j = 0; j <= MilitaryCommandList[i].size(); ++j)
 		{
 			//单独计算首都
-			if(j == MilitaryCommandList[i].size() && isPosValid(playerCapital[i]))
+			if(j == MilitaryCommandList[i].size())
 			{
-				TMap capXPos, capYPos;
-				capXPos = playerCapital[i].x;
-				capYPos = playerCapital[i].y;
-				for(TMap k = inf(capXPos), m = 0; k < sup(capXPos, cols); ++k, ++m)
+				if(isPosValid(playerCapital[i]))
 				{
-					for(TMap l = inf(capXPos), n = 0; l < sup(capYPos, rows); ++l, ++n)
+					TMap capXPos, capYPos;
+					capXPos = playerCapital[i].x;
+					capYPos = playerCapital[i].y;
+					TMilitary atk = map.getMapAtk()[capXPos][capYPos];
+					for(TMap k = inf(capXPos), m = (MILITARY_KERNEL_SIZE - 1)-(capXPos - k); k < sup(capXPos, cols); ++k, ++m)
 					{
-						if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
-							defPower[k][l] += playerIncome[i]*0.3f*MilitaryKernel[m][n];//感觉最好给0.3一个define
-						else if(diplomacy[i][globalMap[k][l]] == AtWar)
-							atkPower[i][k][l] = playerIncome[i]*0.3f*MilitaryKernel[m][n];
-					}	
+						for(TMap l = inf(capYPos), n = (MILITARY_KERNEL_SIZE - 1)-(capYPos - l); l < sup(capYPos, rows); ++l, ++n)
+						{
+							if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
+								atkPower[i][k][l] = playerIncome[i]*0.3f*MilitaryKernel[m][n]*atk;
+							else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
+								defPower[k][l] += playerIncome[i]*0.3f*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);//感觉最好给0.3一个define
+							else if(diplomacy[i][globalMap[k][l]] == AtWar)
+								atkPower[i][k][l] = playerIncome[i]*0.3f*MilitaryKernel[m][n]*atk;
+						}	
+					}
 				}
+				
 			}
-			TMap xPos, yPos;
-			xPos = MilitaryCommandList[i][j].place.x;
-			yPos = MilitaryCommandList[i][j].place.y;
-			for(TMap k = inf(xPos), m = 0; k < sup(xPos, cols); ++k, ++m)
+			else
 			{
-				for(TMap l = inf(yPos), n = 0; l < sup(yPos, rows); ++l, ++n)
+				TMap xPos, yPos;
+				xPos = MilitaryCommandList[i][j].place.x;
+				yPos = MilitaryCommandList[i][j].place.y;
+				TMilitary atk = map.getMapAtk()[xPos][yPos];
+				for(TMap k = inf(xPos), m = (MILITARY_KERNEL_SIZE - 1)-(xPos - k); k < sup(xPos, cols); ++k, ++m)
 				{
-					if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
-						defPower[k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n];
-					else if(diplomacy[i][globalMap[k][l]] == AtWar)
-						atkPower[i][k][l] = MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n];
+					for(TMap l = inf(yPos), n = (MILITARY_KERNEL_SIZE - 1)-(yPos - l); l < sup(yPos, rows); ++l, ++n)
+					{
+		
+						if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
+							atkPower[i][k][l] = MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*atk;
+						else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
+							defPower[k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);
+						else if(diplomacy[i][globalMap[k][l]] == AtWar)
+							atkPower[i][k][l] = MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*atk;
+					}
 				}
 			}
 		}
-		//计算战争结果
-		for(TMap i = 0; i <cols; ++i)
-			for(TMap j = 0; j < rows; ++j)
+	}
+	//计算战争结果
+	for(TMap i = 0; i <cols; ++i)
+		for(TMap j = 0; j < rows; ++j)
+		{
+			float maxAtk = 0;
+			TMilitary equalCount = 0;
+			TId maxAtkId = UNKNOWN_PLAYER_ID;
+			for(TMilitary k = 0; k < playerSize; ++k)
 			{
-				float maxAtk = 0;
-				TMilitary equalCount = 0;
-				TId maxAtkId = UNKNOWN_PLAYER_ID;
-				for(TMilitary k = 0; k < playerSize; ++k)
+				if(atkPower[k][i][j] > maxAtk)
 				{
-					if(atkPower[k][i][j] > maxAtk)
-					{
-						maxAtk = atkPower[k][i][j];
-						equalCount = 1;
-						maxAtkId = k;
-					}
-					else if(atkPower[k][i][j] == maxAtk)
-						equalCount += 1;
+					maxAtk = atkPower[k][i][j];
+					equalCount = 1;
+					maxAtkId = k;
 				}
-				if(maxAtk*(map.getMapAtk())[i][j] > defPower[i][j]*(map.getMapDef())[i][j] + SUPPESS_LIMIT)
-					if(equalCount == 1)
-					{
-						tmpGlobalMap[i][j] = maxAtkId;
-						changeMap[i][j] = true;
-					}
-					else
-					{
-						tmpGlobalMap[i][j] = NEUTRAL_PLAYER_ID;
-						changeMap[i][j] = true;
-					}
+				else if(atkPower[k][i][j] == maxAtk)
+					equalCount += 1;
 			}
-
-		//计算连通性,并更新GlobalMap
-		for(TMap i = 0; i <cols; ++i)
-			for(TMap j = 0; j < rows; ++j)
+			if(maxAtk > defPower[i][j] + SUPPESS_LIMIT)
+				if(equalCount == 1)
+				{
+					tmpGlobalMap[i][j] = maxAtkId;
+					changeMap[i][j] = true;
+				}
+				else
+				{
+					tmpGlobalMap[i][j] = NEUTRAL_PLAYER_ID;
+					changeMap[i][j] = true;
+				}
+		}
+	printVecMat<TId>(tmpGlobalMap, "tmpGlobalMap");
+	printVecMat<TMask>(changeMap, "changeMap");
+	//计算连通性,并更新GlobalMap
+	for(TMap i = 0; i <cols; ++i)
+		for(TMap j = 0; j < rows; ++j)
+		{
+			if(changeMap[i][j])
 			{
 				TMask connection = false;
 				TPosition curPos = {i, j};
-				if(changeMap[i][j])
+				if(tmpGlobalMap[i][j] == NEUTRAL_PLAYER_ID)
 				{
-					if(tmpGlobalMap[i][j] == NEUTRAL_PLAYER_ID)
+					globalMap[i][j] = NEUTRAL_PLAYER_ID;
+					changeMap[i][j] = false;
+				}
+				else//bfs,按照x-1，x+1, y-1, y+1顺序如队列
+				{
+					list[list_length++] = curPos;
+					changeMap[i][j] = false;
+					if(i > 0)
 					{
-						globalMap[i][j] = NEUTRAL_PLAYER_ID;
-						changeMap[i][j] = false;
+						bfs_queue[tail].x = i - 1;
+						bfs_queue[tail].y = j;
+						tail++;
 					}
-					else//bfs,按照x-1，x+1, y-1, y+1顺序如队列
+					if(i + 1 < cols)
 					{
-						list[list_length++] = curPos;
-						changeMap[i][j] = false;
-						if(i > 0)
+						bfs_queue[tail].x = i + 1;
+						bfs_queue[tail].y = j;
+						tail++;
+					}
+					if(j > 0)
+					{
+						bfs_queue[tail].x = i;
+						bfs_queue[tail].y = j - 1;
+						tail++;
+					}
+					if(j + 1 < rows)
+					{
+						bfs_queue[tail].x = i;
+						bfs_queue[tail].y = j + 1;
+						tail++;
+					}
+					while(head != tail)
+					{
+						TMap m = bfs_queue[head].x;
+						TMap n = bfs_queue[head].y;
+						if(globalMap[m][n] != NEUTRAL_PLAYER_ID)
 						{
-							bfs_queue[tail].x = i - 1;
-							bfs_queue[tail].y = j;
-							tail++;
-						}
-						if(i + 1 < cols)
-						{
-							bfs_queue[tail].x = i + 1;
-							bfs_queue[tail].y = j;
-							tail++;
-						}
-						if(j > 0)
-						{
-							bfs_queue[tail].x = i;
-							bfs_queue[tail].y = j - 1;
-							tail++;
-						}
-						if(j + 1 < rows)
-						{
-							bfs_queue[tail].x = i;
-							bfs_queue[tail].y = j + 1;
-							tail++;
-						}
-						while(head != tail)
-						{
-							int m = bfs_queue[head].x;
-							int n = bfs_queue[head].y;
-							if(diplomacy[globalMap[m][n]][tmpGlobalMap[i][j]])
+							if(diplomacy[globalMap[m][n]][tmpGlobalMap[i][j]] == Allied)
 							{
-								changeMap[i][j] = false;
 								head = tail = 0;
 								connection = true;
 								break;
 							}
-							else if(diplomacy[tmpGlobalMap[i][j]][tmpGlobalMap[m][n]] && changeMap[m][n])
+						}
+						else if(tmpGlobalMap[m][n] != UNKNOWN_PLAYER_ID)
+						{
+							if(diplomacy[tmpGlobalMap[i][j]][tmpGlobalMap[m][n]] == Allied)
 							{
 								curPos.x = m;
 								curPos.y = n;
 								list[list_length++] = curPos;
 								changeMap[m][n] = false;
-								if(m > 0 && changeMap[m - 1][n])
+								if(m > 0 && (changeMap[m - 1][n]||globalMap[m - 1][n] != NEUTRAL_PLAYER_ID))
 								{
 									bfs_queue[tail].x = m - 1;
 									bfs_queue[tail].y = n;
 									tail++;
 								}
-								if(m + 1< cols && changeMap[m + 1][n])
+								if(m + 1< cols && (changeMap[m + 1][n]||globalMap[m + 1][n] != NEUTRAL_PLAYER_ID))
 								{
 									bfs_queue[tail].x = m + 1;
 									bfs_queue[tail].y = n;
 									tail++;
 								}
-								if(n > 0 && changeMap[m][n - 1])
+								if(n > 0 && (changeMap[m][n - 1]||globalMap[m][n - 1] != NEUTRAL_PLAYER_ID))
 								{
 									bfs_queue[tail].x = m;
 									bfs_queue[tail].y = n - 1;
 									tail++;
 								}
-								if(n + 1< rows && changeMap[m][n + 1])
+								if(n + 1< rows && (changeMap[m][n + 1]||globalMap[m][n + 1] != NEUTRAL_PLAYER_ID))
 								{
 									bfs_queue[tail].x = m;
 									bfs_queue[tail].y = n + 1;
 									tail++;
 								}
-								head++;
 							}
-							else
-								head++;
 						}
+						head++;
 					}
-
-					//将检测到的点加上
-					if(connection)
-						for(TMap k = 0; k < list_length; ++k)
-							globalMap[list[k].x][list[k].y] = tmpGlobalMap[i][j];
-					list_length = 0;
 				}
+				//将检测到的点加上
+				if(connection){
+					for(TMap k = 0; k < list_length; ++k)
+						globalMap[list[k].x][list[k].y] = tmpGlobalMap[i][j];
+					
+					//打印globalmap，测试用，最终提交删掉
+					//printVecMat<TId>(globalMap, "globalMap");
+				}
+				list_length = 0;
 			}
-
-		//更新首都
-			for(TMap i = 0; i < playerSize; ++i)
-
-		{
-			TPosition tmpPos = NewCapitalList[i];
-			if(diplomacy[i][globalMap[tmpPos.x][tmpPos.y]])
-				playerCapital[i] = tmpPos;
-			else
-				playerCapital[i] = invalidPos;
 		}
 
-		//检测包围
-		for(TMap i = 0; i < playerCapital.size(); ++i)
+	//更新首都
+	for(TMap i = 0; i < playerSize; ++i)
+	{
+		TPosition tmpPos = NewCapitalList[i];
+		if(tmpPos.x >= cols ||tmpPos.y >= rows)
+			playerCapital[i] = invalidPos;
+		else if(diplomacy[i][globalMap[tmpPos.x][tmpPos.y]] == Allied)
+			playerCapital[i] = tmpPos;
+		else
+			playerCapital[i] = invalidPos;
+	}
 
+	//检测包围
+	for(TMap i = 0; i < playerCapital.size(); ++i)
+	{
+		if(playerCapital[i].x != invalidPos.x)
 		{
-			if(playerCapital[i].x != invalidPos.x)
+			TMap xPos = playerCapital[i].x, yPos = playerCapital[i].x;
+			newIsSieged[xPos][yPos] = false;
+			//再做一次bfs，利用静态的bfs数组
+			head = tail = 0;
+			if(xPos > 0 && newIsSieged[xPos - 1][yPos])
 			{
-				TMap xPos = playerCapital[i].x, yPos = playerCapital[i].x;
-				newIsSieged[xPos][yPos] = false;
-				//再做一次bfs，利用静态的bfs数组
-				head = tail = 0;
-				if(xPos > 0 && newIsSieged[xPos - 1][yPos])
+				bfs_queue[tail].x = xPos - 1;
+				bfs_queue[tail].y = yPos;
+				tail++;
+			}
+			if(xPos + 1 < cols && newIsSieged[xPos + 1][yPos])
+			{
+				bfs_queue[tail].x = xPos + 1;
+				bfs_queue[tail].y = yPos;
+				tail++;
+			}
+			if(yPos > 0 && newIsSieged[xPos][yPos - 1])
+			{
+				bfs_queue[tail].x = xPos;
+				bfs_queue[tail].y = yPos - 1;
+				tail++;
+			}
+			if(yPos + 1 < rows && newIsSieged[xPos][yPos + 1])
+			{
+				bfs_queue[tail].x = xPos;
+				bfs_queue[tail].y = yPos + 1;
+				tail++;
+			}
+			while(head != tail)
+			{
+				TMap x_pos = bfs_queue[head].x, y_pos = bfs_queue[head].y;
+				if(globalMap[x_pos][y_pos] != NEUTRAL_PLAYER_ID)
 				{
-					bfs_queue[tail].x = xPos - 1;
-					bfs_queue[tail].y = yPos;
-					tail++;
-				}
-				if(xPos + 1 < cols && newIsSieged[xPos + 1][yPos])
-				{
-					bfs_queue[tail].x = xPos + 1;
-					bfs_queue[tail].y = yPos;
-					tail++;
-				}
-				if(yPos > 0 && newIsSieged[xPos][yPos - 1])
-				{
-					bfs_queue[tail].x = xPos;
-					bfs_queue[tail].y = yPos - 1;
-					tail++;
-				}
-				if(yPos + 1 < rows && newIsSieged[xPos][yPos + 1])
-				{
-					bfs_queue[tail].x = xPos;
-					bfs_queue[tail].y = yPos + 1;
-					tail++;
-				}
-				while(head != tail)
-				{
-					TMap x_pos = bfs_queue[head].x, y_pos = bfs_queue[head].y;
 					if(diplomacy[i][globalMap[x_pos][y_pos]])
 					{
 						newIsSieged[x_pos][y_pos] = false;
@@ -610,31 +641,27 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							tail++;
 						}
 					}
-					head++;
 				}
+				head++;
+				//printVecMat<TMask>(newIsSieged, "newIsSieged");
 			}
 		}
-		//上面一部分是把所有的包括同盟的连通全部算上了，下面单独减去首都不合法的
-		for(TMap i = 0; i < cols; ++i)
-			for(TMap j = 0; j < rows; ++j)
-			{
-				if(playerCapital[globalMap[i][j]].x != invalidPos.x)
-					isSieged[i][j] = newIsSieged[i][j];
-				else
-					isSieged[i][j] = false;
-			}
-
 	}
-	//更新GlobalMap，使用MilitaryKernel
-
-	//阈值取SUPPESS_LIMIT，如果两边一样就强行把地打成中立
-
-	//检查新首都
-	//要是无法放置新首都，就把新首都的位置设定为invalidPos
-
-	//检查包围
-	//更新isSieged
-	*/
+	//上面一部分是把所有的包括同盟的连通全部算上了，下面单独减去首都不合法的
+	for(TMap i = 0; i < cols; ++i)
+		for(TMap j = 0; j < rows; ++j)
+		{
+			if(globalMap[i][j] == NEUTRAL_PLAYER_ID)
+				isSieged[i][j] = false;
+			else if(isPosValid(playerCapital[globalMap[i][j]]))
+				isSieged[i][j] = newIsSieged[i][j];
+			else
+				isSieged[i][j] = false;
+		}
+	printVecMat<TMask>(newIsSieged, "newIsSieged");
+	printVecMat<TMask>(isSieged, "isSieged");
+	//打印globalmap，测试用，最终提交删掉
+	printVecMat<TId>(globalMap, "globalmap");
     return false; //TODO
 }
 
@@ -793,7 +820,7 @@ Info Game::generateInfo(TId playerid) const
 	info.id = playerid;
 	info.playerSize = playerSize;
 	info.round = round;
-	info.newCapital = invalidPos;
+	info.newCapital = playerCapital[playerid];
 	info.map = &map;
 	info.rows = rows;
 	info.cols = cols;
