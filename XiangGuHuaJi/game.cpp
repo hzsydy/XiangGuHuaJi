@@ -501,6 +501,11 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 								break;
 							}
 						}
+						else if(tmpGlobalMap[m][n] == NEUTRAL_PLAYER_ID)
+						{
+							globalMap[m][n] = NEUTRAL_PLAYER_ID;
+							changeMap[m][n] = false;
+						}
 						else if(tmpGlobalMap[m][n] != UNKNOWN_PLAYER_ID)
 						{
 							if(diplomacy[tmpGlobalMap[i][j]][tmpGlobalMap[m][n]] == Allied)
