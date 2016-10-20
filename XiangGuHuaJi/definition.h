@@ -81,6 +81,7 @@ const static TMilitary	SUPPESS_LIMIT = 3;//я╧жфиоочё╛Ё╛╧Щя╧жфиоочж╝╨С╬м╩АффЁг║ё║
 const static TMoney     INITIAL_PLAYER_MONEY = 10;
 const static TMoney     WAR_JUSTIFY_PRICE = 1;
 const static int		FIELD_BOUNDARY = 2;//р╩©ИаЛма╣дйср╟╥╤н╖
+const static float      CAPITAL_INFLUENCE = 0.3f;//йв╤╪╢Ью╢╣дмЧа╕
 
 
 const static TId		NEUTRAL_PLAYER_ID = 233;
