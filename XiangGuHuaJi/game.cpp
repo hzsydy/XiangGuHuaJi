@@ -644,41 +644,45 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     return false; //TODO
 }
 
+bool Game::isPlayer(TId id)
+{
+    return id >= 0 && id < playerSize;
+}
+
 //Producing Phase (Deal with MapResource, PlayerInfoList)
 bool Game::ProducingPhase()
 {
-	
+    //initialize
+    for (TId id=0; id<playerSize; ++id)
+    {
+        playerArea[id] = 0;
+        // lowest income
+        playerIncome[id] = 1;
+        // corruption 
+        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
+    }
+    // map income 
+    for (TMap i=0; i<cols; i++)
+    {
+        for (TMap j=0; j<rows; j++)
+        {
+            if (isPlayer(globalMap[i][j])) 
+            {
+                playerIncome[globalMap[i][j]] +=map.getMapRes()[i][j];
+                playerArea[globalMap[i][j]]++;
+            }
+        }
+    }
+
     for (TId id=0; id<playerSize; ++id)
 	{
-		playerArea[id] = 0;
-		// lowest income
-		TMoney new_saving = 1;
-
-        // map income 
-		for (TMap i=0; i<cols; i++)
-		{
-			for (TMap j=0; j<rows; j++)
-			{
-				if (globalMap[i][j] == id) 
-				{
-					new_saving+=map.getMapRes()[i][j];
-					playerArea[id]++;
-				}
-			}
-		}
-
         // city income
 		if (isPosValid(playerCapital[id]))
 		{
-			new_saving += (TMoney)(UNIT_CITY_INCOME * (float)round);
+			playerSaving[id] += (TMoney)(UNIT_CITY_INCOME * (float)round);
 		}
-
-        // corruption 
-        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
-
         // refresh
-		playerSaving[id] += new_saving;
-        playerIncome[id] = new_saving;
+		playerSaving[id] += playerIncome[id];
     }
 	DiscoverCountry();
 

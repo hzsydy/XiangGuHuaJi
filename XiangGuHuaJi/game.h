@@ -70,6 +70,7 @@ private:
 	TMap inf(TMap pos);
 	TMap sup(TMap pos, TMap max);
     bool canSetGlobalMapPos(TPosition pos, TId id);
+    bool isPlayer(TId id);
 };
 
 }

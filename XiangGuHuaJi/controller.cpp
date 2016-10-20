@@ -98,8 +98,14 @@ namespace XGHJ
                 posChoosed.push_back(pos);
             }
 
+            vector<TPosition> posChoosedSorted(playerSize);
+            for (TId i=0; i<playerSize; ++i)
+            {
+                TId id = std::get<1>(bidPriceTuple[i]);
+                posChoosedSorted[id] = posChoosed[i];
+            }
 			// choose start pos
-			game_.Start(bidPrice, posChoosed);
+			game_.Start(bidPrice, posChoosedSorted);
 		}
 
         //check if killed
