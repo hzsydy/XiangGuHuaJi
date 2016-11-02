@@ -15,34 +15,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="player.cpp">
+    <ClCompile Include="..\src\json_writer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="game.cpp">
+    <ClCompile Include="..\src\json_value.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="map.cpp">
+    <ClCompile Include="..\src\json_reader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="map.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="player.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="game.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ai.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="definition.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="debug.hpp">
-      <Filter>头文件</Filter>
+    <None Include="..\src\json_valueiterator.inl">
+      <Filter>源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\json_tool.h">
+      <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

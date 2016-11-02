@@ -15,33 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="player.cpp">
+    <ClCompile Include="controller.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="game.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="map.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="map.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="player.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="game.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ai.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="definition.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="debug.hpp">
+    <ClInclude Include="controller.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

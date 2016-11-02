@@ -10,25 +10,14 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\thirdparty\src\json\json_reader.cpp" />
-    <ClCompile Include="..\thirdparty\src\json\json_value.cpp" />
-    <ClCompile Include="..\thirdparty\src\json\json_writer.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\thirdparty\src\json\json_tool.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\thirdparty\src\json\json_valueiterator.inl" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{497B78A8-5A26-4837-BFFE-65D95E1B14C2}</ProjectGuid>
+    <ProjectGuid>{9E7EEFFA-7B55-4666-ADC7-F3F4E58F4236}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Jsoncpp</RootNamespace>
+    <RootNamespace>HuaJiCmd</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -45,16 +34,15 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\XiangGuHuaJi\XiangGuHuaJi.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\XiangGuHuaJi\XiangGuHuaJi.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)thirdparty\include;$(IncludePath)</IncludePath>
-    <SourcePath>$(SolutionDir)thirdparty\src\json;$(SourcePath)</SourcePath>
-    <TargetName>lib_json</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -66,7 +54,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +77,18 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="controller.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="controller.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XiangGuHuaJi\XiangGuHuaJi.vcxproj">
+      <Project>{c0bd96c8-e0aa-4521-8f58-e8512266e268}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
