@@ -10,10 +10,21 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\json_reader.cpp" />
+    <ClCompile Include="..\src\json_value.cpp" />
+    <ClCompile Include="..\src\json_writer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\json_valueiterator.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\json_tool.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C0BD96C8-E0AA-4521-8F58-E8512266E268}</ProjectGuid>
+    <ProjectGuid>{497B78A8-5A26-4837-BFFE-65D95E1B14C2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>XiangGuHuaJi</RootNamespace>
+    <RootNamespace>Jsoncpp</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -34,24 +45,21 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="XiangGuHuaJi.props" />
+    <Import Project="..\..\..\XiangGuHuaJi\XiangGuHuaJi.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="XiangGuHuaJi.props" />
+    <Import Project="..\..\..\XiangGuHuaJi\XiangGuHuaJi.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)thirdparty\include;$(IncludePath)</IncludePath>
-    <SourcePath>$(SourcePath)</SourcePath>
-    <ReferencePath>$(SolutionDir)Debug;$(ReferencePath)</ReferencePath>
-    <LibraryPath>$(SolutionDir)Debug;$(LibraryPath)</LibraryPath>
+    <SourcePath>$(SolutionDir)thirdparty\src\json;$(SourcePath)</SourcePath>
+    <TargetName>lib_json</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)thirdparty\include;$(IncludePath)</IncludePath>
-    <SourcePath>$(SolutionDir)\src\json;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -60,6 +68,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -72,9 +81,9 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,24 +92,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="game.cpp" />
-    <ClCompile Include="map.cpp" />
-    <ClCompile Include="player.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="debug.hpp" />
-    <ClInclude Include="definition.h" />
-    <ClInclude Include="ai.h" />
-    <ClInclude Include="game.h" />
-    <ClInclude Include="map.h" />
-    <ClInclude Include="player.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\thirdparty\json\VS\Jsoncpp.vcxproj">
-      <Project>{497b78a8-5a26-4837-bffe-65d95e1b14c2}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

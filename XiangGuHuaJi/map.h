@@ -13,7 +13,6 @@
 #include "definition.h"
 
 #include "json/json.h"
-#pragma comment(lib, "lib_json.lib")
 
 namespace XGHJ {
 
