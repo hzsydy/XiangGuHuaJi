@@ -78,7 +78,6 @@ Game::~Game()
 }
 
 // Round<0>
-//TODO  init the player, call each player to select their birthplace
 bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
 {
 	round = 0;
@@ -101,7 +100,7 @@ bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
         }
         playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
     }
-
+    DiscoverCountry();
 	return true;
 }
 
