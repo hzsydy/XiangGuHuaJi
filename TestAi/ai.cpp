@@ -7,6 +7,13 @@
 #include "ai.h"
 
 #include <cstdio>
+#include <string>
+using std::string;
+
+string dipStatStr[] = {"Undiscovered", "Neutral", "Allied", "At War"};
+string dipCommStr[] = {"Keep Neutral", "Form Alliance", "Justify War", "Backstab"};
+
+
 
 int getNumber() {
     
@@ -43,6 +50,7 @@ int getNumber() {
     }
 
     printf("[Error][GetNumber] input error.\n");
+    printf("\n");
     return ans*sign;
 
 }
@@ -64,13 +72,16 @@ TPosition birthplace(vector<TPosition> posSelected)
     TPosition pos;
     pos.x=(TMap)getNumber();
     pos.y=(TMap)getNumber();
+    printf("\nyou choose (%d, %d) \n", pos.x, pos.y);
     return pos;
 }
 
 void player_ai(Info& info)
 {
-    cout << endl << "[P"<<(int)info.id<<"]'s player_ai. Round <" << info.round << ">" << endl;
-    cout << "Saving=" << info.playerInfo[info.id].saving << endl;
+
+    cout << endl << "[P"<<(int)info.id<<"]'s player_ai.";
+    cout << endl << "Round <" << info.round << ">";
+    cout << endl << "Saving=" << info.playerInfo[info.id].saving << endl;
 
     // display map
     cout << "your map:" << endl;
@@ -101,13 +112,15 @@ void player_ai(Info& info)
     {
         if (id != info.id)
         {
-            cout << "your DipStat to P" << (int)id <<" :" << info.playerInfo[id].dipStatus << endl;
-            cout << "your DipComm to P" << (int)id <<" >>> ";
+            cout << "your Dip. Status to P" << (int)id <<" :" << dipStatStr[info.playerInfo[id].dipStatus] << endl;
+            cout << "your Dip. Command to P" << (int)id <<" >>> ";
             int input = getNumber();
             if (input>=0 && input<4)
             {
                 info.DiplomaticCommandList[id] = (TDiplomaticCommand)input;
+                cout << "you decided to " << dipCommStr[input] <<" to P" << (int)id << endl;
             }
+
         }
     }
     //military test
@@ -130,7 +143,11 @@ void player_ai(Info& info)
             tmc.bomb_size = inputList[2];
             inputListCnt = 0;
             info.MilitaryCommandList.push_back(tmc);
+
+            printf("\nyou decided to attack (%d, %d) with bomb size %d\n", tmc.place.x, tmc.place.y, tmc.bomb_size);
         }
     }
+    
+    printf("\n");
     return;
 }

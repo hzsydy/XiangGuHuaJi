@@ -53,7 +53,11 @@
 -1
 
 # P2
+2 2 2#dip
+-1
 
-
+# P3
+2 2 2#dip
+-1
 
 # to be continued...
