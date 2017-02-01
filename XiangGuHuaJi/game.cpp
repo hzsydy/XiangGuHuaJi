@@ -376,6 +376,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			{
 				if(isPosValid(playerCapital[i]))
 				{
+					//下面两个是首都的位置坐标，以及首都处地形的攻击力
 					TMap capXPos, capYPos;
 					capXPos = playerCapital[i].x;
 					capYPos = playerCapital[i].y;
@@ -384,6 +385,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					{
 						for(TMap l = inf(capYPos), n = (MILITARY_KERNEL_SIZE - 1)-(capYPos - l); l < sup(capYPos, rows); ++l, ++n)
 						{
+							//这两个for循环用来计算首都出提供的攻击力和防御力，两个for循环的范围为高斯核矩阵的大小
+							//这里分为三种情况，对中立地区施加攻，对同盟施加防御力和对敌对势力施加攻击力
 							if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
 								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
 							else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
@@ -393,13 +396,16 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 						}	
 					}
 				}
-				
 			}
 			else
 			{
+				//这是对于炸弹放置点的计算，和上面完全相同
 				TMap xPos, yPos;
 				xPos = MilitaryCommandList[i][j].place.x;
 				yPos = MilitaryCommandList[i][j].place.y;
+				//加了一条放置地点合法性的判断
+				if(xPos<0||xPos>=cols||yPos<0||yPos>=rows)
+					continue;
 				TMilitary atk = map.getMapAtk()[xPos][yPos];
 				for(TMap k = inf(xPos), m = (MILITARY_KERNEL_SIZE - 1)-(xPos - k); k < sup(xPos, cols); ++k, ++m)
 				{
@@ -421,11 +427,14 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	for(TMap i = 0; i <cols; ++i)
 		for(TMap j = 0; j < rows; ++j)
 		{
+			//关于坐标的计算，在每一个坐标出保存一个最大攻击力，和达到最大攻击力的玩家的个数，以及最大攻击力玩家的ID
 			float maxAtk = 0;
 			TMilitary equalCount = 0;
 			TId maxAtkId = UNKNOWN_PLAYER_ID;
 			for(TMilitary k = 0; k < playerSize; ++k)
 			{
+				//由于攻击力每个玩家单独计算，所以进行一个k次循环
+				//分两种情况，当前玩家攻击力大于当前该点最大攻击力和等于该点当前最大攻击力，小于的情况不处理
 				if(atkPower[k][i][j] > maxAtk)
 				{
 					maxAtk = atkPower[k][i][j];
@@ -435,6 +444,9 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				else if(atkPower[k][i][j] == maxAtk)
 					equalCount += 1;
 			}
+			//下面处理最大攻击力减去防御力大于阈值的情况，
+			//如果达到最大攻击力的玩家只有一个，则在该局改变所属地图（tmpGlobalMap）中记录
+			//若超过一个，打成中立
 			if(maxAtk > defPower[i][j] + SUPPESS_LIMIT)
 				if(equalCount == 1)
 				{
@@ -451,8 +463,10 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	for(TMap i = 0; i <cols; ++i)
 		for(TMap j = 0; j < rows; ++j)
 		{
+			//首先判断这个点在这回合有没有发生变化，如果没有，这个地方不处理
 			if(changeMap[i][j])
 			{
+				//当该点所属发生变化后，则先判断是否中立，如果中立，改为中立结束这次循环
 				TMask connection = false;
 				TPosition curPos = {i, j};
 				if(tmpGlobalMap[i][j] == NEUTRAL_PLAYER_ID)
@@ -460,8 +474,15 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					globalMap[i][j] = NEUTRAL_PLAYER_ID;
 					changeMap[i][j] = false;
 				}
+				//否则，判断变化部分的连通性，连通性用bfs判断
+				//策略是判断当前坐标周围的四个坐标放入队列，然后从对列头开始判断
+				//如果队列头所对应坐标的playerId和tmpGlobalMap中正在判断的这点，则判断联通，结束这轮循环
+				//否则判断队列头在tmpGlobalMap中的id是否和正在判断的这点相同，如果是，将队列头周围的四个点放入队列，判断队列中下一点
+				//否则，判断队列中下一点
+				//为了防止重复判断，除了最开始加入的四个点外，所有进入队列的点changeMap变量会被置为false。
 				else//bfs,按照x-1，x+1, y-1, y+1顺序如队列
 				{
+					//先添加进去周围的四个点
 					list[list_length++] = curPos;
 					changeMap[i][j] = false;
 					if(i > 0)
@@ -488,10 +509,11 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 						bfs_queue[tail].y = j + 1;
 						tail++;
 					}
-					while(head != tail)
+					while(head != tail)//bfs终止条件，当队列空了以后停止
 					{
 						TMap m = bfs_queue[head].x;
 						TMap n = bfs_queue[head].y;
+						//判断是GlobalMap中是否为中立id
 						if(globalMap[m][n] != NEUTRAL_PLAYER_ID)
 						{
 							if(diplomacy[globalMap[m][n]][tmpGlobalMap[i][j]] == Allied)
@@ -503,7 +525,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 						}
 						else if(tmpGlobalMap[m][n] != UNKNOWN_PLAYER_ID)
 						{
-							if(diplomacy[tmpGlobalMap[i][j]][tmpGlobalMap[m][n]] == Allied)
+							if(tmpGlobalMap[m][n]!=NEUTRAL_PLAYER_ID && diplomacy[tmpGlobalMap[i][j]][tmpGlobalMap[m][n]] == Allied)
 							{
 								curPos.x = m;
 								curPos.y = n;
