@@ -20,7 +20,7 @@ namespace XGHJ {
 class Game
 {
 public:
-    Game(Map& map, int playersize);
+    Game(Map& map, vector<vector<float> > militaryKernel,int playersize);
     ~Game();
 
     bool Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed);
