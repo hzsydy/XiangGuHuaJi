@@ -27,6 +27,15 @@ int getNumber() {
 
         c = getchar();
 
+        if (c == EOF)
+        {
+            std::cerr<<"End of file reach!"<<endl;
+            while (1)
+            {
+                ;
+            }
+        }
+
         if (c=='-') {
             gotcha = true;
             sign = -1;
