@@ -1,16 +1,56 @@
 /* XiangGuHuaJi 2016, ai.cpp
- *
+ * 
+ * This is a test ai driven by keyboard input.
+ * Last edited by sugar10w, 2017.02.
  */
 
 #include "ai.h"
-#include "stdio.h"
+
+#include <cstdio>
+
+int getNumber() {
+    
+    int cnt = 0;
+    int ans = 0;
+    bool gotcha = false;
+    int sign = 1;
+    char c;
+
+    while (++cnt<32768) {
+
+        c = getchar();
+
+        if (c=='-') {
+            gotcha = true;
+            sign = -1;
+            continue;
+        }
+
+        if ('0'<=c&&c<='9') {
+            gotcha = true;
+            ans = ans * 10 + c - '0';
+            continue;
+        }
+
+        if (c=='#') {
+            while ((c=getchar())!='\n') ;
+            if (gotcha) return ans*sign;
+            continue;
+        }
+
+        if (gotcha) return ans*sign;
+        continue;
+    }
+
+    printf("[Error][GetNumber] input error.\n");
+    return ans*sign;
+
+}
 
 TMoney birthplacePrice(void)
 {
-    printf("Your price for birthprice?");
-    int price;
-    scanf("%d", &price);
-    return (TMoney)price;
+    printf("price for birthprice >>> ");
+    return (TMoney)getNumber();
 }
 
 TPosition birthplace(vector<TPosition> posSelected)
@@ -20,38 +60,20 @@ TPosition birthplace(vector<TPosition> posSelected)
     {
         printf("(%d, %d), ", posSelected[i].x, posSelected[i].y);
     }
-    printf("\n Now input your birthplace to choose\n");
-    int x; 
-    int y;
-    scanf("%d %d", &x, &y);
+    printf("\nyour birthplace >>> ");
     TPosition pos;
-    pos.x=(TMap)x;
-    pos.y=(TMap)y;
+    pos.x=(TMap)getNumber();
+    pos.y=(TMap)getNumber();
     return pos;
 }
 
 void player_ai(Info& info)
 {
-    cout << endl << "It's Player "<<(int)info.id<<" 's AI main function here. Round <" << info.round << ">" << endl;
-    cout << "Saving left:" << info.playerInfo[info.id].saving << endl;
-    //diplomacy test
-    for (TId id=0; id<info.playerSize; id++)
-    {
-        if (id != info.id)
-        {
-            cout << "your dip status towards player " << (int)id <<"is :" << info.playerInfo[id].dipStatus << endl;
-            cout << "your new attitude towards player " << (int)id <<":"<<endl
-                <<"(KeepNeutral=0, FormAlliance=1, JustifyWar=2, Backstab=3)" << endl;
-            int input;
-            scanf("%d", &input);
-            if (input>=0 && input<4)
-            {
-                info.DiplomaticCommandList[id] = (TDiplomaticCommand)input;
-            }
-        }
-    }
-    //military test
-    cout << "the map you get:" << endl;
+    cout << endl << "[P"<<(int)info.id<<"]'s player_ai. Round <" << info.round << ">" << endl;
+    cout << "Saving=" << info.playerInfo[info.id].saving << endl;
+
+    // display map
+    cout << "your map:" << endl;
     for (TMap y=0; y<info.rows; y++)
     {
         for (TMap x=0; x<info.cols; x++)
@@ -60,18 +82,8 @@ void player_ai(Info& info)
             string owner;
             if(mpi.isVisible)
             {
-                if (mpi.owner == NEUTRAL_PLAYER_ID)
-                {
-                    owner = "-";
-                }
-                else
-                {
-                    owner = std::to_string((int)mpi.owner);
-                }
-                if (mpi.isSieged)
-                {
-                    owner += "*";
-                }
+                owner = (mpi.owner == NEUTRAL_PLAYER_ID) ? "-" : std::to_string((int)mpi.owner);
+                if (mpi.isSieged) owner += "*";
             }
             else
             {
@@ -81,17 +93,33 @@ void player_ai(Info& info)
         }
         cout<<endl;
     }
-    cout << "enter your military command as \"x y cost\", enter -1 to exit" << endl;
+
+    //diplomacy test
+    cout << "DipStat: Undiscovered=0, Neutral=1, Allied=2, AtWar=3" << endl;
+    cout << "DipComm: KeepNeutral=0, FormAlliance=1, JustifyWar=2, Backstab=3" << endl;
+    for (TId id=0; id<info.playerSize; id++)
+    {
+        if (id != info.id)
+        {
+            cout << "your DipStat to P" << (int)id <<" :" << info.playerInfo[id].dipStatus << endl;
+            cout << "your DipComm to P" << (int)id <<" >>> ";
+            int input = getNumber();
+            if (input>=0 && input<4)
+            {
+                info.DiplomaticCommandList[id] = (TDiplomaticCommand)input;
+            }
+        }
+    }
+    //military test
+    
+    cout << "enter your military command as \"x y cost\", enter -1 to exit >>> ";
     int inputList[3];
     int inputListCnt = 0;
     while (true)
     {
-        int i;
-        scanf("%d", &i);
-        if (i<0)
-        {
-            break;
-        }
+        int i = getNumber();
+        if (i<0) break;
+
         inputList[inputListCnt] = i;
         inputListCnt++;
         if (inputListCnt == 3)
