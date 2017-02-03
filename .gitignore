@@ -3,6 +3,7 @@ Debug/
 Release/
 build/
 TestAi/
+*.pyc
 *.sdf
 *.opensdf
 *.suo
