@@ -26,6 +26,20 @@ int getNumber(const char* p){
     return t*sign;
 }
 
+int getNumber(char** p){
+    int t = 0;
+    int sign = 1;
+    
+    while (!isdigit(**p) && **p!='-' && **p!='\0') ++*p;
+    if (**p=='-') {sign = -1; ++*p; }
+
+    while (isdigit(**p) &&  **p!='\0') {
+        t = t*10 + **p - '0';
+        ++*p;
+    }
+    return t*sign;
+}
+
 XghjProtocolSocket::XghjProtocolSocket(boost::asio::io_service& io_service, const std::string& addr, int port)
     : _socket(io_service)
 {
@@ -69,19 +83,27 @@ bool XghjProtocolSocket::send(const XghjObject& obj) {
 bool XghjProtocolSocket::recv() {
 
     char buf[1024];
-    size_t len;
+    size_t len = 0;
+    size_t count = 0;
 
     if (!_valid) return false;
 
+    while (_valid && count<1000) {
+        ++count;
 
-    try { 
-        len = _socket.read_some(boost::asio::buffer(buf, 1024));
-        buf[len] = '\0';
-    }
-    catch (std::exception& e) {
-        _valid = false;
-        std::cerr << e.what() << std::endl;
-        return false;
+        try { 
+            len = _socket.read_some(boost::asio::buffer(buf, 1024));
+            buf[len] = '\0';
+        }
+        catch (std::exception& e) {
+            _valid = false;
+            std::cerr << e.what() << std::endl;
+            return false;
+        }
+
+        if (len>0 || !empty()) break;
+        _sleep(50);
+        
     }
 
     _buffer = _buffer + buf;
@@ -112,6 +134,7 @@ bool XghjProtocolSocket::recv() {
 XghjObject XghjProtocolSocket::getObj(){
     XghjObject obj;
     
+    recv();
     if (_obj_queue.empty()) return obj;
 
     obj = _obj_queue.front();

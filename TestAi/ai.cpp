@@ -157,6 +157,11 @@ void player_ai(Info& info)
         }
     }
     
+    cout << "your new capital >>> ";
+    info.newCapital.x = getNumber();
+    info.newCapital.y = getNumber();
+    printf("your new capital : (%d, %d)\n", info.newCapital.x, info.newCapital.y);
+
     printf("\n");
     return;
 }

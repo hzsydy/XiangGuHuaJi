@@ -22,6 +22,8 @@ class XghjAction(Enum):
     Error = 4
     Invalid = 5
     Kill = 6
+    BidPrice = 7
+    BidPosition = 8
     
 class XghjObject(object):
     def __init__(self):

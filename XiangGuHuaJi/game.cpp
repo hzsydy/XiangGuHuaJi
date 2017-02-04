@@ -100,6 +100,7 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
     DiplomacyPhase(DiplomaticCommandMap);
     MilitaryPhase(MilitaryCommandMap, NewCapitalList);
     ProducingPhase();
+    UpdateMapChecksum();
 
     ++round;
     if (CheckWinner()) 
@@ -562,6 +563,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 		TPosition tmpPos = NewCapitalList[i];
 		if(tmpPos.x >= cols ||tmpPos.y >= rows)
 			playerCapital[i] = invalidPos;
+        else if(globalMap[tmpPos.x][tmpPos.y]>=playerSize)
+            playerCapital[i] = invalidPos;
 		else if(diplomacy[i][globalMap[tmpPos.x][tmpPos.y]] == Allied)
 			playerCapital[i] = tmpPos;
 		else
@@ -735,6 +738,14 @@ bool Game::CheckWinner()
         }
         return false;
     }
+}
+
+void Game::UpdateMapChecksum() {
+
+    map_checksum = 47831;
+    for (int i=0; i<cols; ++i)
+        for (int j=0; j<rows; ++j)
+            map_checksum = map_checksum * 17 + globalMap[i][j];
 }
 
 PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const

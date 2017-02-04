@@ -31,18 +31,21 @@ public:
     bool MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList);
     bool ProducingPhase();
     bool CheckWinner();
-    vector<bool> isPlayerAlive;
-
-    Map& map;  
+    void UpdateMapChecksum();
 
 	PlayerInfo getPlayerInfo(TId id, TId playerId) const;
 	MapPointInfo getMapPointInfo(TMap x, TMap y, TId playerId) const;
 	Info generateInfo(TId playerid) const;
 
+    inline int getMapChecksum() { return map_checksum; }
 	inline TRound getRound() {return round ;}
 	inline TId getPlayerSize() {return playerSize ;}
+
+    Map& map; 
+    vector<bool> isPlayerAlive;
 	bool                isValid;
 protected:
+    int                 map_checksum;
 	TMap				rows,cols;
 	TId                 playerSize;
 	//需要保存到下回合的中间变量

@@ -18,9 +18,17 @@ namespace XGHJ_Client
 {
 
 int getNumber(const char* p);
+int getNumber(char** p);
 
 struct XghjObject {
 
+
+    enum XghjSender {
+        Server,
+        Player,
+        Viewer,
+        Unknown
+    };
 
     enum XghjAction{
         OK, 
@@ -29,14 +37,9 @@ struct XghjObject {
         NextRound, 
         Error,
         Invalid,
-        Kill
-    };
-    
-    enum XghjSender {
-        Server,
-        Player,
-        Viewer,
-        Unknown
+        Kill,
+        BidPrice,
+        BidPosition
     };
 
     // constructor
@@ -115,13 +118,14 @@ public:
 
     bool send(std::string s);
     bool send(const XghjObject& obj);
-    bool recv();
     XghjObject getObj();
 
     inline bool isValid() const { return _valid; }
     inline bool empty() const { return _obj_queue.empty(); }
 
 private:
+
+    bool recv();
 
     std::queue<XghjObject> _obj_queue;
 

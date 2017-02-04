@@ -28,15 +28,15 @@ namespace XGHJ
                 Info info = game_.generateInfo(id);
                 if (player.isValid())
                 {
-                    cout << "Calling Player " << (int)id << "'s Run() method" << endl;
+                    cout << "[Info] Calling Player " << (int)id << "'s Run() method" << endl;
                     players_[id].run(info);
                 }
                 else
                 {
                     ;
                 }
+                DiplomaticCommandMap[id] = info.DiplomaticCommandList;                
                 MilitaryCommandMap[id] = info.MilitaryCommandList;
-                DiplomaticCommandMap[id] = info.DiplomaticCommandList;	
                 NewCapitalList[id] = info.newCapital;
 			}
 			if (!game_.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList))
@@ -56,6 +56,7 @@ namespace XGHJ
             {
                 Player& player = players_[id];
                 TMoney price = 0;
+                
                 if (player.isValid())
                 {
                     cout << "Calling Player " << (int)id << "'s birthplacePrice() method" << endl;
@@ -64,10 +65,6 @@ namespace XGHJ
                 else
                 {
                     ;
-                }
-                if (price>INITIAL_PLAYER_MONEY)
-                {
-                    price = INITIAL_PLAYER_MONEY;
                 }
                 bidPriceTuple.push_back(std::make_tuple(price, id));
                 bidPrice.push_back(price);

@@ -3,6 +3,7 @@ Debug/
 Release/
 build/
 TestAi/
+.vscode/
 *.pyc
 *.sdf
 *.opensdf
