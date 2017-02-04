@@ -13,7 +13,65 @@ using std::string;
 string dipStatStr[] = {"Undiscovered", "Neutral", "Allied", "At War"};
 string dipCommStr[] = {"Keep Neutral", "Form Alliance", "Justify War", "Backstab"};
 
+#include <windows.h> 
+enum Color_t {Gray, White ,DarkRed,Red,DarkBlue, Blue, DarkGreen,Green,DarkCyan,Cyan,DarkMagenta,Magenta,DarkYellow,Yellow, None};
 
+Color_t playerColor[] = {Red, Blue, Green, Yellow};
+
+void SetColor(Color_t Fore)
+{
+    WORD fore;
+
+    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    switch(Fore)
+    {
+    case 0:
+        fore = FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN;
+        break;
+    case 1:
+        fore = FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        break;
+    case 2:
+        fore = FOREGROUND_RED;
+        break;
+    case 3:
+        fore = FOREGROUND_RED|FOREGROUND_INTENSITY;
+        break;
+    case 4:
+        fore = FOREGROUND_BLUE;
+        break;
+    case 5:
+        fore = FOREGROUND_BLUE|FOREGROUND_INTENSITY;
+        break;
+    case 6:
+        fore = FOREGROUND_GREEN;
+        break;
+    case 7:
+        fore = FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        break;
+    case 8:
+        fore = FOREGROUND_BLUE|FOREGROUND_GREEN;
+        break;
+    case 9:
+        fore = FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        break;
+    case 10:
+        fore =  FOREGROUND_BLUE|FOREGROUND_RED;
+        break;
+    case 11:
+        fore = FOREGROUND_BLUE|FOREGROUND_RED|FOREGROUND_INTENSITY;
+        break;
+    case 12:
+        fore = FOREGROUND_RED|FOREGROUND_GREEN;
+        break;
+    case 13:
+        fore = FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        break;
+    }
+
+    SetConsoleTextAttribute(hStdout,fore);
+}
 
 int getNumber() {
     
@@ -94,25 +152,47 @@ void player_ai(Info& info)
 
     // display map
     cout << "your map:" << endl;
+
+    SetColor(Gray);
+    cout << std::left << std::setw(4) << std::setfill(' ') <<' ';
+    for (TMap x=0; x<info.cols; x++)
+    {
+        cout << std::left << std::setw(4) << std::setfill(' ') <<(int)x;
+    }
+    cout<<endl;
     for (TMap y=0; y<info.rows; y++)
     {
+        cout << std::left << std::setw(4) << std::setfill(' ') <<(int)y;
         for (TMap x=0; x<info.cols; x++)
         {
             MapPointInfo mpi = info.mapPointInfo[x][y];
             string owner;
             if(mpi.isVisible)
             {
-                owner = (mpi.owner == NEUTRAL_PLAYER_ID) ? "-" : std::to_string((int)mpi.owner);
+                if (mpi.owner == NEUTRAL_PLAYER_ID)
+                {
+                    SetColor(Gray);
+                    owner = "-";
+                }
+                else
+                {
+                    int o = (int)mpi.owner;
+                    SetColor(playerColor[o%4]);
+                    owner = std::to_string(o);
+                }
                 if (mpi.isSieged) owner += "*";
             }
             else
             {
+                SetColor(Gray);
                 owner = "?";
             }
             cout << std::left << std::setw(4) << std::setfill(' ') <<owner;
         }
         cout<<endl;
     }
+
+    SetColor(Gray);
 
     //diplomacy test
     cout << "DipStat: Undiscovered=0, Neutral=1, Allied=2, AtWar=3" << endl;
