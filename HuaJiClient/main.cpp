@@ -21,7 +21,8 @@ using namespace XGHJ;
 using namespace XGHJ_Client;
 
 
-const string server_ip = "127.0.0.1";
+const string server_ip = "166.111.72.13";
+//const string server_ip = "127.0.0.1";
 const int server_port = 9999;
 const TId playerSize = 4;
 

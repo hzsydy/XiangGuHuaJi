@@ -82,6 +82,8 @@ bool XghjProtocolSocket::send(const XghjObject& obj) {
 
 bool XghjProtocolSocket::recv() {
 
+    if (!_obj_queue.empty()) return true;
+
     char buf[1024];
     size_t len = 0;
     size_t count = 0;
