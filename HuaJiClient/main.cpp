@@ -21,8 +21,8 @@ using namespace XGHJ;
 using namespace XGHJ_Client;
 
 
-const string server_ip = "166.111.72.13";
-//const string server_ip = "127.0.0.1";
+//const string server_ip = "166.111.72.13";
+const string server_ip = "127.0.0.1";
 const int server_port = 9999;
 const TId playerSize = 4;
 
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
     // waiting for the start
     cout << "[Info] I'm ready. Waiting for the start." << endl;
     obj = xs.getObj();
-    if (obj.action!=XghjObject::NextRound) {
+    if (obj.action!=XghjObject::NewGame) {
         cout << "[Error] Sorry I missed the start." << endl;
         cout << "[Error][recv] "<< obj.content << endl;
         SHUTDOWN;

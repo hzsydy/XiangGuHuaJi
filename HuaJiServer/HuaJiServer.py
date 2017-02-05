@@ -81,12 +81,13 @@ def sendToAll(data, push_flag=False):
         except:
             deleteConnection(s,a,n) 
 
-# send XghjAction.NextRound to all 
-def sendNextRound():
-    print "[Info] Everyone go ahead!"
+# send XghjAction.sendNewGame to all 
+def sendNewGame():
+    print "[Info] New Game"
     global curr_round_count
+    curr_round_count = 0
     obj = XghjObject()
-    obj.set(XghjSender.Server, XghjAction.NextRound, "Everyone go ahead!")
+    obj.set(XghjSender.Server, XghjAction.NewGame, "New Game")
     obj.round = curr_round_count
 
     sendToAll(obj.toString(), True)
@@ -158,7 +159,7 @@ def checkNewConnection(sock, addr):
             # keep him
             valid = True
             userName = first_obj.content
-            viewer_list.append((sock, addrs, userName))
+            viewer_list.append((sock, addr, userName))
         else:
             # ?? sender
             obj.content = "[Error] unidentified sender."
@@ -305,7 +306,7 @@ if "__main__"==__name__:
     
     # bidding
     print "[Game] Bidding. Stop accepting connections."
-    sendNextRound()
+    sendNewGame()
     biddingPhase()
 
     # game main phase
