@@ -670,8 +670,6 @@ bool Game::ProducingPhase()
         playerArea[id] = 0;
         // lowest income
         playerIncome[id] = 1;
-        // corruption 
-        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
     }
     // map income 
     for (TMap i=0; i<cols; i++)
@@ -688,6 +686,8 @@ bool Game::ProducingPhase()
 
     for (TId id=0; id<playerSize; ++id)
 	{
+        // corruption 
+        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
         // city income
 		if (isPosValid(playerCapital[id]))
 		{
