@@ -86,8 +86,9 @@ def sendNewGame():
     print "[Info] New Game"
     global curr_round_count
     curr_round_count = 0
+    content = str(PLAYER_COUNT_MAX)
     obj = XghjObject()
-    obj.set(XghjSender.Server, XghjAction.NewGame, "New Game")
+    obj.set(XghjSender.Server, XghjAction.NewGame, content)
     obj.round = curr_round_count
 
     sendToAll(obj.toString(), True)
