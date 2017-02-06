@@ -21,12 +21,24 @@
     <ClCompile Include="controller.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="xghj_protocol.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="military_kernel_reader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="net.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="controller.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="xghj_protocol.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="military_kernel_reader.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

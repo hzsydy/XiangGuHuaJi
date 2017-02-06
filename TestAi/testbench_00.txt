@@ -1,0 +1,66 @@
+# Ai: Test_Ai * 4
+# Map: PE_Class.json (10*20)
+
+# bidding 
+0   # P0 is a pacificist
+5   # P1 is a terrorist
+2   # P2 is a centrist
+0   # P3 is a dou-bi
+
+# birth place
+4 9 #P1
+4 4 #P2
+4 14 #P0
+4 5 #P3
+
+### 1
+
+# P0
+1 1 1 #dip
+4 14 10 
+-1
+4 14
+
+# P1
+2 2 2 #dip
+4 9 5
+-1
+4 9
+
+# P2
+0 0 2 #dip
+4 4 8 
+-1
+4 4
+
+# P3
+0 0 3 #dip     # [Bug] P3 backstab P2, but failed
+4 5 10 
+-1
+4 5
+
+### R2
+
+# P0
+1 1 1#dip
+2 17 8
+7 16 10
+7 12 10
+-1
+7 12
+
+# P1
+2 2 2#dip
+1 10 10
+7 10 10
+1 8 10
+7 8 10
+-1
+7 8
+
+# P2
+2 2 2#dip
+-1
+
+
+# to be continued...

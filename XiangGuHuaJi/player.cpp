@@ -81,6 +81,7 @@ bool Player::run(TMoney &price)
     try
     {
         price = birthplacePrice();
+        if (price>INITIAL_PLAYER_MONEY) price = INITIAL_PLAYER_MONEY;
     }
     catch(exception e)
     {

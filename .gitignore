@@ -3,6 +3,8 @@ Debug/
 Release/
 build/
 TestAi/
+.vscode/
+*.pyc
 *.sdf
 *.opensdf
 *.suo
@@ -10,7 +12,6 @@ TestAi/
 fuck*
 test*
 
-*.ini
 
 # Compiled Object files
 *.slo

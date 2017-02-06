@@ -10,9 +10,10 @@ namespace XGHJ
 inline float x2plusy2(float x, float y){return x*x+y*y;}
 
 
-Game::Game(Map& map, int playersize)
+Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
-      round(0), isValid(true), isPlayerAlive(playersize), playerIncome(playersize, 0)
+      round(0), isValid(true), isPlayerAlive(playersize), playerIncome(playersize, 0), 
+      MilitaryKernel(militaryKernel)
 {
 	rows = map.getRows();
 	cols = map.getCols();
@@ -55,21 +56,8 @@ Game::Game(Map& map, int playersize)
 		}
 	}
 
+    printVecMat<float>(militaryKernel, "MilitaryKernel");
 	const float pi = 3.1416f;
-	MilitaryKernel.resize(2*MILITARY_KERNEL_SIZE-1);
-	for (int i=0; i<2*MILITARY_KERNEL_SIZE-1; i++)
-	{
-		MilitaryKernel[i].resize(2*MILITARY_KERNEL_SIZE-1);
-		for (int j=0; j<2*MILITARY_KERNEL_SIZE-1; j++)
-		{
-			float f = x2plusy2((float)(i-MILITARY_KERNEL_SIZE+1),(float)(j-MILITARY_KERNEL_SIZE+1));
-			f /= -2*MILITARY_KERNEL_SIGMA_2;
-			f = (float)exp(f);
-			f /= 2*MILITARY_KERNEL_SIGMA_2*pi;
-			MilitaryKernel[i][j] = f;
-		}
-	}
-	printVecMat<float>(MilitaryKernel, "MilitaryKernel");
 }
 
 Game::~Game()
@@ -78,7 +66,6 @@ Game::~Game()
 }
 
 // Round<0>
-//TODO  init the player, call each player to select their birthplace
 bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
 {
 	round = 0;
@@ -101,7 +88,7 @@ bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
         }
         playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
     }
-
+    DiscoverCountry();
 	return true;
 }
 
@@ -113,6 +100,7 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
     DiplomacyPhase(DiplomaticCommandMap);
     MilitaryPhase(MilitaryCommandMap, NewCapitalList);
     ProducingPhase();
+    UpdateMapChecksum();
 
     ++round;
     if (CheckWinner()) 
@@ -575,6 +563,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 		TPosition tmpPos = NewCapitalList[i];
 		if(tmpPos.x >= cols ||tmpPos.y >= rows)
 			playerCapital[i] = invalidPos;
+        else if(globalMap[tmpPos.x][tmpPos.y]>=playerSize)
+            playerCapital[i] = invalidPos;
 		else if(diplomacy[i][globalMap[tmpPos.x][tmpPos.y]] == Allied)
 			playerCapital[i] = tmpPos;
 		else
@@ -748,6 +738,14 @@ bool Game::CheckWinner()
         }
         return false;
     }
+}
+
+void Game::UpdateMapChecksum() {
+
+    map_checksum = 47831;
+    for (int i=0; i<cols; ++i)
+        for (int j=0; j<rows; ++j)
+            map_checksum = map_checksum * 17 + globalMap[i][j];
 }
 
 PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const

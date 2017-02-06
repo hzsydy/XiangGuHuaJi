@@ -1,16 +1,131 @@
 /* XiangGuHuaJi 2016, ai.cpp
- *
+ * 
+ * This is a test ai driven by keyboard input.
+ * Last edited by sugar10w, 2017.02.
  */
 
 #include "ai.h"
-#include "stdio.h"
+
+#include <cstdio>
+#include <string>
+using std::string;
+
+string dipStatStr[] = {"Undiscovered", "Neutral", "Allied", "At War"};
+string dipCommStr[] = {"Keep Neutral", "Form Alliance", "Justify War", "Backstab"};
+
+#include <windows.h> 
+enum Color_t {Gray, White ,DarkRed,Red,DarkBlue, Blue, DarkGreen,Green,DarkCyan,Cyan,DarkMagenta,Magenta,DarkYellow,Yellow, None};
+
+Color_t playerColor[] = {Red, Blue, Green, Yellow};
+
+void SetColor(Color_t Fore)
+{
+    WORD fore;
+
+    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    switch(Fore)
+    {
+    case 0:
+        fore = FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN;
+        break;
+    case 1:
+        fore = FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        break;
+    case 2:
+        fore = FOREGROUND_RED;
+        break;
+    case 3:
+        fore = FOREGROUND_RED|FOREGROUND_INTENSITY;
+        break;
+    case 4:
+        fore = FOREGROUND_BLUE;
+        break;
+    case 5:
+        fore = FOREGROUND_BLUE|FOREGROUND_INTENSITY;
+        break;
+    case 6:
+        fore = FOREGROUND_GREEN;
+        break;
+    case 7:
+        fore = FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        break;
+    case 8:
+        fore = FOREGROUND_BLUE|FOREGROUND_GREEN;
+        break;
+    case 9:
+        fore = FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        break;
+    case 10:
+        fore =  FOREGROUND_BLUE|FOREGROUND_RED;
+        break;
+    case 11:
+        fore = FOREGROUND_BLUE|FOREGROUND_RED|FOREGROUND_INTENSITY;
+        break;
+    case 12:
+        fore = FOREGROUND_RED|FOREGROUND_GREEN;
+        break;
+    case 13:
+        fore = FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+        break;
+    }
+
+    SetConsoleTextAttribute(hStdout,fore);
+}
+
+int getNumber() {
+    
+    int cnt = 0;
+    int ans = 0;
+    bool gotcha = false;
+    int sign = 1;
+    char c;
+
+    while (++cnt<32768) {
+
+        c = getchar();
+
+        if (c == EOF)
+        {
+            std::cerr<<"End of file reach!"<<endl;
+            while (1)
+            {
+                ;
+            }
+        }
+
+        if (c=='-') {
+            gotcha = true;
+            sign = -1;
+            continue;
+        }
+
+        if ('0'<=c&&c<='9') {
+            gotcha = true;
+            ans = ans * 10 + c - '0';
+            continue;
+        }
+
+        if (c=='#') {
+            while ((c=getchar())!='\n') ;
+            if (gotcha) return ans*sign;
+            continue;
+        }
+
+        if (gotcha) return ans*sign;
+        continue;
+    }
+
+    printf("[Error][GetNumber] input error.\n");
+    printf("\n");
+    return ans*sign;
+
+}
 
 TMoney birthplacePrice(void)
 {
-    printf("Your price for birthprice?");
-    int price;
-    scanf("%d", &price);
-    return (TMoney)price;
+    printf("price for birthprice >>> ");
+    return (TMoney)getNumber();
 }
 
 TPosition birthplace(vector<TPosition> posSelected)
@@ -20,40 +135,34 @@ TPosition birthplace(vector<TPosition> posSelected)
     {
         printf("(%d, %d), ", posSelected[i].x, posSelected[i].y);
     }
-    printf("\n Now input your birthplace to choose\n");
-    int x; 
-    int y;
-    scanf("%d %d", &x, &y);
+    printf("\nyour birthplace >>> ");
     TPosition pos;
-    pos.x=(TMap)x;
-    pos.y=(TMap)y;
+    pos.x=(TMap)getNumber();
+    pos.y=(TMap)getNumber();
+    printf("\nyou choose (%d, %d) \n", pos.x, pos.y);
     return pos;
 }
 
 void player_ai(Info& info)
 {
-    cout << endl << "It's Player "<<(int)info.id<<" 's AI main function here. Round <" << info.round << ">" << endl;
-    cout << "Saving left:" << info.playerInfo[info.id].saving << endl;
-    //diplomacy test
-    for (TId id=0; id<info.playerSize; id++)
+
+    cout << endl << "[P"<<(int)info.id<<"]'s player_ai.";
+    cout << endl << "Round <" << info.round << ">";
+    cout << endl << "Saving=" << info.playerInfo[info.id].saving << endl;
+
+    // display map
+    cout << "your map:" << endl;
+
+    SetColor(Gray);
+    cout << std::left << std::setw(4) << std::setfill(' ') <<' ';
+    for (TMap x=0; x<info.cols; x++)
     {
-        if (id != info.id)
-        {
-            cout << "your dip status towards player " << (int)id <<"is :" << info.playerInfo[id].dipStatus << endl;
-            cout << "your new attitude towards player " << (int)id <<":"<<endl
-                <<"(KeepNeutral=0, FormAlliance=1, JustifyWar=2, Backstab=3)" << endl;
-            int input;
-            scanf("%d", &input);
-            if (input>=0 && input<4)
-            {
-                info.DiplomaticCommandList[id] = (TDiplomaticCommand)input;
-            }
-        }
+        cout << std::left << std::setw(4) << std::setfill(' ') <<(int)x;
     }
-    //military test
-    cout << "the map you get:" << endl;
+    cout<<endl;
     for (TMap y=0; y<info.rows; y++)
     {
+        cout << std::left << std::setw(4) << std::setfill(' ') <<(int)y;
         for (TMap x=0; x<info.cols; x++)
         {
             MapPointInfo mpi = info.mapPointInfo[x][y];
@@ -62,36 +171,57 @@ void player_ai(Info& info)
             {
                 if (mpi.owner == NEUTRAL_PLAYER_ID)
                 {
+                    SetColor(Gray);
                     owner = "-";
                 }
                 else
                 {
-                    owner = std::to_string((int)mpi.owner);
+                    int o = (int)mpi.owner;
+                    SetColor(playerColor[o%4]);
+                    owner = std::to_string(o);
                 }
-                if (mpi.isSieged)
-                {
-                    owner += "*";
-                }
+                if (mpi.isSieged) owner += "*";
             }
             else
             {
+                SetColor(Gray);
                 owner = "?";
             }
             cout << std::left << std::setw(4) << std::setfill(' ') <<owner;
         }
         cout<<endl;
     }
-    cout << "enter your military command as \"x y cost\", enter -1 to exit" << endl;
+
+    SetColor(Gray);
+
+    //diplomacy test
+    cout << "DipStat: Undiscovered=0, Neutral=1, Allied=2, AtWar=3" << endl;
+    cout << "DipComm: KeepNeutral=0, FormAlliance=1, JustifyWar=2, Backstab=3" << endl;
+    for (TId id=0; id<info.playerSize; id++)
+    {
+        if (id != info.id)
+        {
+            cout << "your Dip. Status to P" << (int)id <<" :" << dipStatStr[info.playerInfo[id].dipStatus] << endl;
+            cout << "your Dip. Command to P" << (int)id <<" >>> ";
+            int input = getNumber();
+            if (input>=0 && input<4)
+            {
+                info.DiplomaticCommandList[id] = (TDiplomaticCommand)input;
+                cout << "you decided to " << dipCommStr[input] <<" to P" << (int)id << endl;
+            }
+
+        }
+    }
+    //military test
+    
+    cout << "enter your military command as \"x y cost\", enter -1 to exit >>> ";
     int inputList[3];
     int inputListCnt = 0;
     while (true)
     {
-        int i;
-        scanf("%d", &i);
-        if (i<0)
-        {
-            break;
-        }
+        int i = getNumber();
+        if (i<0) break;
+
         inputList[inputListCnt] = i;
         inputListCnt++;
         if (inputListCnt == 3)
@@ -102,7 +232,16 @@ void player_ai(Info& info)
             tmc.bomb_size = inputList[2];
             inputListCnt = 0;
             info.MilitaryCommandList.push_back(tmc);
+
+            printf("\nyou decided to attack (%d, %d) with bomb size %d\n", tmc.place.x, tmc.place.y, tmc.bomb_size);
         }
     }
+    
+    cout << "your new capital >>> ";
+    info.newCapital.x = getNumber();
+    info.newCapital.y = getNumber();
+    printf("your new capital : (%d, %d)\n", info.newCapital.x, info.newCapital.y);
+
+    printf("\n");
     return;
 }
