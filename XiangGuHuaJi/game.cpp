@@ -380,7 +380,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							//这里分为三种情况，对中立地区施加攻，对同盟施加防御力和对敌对势力施加攻击力
 							if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
 								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
-							else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
+							//else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
+                            else if((diplomacy[i][globalMap[k][l]] == Allied) && (!isSieged[k][l]))
 								defPower[k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);
 							else if(diplomacy[i][globalMap[k][l]] == AtWar)
 								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
