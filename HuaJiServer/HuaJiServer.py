@@ -33,6 +33,8 @@ viewer_list=[]
 
 curr_round_count = 0
 
+log_file = open("server_log.txt", "w")
+
 # kill a player
 def killPlayer(player_id):
     if player_id<0 or player_id>=PLAYER_COUNT_MAX:
@@ -67,6 +69,11 @@ def sendToAll(data, push_flag=False):
     if not push_flag and (status == ServerStatus.Ready or status == ServerStatus.Bidding):
         print "[Warning] Server ought to keep silent before `ServerStatus.Playing`"
         return
+    
+    try:
+        log_file.write(data+"\r\n")
+    except:
+        print "[Warning] log file not ready."
 
     for i in range(PLAYER_COUNT_MAX):
         if player_status_list[i]==PlayerStatus.OK:
@@ -319,3 +326,5 @@ if "__main__"==__name__:
     
     status = ServerStatus.GameOver
 
+    log_file.close()
+    
