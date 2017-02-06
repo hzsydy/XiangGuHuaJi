@@ -15,8 +15,10 @@
 #include<string>
 #include<sstream>
 
+#include "definition.h"
+#include "game.h"
+
 #include "xghj_protocol.h"
-#include "controller.h"
 #include "military_kernel_reader.h"
 
 using namespace std;

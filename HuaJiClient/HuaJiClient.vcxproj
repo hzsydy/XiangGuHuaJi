@@ -80,15 +80,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="controller.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="military_kernel_reader.cpp" />
     <ClCompile Include="xghj_protocol.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="controller.h" />
     <ClInclude Include="military_kernel_reader.h" />
-    <ClInclude Include="net.hpp" />
     <ClInclude Include="xghj_protocol.h" />
   </ItemGroup>
   <ItemGroup>

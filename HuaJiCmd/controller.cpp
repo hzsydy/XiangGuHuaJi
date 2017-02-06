@@ -4,11 +4,24 @@
 
 #include "controller.h"
 
+#include <fstream>
 
 namespace XGHJ
 {
+    using namespace std;
+
+    static ofstream ofs;
+
 	void Controller::run()
 	{
+
+        if (!ofs.is_open()){
+            char buffer[1024];
+            time_t t = time(0);
+            strftime(buffer, sizeof(buffer), "log_%Y%m%d_%H%M%S.txt",localtime(&t));
+            ofs.open(buffer);
+        }
+
 		TId playerSize = game_.getPlayerSize();
 		TRound round = game_.getRound();
 
@@ -35,10 +48,19 @@ namespace XGHJ
                 {
                     ;
                 }
-                MilitaryCommandMap[id] = info.MilitaryCommandList;
                 DiplomaticCommandMap[id] = info.DiplomaticCommandList;	
+                MilitaryCommandMap[id] = info.MilitaryCommandList;
                 NewCapitalList[id] = info.newCapital;
+
+                for (int i=0; i<playerSize; ++i) ofs<<" "<<(int)info.DiplomaticCommandList[i];
+                for (int i=0; i<info.MilitaryCommandList.size(); ++i) 
+                    ofs<<" "<<(int)info.MilitaryCommandList[i].place.x 
+                       <<" "<<(int)info.MilitaryCommandList[i].place.y
+                       <<" "<<(int)info.MilitaryCommandList[i].bomb_size; 
+                ofs << " -1 " << (int)info.newCapital.x << " " << (int)info.newCapital.y << "\t" ;
 			}
+            ofs << endl;
+
 			if (!game_.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList))
 			{
                 cout << "-=-=-=-=-=-=-=-=-=-=-= GAME ENDS ! =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
@@ -104,6 +126,13 @@ namespace XGHJ
                 TId id = std::get<1>(bidPriceTuple[i]);
                 posChoosedSorted[id] = posChoosed[i];
             }
+
+            ofs << (int)playerSize << endl;
+            for (int i=0; i<playerSize; ++i) ofs<<" "<<(int)bidPrice[i];
+            ofs << endl;
+            for (int i=0; i<playerSize; ++i) ofs<<" "<<(int)posChoosedSorted[i].x << " " << (int)posChoosedSorted[i].y;
+            ofs << endl;
+
 			// choose start pos
 			game_.Start(bidPrice, posChoosedSorted);
 		}
