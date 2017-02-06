@@ -881,22 +881,39 @@ Info Game::generateInfo(TId playerid) const
 
 void Game::DiscoverCountry()
 {
-	for (TMap i = 0; i <cols; ++i)
-		for (TMap j = 0; j < rows; ++j)
-			for (int fi = -1; fi <= 1; fi += 2)
-				for (int fj = -1; fj <= 1; fj += 2)
-					for (int k = 1; k <= FIELD_BOUNDARY; ++k)
-						for (int pi = 0; pi <= k; ++pi)
-						{
-							int pj = k - pi;
-							int si = i + fi * pi;
-							int sj = j + fj * pj;
-							if (si >= 0 && si < cols && sj >= 0 && sj < rows)
-								if (globalMap[i][j] != globalMap[si][sj] && globalMap[i][j] < playerSize && globalMap[si][sj] < playerSize)
-									if (diplomacy[globalMap[i][j]][globalMap[si][sj]] == Undiscovered)
-										diplomacy[globalMap[i][j]][globalMap[si][sj]] = Neutral;
-						}
+    for (TMap i = 0; i <cols; ++i)
+        for (TMap j = 0; j < rows; ++j)
+            for (int fi = -1; fi <= 1; fi += 2)
+                for (int fj = -1; fj <= 1; fj += 2)
+                    for (int k = 1; k <= FIELD_BOUNDARY; ++k)
+                        for (int pi = 0; pi <= k; ++pi)
+                        {
+                            int pj = k - pi;
+                            int si = i + fi * pi;
+                            int sj = j + fj * pj;
+                            if (si >= 0 && si < cols && sj >= 0 && sj < rows)
+                                if (globalMap[i][j] != globalMap[si][sj] && globalMap[i][j] < playerSize && globalMap[si][sj] < playerSize)
+                                {
+                                    for (int qt = 0; qt < playerSize; ++qt)
+                                    {
+                                        if (qt != globalMap[i][j])
+                                        {
+                                            if (diplomacy[globalMap[i][j]][qt] == Allied)
+                                            {
+                                                if (diplomacy[qt][globalMap[si][sj]] == Undiscovered)
+                                                    diplomacy[qt][globalMap[si][sj]] = Neutral;
+                                                if (diplomacy[globalMap[si][sj]][qt] == Undiscovered)
+                                                    diplomacy[globalMap[si][sj]][qt] = Neutral;
+                                            }
+                                        }
+
+                                    }
+                                    if (diplomacy[globalMap[i][j]][globalMap[si][sj]] == Undiscovered)
+                                        diplomacy[globalMap[i][j]][globalMap[si][sj]] = Neutral;
+                                }
+                        }
 }
+
 
 TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
 {
