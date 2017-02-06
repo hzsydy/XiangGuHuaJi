@@ -7,6 +7,9 @@
 #define min(x,y) ((x)<(y)?(x):(y))
 #define max(x,y) ((x)>(y)?(x):(y))
 
+#include<ctime>
+#include<cstdio>
+
 #include<iostream>  
 #include<fstream>
 #include<string>
@@ -21,8 +24,8 @@ using namespace XGHJ;
 using namespace XGHJ_Client;
 
 
-const string server_ip = "166.111.72.13";
-//const string server_ip = "127.0.0.1";
+//const string server_ip = "166.111.72.13";
+const string server_ip = "127.0.0.1";
 const int server_port = 9999;
 const TId playerSize = 4;
 
@@ -45,6 +48,7 @@ int main(int argc, char** argv)
         return -1;
 	}
 
+    char buffer[1024];
     string          map_filename;       // map filename 
     string          mknl_filename;      // military kernel filename
     string          player_filename;    // player dll/so filename 
@@ -61,6 +65,11 @@ int main(int argc, char** argv)
     ifs >> map_filename;   
     ifs >> mknl_filename; 
     ifs >> player_filename;
+
+    // log file output
+    time_t t = time(0);
+    strftime(buffer, sizeof(buffer), "log_%Y%m%d_%H%M%S.txt",localtime(&t));
+    ofstream  ofs(buffer);
 
     // load map
     Map map = Map();
@@ -113,15 +122,15 @@ int main(int argc, char** argv)
     // waiting for the start
     cout << "[Info] I'm ready. Waiting for the start." << endl;
     obj = xs.getObj();
-    if (obj.action!=XghjObject::NextRound) {
+    if (obj.action!=XghjObject::NewGame) {
         cout << "[Error] Sorry I missed the start." << endl;
         cout << "[Error][recv] "<< obj.content << endl;
         SHUTDOWN;
     }
+    ofs << obj.content << endl;
 
 
     // ---------------------------------------------------
-    char buffer[1024];
     char *p;
     TId count = 0;
 
@@ -149,12 +158,13 @@ int main(int argc, char** argv)
 
         // recv full bidPrice
         obj = xs.getObj();
+        ofs << obj.content << endl;
         sprintf(buffer, "%s", obj.content.c_str());
         p = buffer;
         for (TId id=0; id<playerSize; ++id){
             bidPrice[id] = getNumber(&p);
         }
-
+        
         // wait for posUnaccessible
         obj = xs.getObj();  
         sprintf(buffer, "%s", obj.content.c_str());
@@ -174,7 +184,8 @@ int main(int argc, char** argv)
         xs.send(obj);
 
         // recv full bidPosition
-        obj = xs.getObj(); cout << obj.toString() << endl;
+        obj = xs.getObj(); 
+        ofs << obj.content << endl;
         sprintf(buffer, "%s", obj.content.c_str());
         p = buffer;
         for (int player_id=0; player_id<playerSize; ++player_id) {
@@ -238,6 +249,8 @@ int main(int argc, char** argv)
                 cout << "[Info] recv: " << obj.content << endl;
 
         } while (obj.action!=XghjObject::NextRound);
+
+        ofs << obj.content << endl;
 
         ss.str("");
         ss << obj.content;

@@ -124,12 +124,17 @@ int getNumber() {
 
 TMoney birthplacePrice(void)
 {
+    SetColor(Gray);
     printf("price for birthprice >>> ");
-    return (TMoney)getNumber();
+    SetColor(White);
+    TMoney t = getNumber();
+    SetColor(Gray);
+    return t;
 }
 
 TPosition birthplace(vector<TPosition> posSelected)
 {
+    SetColor(Gray);
     printf("Birthplaces choosed:");
     for (size_t i=0; i<posSelected.size(); i++)
     {
@@ -137,23 +142,24 @@ TPosition birthplace(vector<TPosition> posSelected)
     }
     printf("\nyour birthplace >>> ");
     TPosition pos;
+    SetColor(White);
     pos.x=(TMap)getNumber();
     pos.y=(TMap)getNumber();
+    SetColor(Gray);
     printf("\nyou choose (%d, %d) \n", pos.x, pos.y);
     return pos;
 }
 
 void player_ai(Info& info)
 {
-
+    SetColor(playerColor[info.id%4]);
     cout << endl << "[P"<<(int)info.id<<"]'s player_ai.";
     cout << endl << "Round <" << info.round << ">";
     cout << endl << "Saving=" << info.playerInfo[info.id].saving << endl;
 
     // display map
-    cout << "your map:" << endl;
-
     SetColor(Gray);
+    cout << "your map:" << endl;
     cout << std::left << std::setw(4) << std::setfill(' ') <<' ';
     for (TMap x=0; x<info.cols; x++)
     {
@@ -162,7 +168,9 @@ void player_ai(Info& info)
     cout<<endl;
     for (TMap y=0; y<info.rows; y++)
     {
+        SetColor(Gray);
         cout << std::left << std::setw(4) << std::setfill(' ') <<(int)y;
+
         for (TMap x=0; x<info.cols; x++)
         {
             MapPointInfo mpi = info.mapPointInfo[x][y];
@@ -201,9 +209,14 @@ void player_ai(Info& info)
     {
         if (id != info.id)
         {
+            SetColor(Gray);
             cout << "your Dip. Status to P" << (int)id <<" :" << dipStatStr[info.playerInfo[id].dipStatus] << endl;
             cout << "your Dip. Command to P" << (int)id <<" >>> ";
+
+            SetColor(playerColor[info.id%4]);
             int input = getNumber();
+            SetColor(Gray);
+
             if (input>=0 && input<4)
             {
                 info.DiplomaticCommandList[id] = (TDiplomaticCommand)input;
@@ -214,12 +227,16 @@ void player_ai(Info& info)
     }
     //military test
     
+    SetColor(Gray);
     cout << "enter your military command as \"x y cost\", enter -1 to exit >>> ";
     int inputList[3];
     int inputListCnt = 0;
     while (true)
     {
+        SetColor(playerColor[info.id%4]);
         int i = getNumber();
+        SetColor(Gray);
+
         if (i<0) break;
 
         inputList[inputListCnt] = i;
@@ -233,13 +250,17 @@ void player_ai(Info& info)
             inputListCnt = 0;
             info.MilitaryCommandList.push_back(tmc);
 
+            
             printf("\nyou decided to attack (%d, %d) with bomb size %d\n", tmc.place.x, tmc.place.y, tmc.bomb_size);
         }
     }
     
+    SetColor(Gray);
     cout << "your new capital >>> ";
+    SetColor(playerColor[info.id%4]);
     info.newCapital.x = getNumber();
     info.newCapital.y = getNumber();
+    SetColor(Gray);
     printf("your new capital : (%d, %d)\n", info.newCapital.x, info.newCapital.y);
 
     printf("\n");

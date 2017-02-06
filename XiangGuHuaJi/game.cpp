@@ -83,7 +83,7 @@ bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
         else
         {
             playerCapital[i] = invalidPos;
-            //ÄÇ¾ÍÖ±½Ó¸ÉËÀ°É »¬»ü¿©
+            //é‚£å°±ç›´æ¥å¹²æ­»å§ æ»‘ç¨½å’¯
             isPlayerAlive[i] = false;
         }
         playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
@@ -113,13 +113,13 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
 	//TODO
-	//Íâ½»
+	//å¤–äº¤
 
-	//¶ÁÈ¡DiplomaticCommandMap
-	//¸üĞÂDiplomacy£¨¼ÇµÃÕ½ÕùĞèÒªÔìWAR_JUSTIFY_TIME»ØºÏ£¬²»ÒªÍüÁËÎ¬»¤ÁĞ±í£©
-	//¼ÇµÃ¿ÛÇ®£¨Ôì½è¿ÚÒª¿ÛWAR_JUSTIFY_PRICEµÄÇ®£©
+	//è¯»å–DiplomaticCommandMap
+	//æ›´æ–°Diplomacyï¼ˆè®°å¾—æˆ˜äº‰éœ€è¦é€ WAR_JUSTIFY_TIMEå›åˆï¼Œä¸è¦å¿˜äº†ç»´æŠ¤åˆ—è¡¨ï¼‰
+	//è®°å¾—æ‰£é’±ï¼ˆé€ å€Ÿå£è¦æ‰£WAR_JUSTIFY_PRICEçš„é’±ï¼‰
 
-	//ÊµÏÖ´ÎÒªº¯ÊıGame::getWarList
+	//å®ç°æ¬¡è¦å‡½æ•°Game::getWarList
 
 	for (TId i = 0; i < playerSize-1; ++i)
 		for (TId j = i+1; j < playerSize; ++j)
@@ -297,26 +297,26 @@ TMap Game::sup(TMap pos, TMap max)
 
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList)
 {
-	//¶ÁÈ¡MilitaryCommandList²¢ÇÒ¿ÛUNIT_BOMB_COSTµÄÇ®
+	//è¯»å–MilitaryCommandListå¹¶ä¸”æ‰£UNIT_BOMB_COSTçš„é’±
 	TMoney bombSumCost = 0;
 
-	//¾²Ì¬Êı×é£¬ÓÃÓÚ¹¹ÔìbfsµÄÕ»
+	//é™æ€æ•°ç»„ï¼Œç”¨äºæ„é€ bfsçš„æ ˆ
 	static TPosition bfs_queue[1000000];
 	int head = 0, tail = 0;
 	static TPosition list[1000];
 	int list_length = 0;
 
-	//´æ´¢Ç®ÊÇ·ñ¹»µÄÊı×é
+	//å­˜å‚¨é’±æ˜¯å¦å¤Ÿçš„æ•°ç»„
 	vector<TMask> moneyEnough(playerSize);
 
-	//·ÀÓùÁ¦µÄÊı×é
+	//é˜²å¾¡åŠ›çš„æ•°ç»„
 	vector<vector<float> > defPower(cols);
 	for(TMap i = 0; i < cols; ++i)
 	{
 		defPower[i].resize(rows, 0);
 	}
 
-	//¹¥»÷Á¦µÄÊı×é
+	//æ”»å‡»åŠ›çš„æ•°ç»„
 	vector<vector<vector<float> > > atkPower(playerSize);
 	for(TMilitary i = 0; i <playerSize; ++i)
 	{
@@ -327,7 +327,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 		}
 	}
 
-	//±¾¾ÖÕ½Õù½á¹ûµØÍ¼
+	//æœ¬å±€æˆ˜äº‰ç»“æœåœ°å›¾
 	vector<vector<TId>> tmpGlobalMap(cols);
 	for(TId i = 0; i < cols; ++i)
 		tmpGlobalMap[i].resize(rows, UNKNOWN_PLAYER_ID);
@@ -336,7 +336,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	for(TMap i = 0; i < cols; ++i)
 		changeMap[i].resize(rows, false);
 
-	//ÅĞ¶ÏÁ¬Í¨ĞÔÓÃµ½µÄ
+	//åˆ¤æ–­è¿é€šæ€§ç”¨åˆ°çš„
 	vector<vector<int>> newIsSiegedPlayer(cols);
 	for(int i = 0; i < cols; ++i)
 		newIsSiegedPlayer[i].resize(rows, 0);
@@ -345,10 +345,11 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	for(int i = 0; i < cols; ++i)
 		newIsSiegedAll[i].resize(rows, true);
 
-	//¿ªÊ¼Ö´ĞĞÃüÁî¶ÓÁĞµÄÄÚÈİ
+
+	//å¼€å§‹æ‰§è¡Œå‘½ä»¤é˜Ÿåˆ—çš„å†…å®¹
 	for(TMilitary i = 0; i < playerSize;++i)
 	{
-		//ÅĞ¶ÏÇ®ÊÇ·ñ¹»ÓÃ
+		//åˆ¤æ–­é’±æ˜¯å¦å¤Ÿç”¨
 		for(TMilitary j = 0; j < MilitaryCommandList[i].size(); ++j)
 		{
 			bombSumCost += MilitaryCommandList[i][j].bomb_size*UNIT_BOMB_COST;
@@ -358,15 +359,15 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 		else
 			moneyEnough[i] = true;
 		bombSumCost = 0;
-		//¹¥»÷Á¦ºÍ·ÀÓùÁ¦
+		//æ”»å‡»åŠ›å’Œé˜²å¾¡åŠ›
 		for(TMilitary j = 0; j <= MilitaryCommandList[i].size(); ++j)
 		{
-			//µ¥¶À¼ÆËãÊ×¶¼
+			//å•ç‹¬è®¡ç®—é¦–éƒ½
 			if(j == MilitaryCommandList[i].size())
 			{
 				if(isPosValid(playerCapital[i]))
 				{
-					//ÏÂÃæÁ½¸öÊÇÊ×¶¼µÄÎ»ÖÃ×ø±ê£¬ÒÔ¼°Ê×¶¼´¦µØĞÎµÄ¹¥»÷Á¦
+					//ä¸‹é¢ä¸¤ä¸ªæ˜¯é¦–éƒ½çš„ä½ç½®åæ ‡ï¼Œä»¥åŠé¦–éƒ½å¤„åœ°å½¢çš„æ”»å‡»åŠ›
 					TMap capXPos, capYPos;
 					capXPos = playerCapital[i].x;
 					capYPos = playerCapital[i].y;
@@ -375,8 +376,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					{
 						for(TMap l = inf(capYPos), n = (MILITARY_KERNEL_SIZE - 1)-(capYPos - l); l < sup(capYPos, rows); ++l, ++n)
 						{
-							//ÕâÁ½¸öforÑ­»·ÓÃÀ´¼ÆËãÊ×¶¼³öÌá¹©µÄ¹¥»÷Á¦ºÍ·ÀÓùÁ¦£¬Á½¸öforÑ­»·µÄ·¶Î§Îª¸ßË¹ºË¾ØÕóµÄ´óĞ¡
-							//ÕâÀï·ÖÎªÈıÖÖÇé¿ö£¬¶ÔÖĞÁ¢µØÇøÊ©¼Ó¹¥£¬¶ÔÍ¬ÃËÊ©¼Ó·ÀÓùÁ¦ºÍ¶ÔµĞ¶ÔÊÆÁ¦Ê©¼Ó¹¥»÷Á¦
+							//è¿™ä¸¤ä¸ªforå¾ªç¯ç”¨æ¥è®¡ç®—é¦–éƒ½å‡ºæä¾›çš„æ”»å‡»åŠ›å’Œé˜²å¾¡åŠ›ï¼Œä¸¤ä¸ªforå¾ªç¯çš„èŒƒå›´ä¸ºé«˜æ–¯æ ¸çŸ©é˜µçš„å¤§å°
+							//è¿™é‡Œåˆ†ä¸ºä¸‰ç§æƒ…å†µï¼Œå¯¹ä¸­ç«‹åœ°åŒºæ–½åŠ æ”»ï¼Œå¯¹åŒç›Ÿæ–½åŠ é˜²å¾¡åŠ›å’Œå¯¹æ•Œå¯¹åŠ¿åŠ›æ–½åŠ æ”»å‡»åŠ›
 							if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
 								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
 							else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
@@ -389,11 +390,11 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			}
 			else
 			{
-				//ÕâÊÇ¶ÔÓÚÕ¨µ¯·ÅÖÃµãµÄ¼ÆËã£¬ºÍÉÏÃæÍêÈ«ÏàÍ¬
+				//è¿™æ˜¯å¯¹äºç‚¸å¼¹æ”¾ç½®ç‚¹çš„è®¡ç®—ï¼Œå’Œä¸Šé¢å®Œå…¨ç›¸åŒ
 				TMap xPos, yPos;
 				xPos = MilitaryCommandList[i][j].place.x;
 				yPos = MilitaryCommandList[i][j].place.y;
-				//¼ÓÁËÒ»Ìõ·ÅÖÃµØµãºÏ·¨ĞÔµÄÅĞ¶Ï
+				//åŠ äº†ä¸€æ¡æ”¾ç½®åœ°ç‚¹åˆæ³•æ€§çš„åˆ¤æ–­
 				if(xPos<0||xPos>=cols||yPos<0||yPos>=rows)
 					continue;
 				TMilitary atk = map.getMapAtk()[xPos][yPos];
@@ -413,18 +414,18 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			}
 		}
 	}
-	//¼ÆËãÕ½Õù½á¹û
+	//è®¡ç®—æˆ˜äº‰ç»“æœ
 	for(TMap i = 0; i <cols; ++i)
 		for(TMap j = 0; j < rows; ++j)
 		{
-			//¹ØÓÚ×ø±êµÄ¼ÆËã£¬ÔÚÃ¿Ò»¸ö×ø±ê³ö±£´æÒ»¸ö×î´ó¹¥»÷Á¦£¬ºÍ´ïµ½×î´ó¹¥»÷Á¦µÄÍæ¼ÒµÄ¸öÊı£¬ÒÔ¼°×î´ó¹¥»÷Á¦Íæ¼ÒµÄID
+			//å…³äºåæ ‡çš„è®¡ç®—ï¼Œåœ¨æ¯ä¸€ä¸ªåæ ‡å‡ºä¿å­˜ä¸€ä¸ªæœ€å¤§æ”»å‡»åŠ›ï¼Œå’Œè¾¾åˆ°æœ€å¤§æ”»å‡»åŠ›çš„ç©å®¶çš„ä¸ªæ•°ï¼Œä»¥åŠæœ€å¤§æ”»å‡»åŠ›ç©å®¶çš„ID
 			float maxAtk = 0;
 			TMilitary equalCount = 0;
 			TId maxAtkId = UNKNOWN_PLAYER_ID;
 			for(TMilitary k = 0; k < playerSize; ++k)
 			{
-				//ÓÉÓÚ¹¥»÷Á¦Ã¿¸öÍæ¼Òµ¥¶À¼ÆËã£¬ËùÒÔ½øĞĞÒ»¸ök´ÎÑ­»·
-				//·ÖÁ½ÖÖÇé¿ö£¬µ±Ç°Íæ¼Ò¹¥»÷Á¦´óÓÚµ±Ç°¸Ãµã×î´ó¹¥»÷Á¦ºÍµÈÓÚ¸Ãµãµ±Ç°×î´ó¹¥»÷Á¦£¬Ğ¡ÓÚµÄÇé¿ö²»´¦Àí
+				//ç”±äºæ”»å‡»åŠ›æ¯ä¸ªç©å®¶å•ç‹¬è®¡ç®—ï¼Œæ‰€ä»¥è¿›è¡Œä¸€ä¸ªkæ¬¡å¾ªç¯
+				//åˆ†ä¸¤ç§æƒ…å†µï¼Œå½“å‰ç©å®¶æ”»å‡»åŠ›å¤§äºå½“å‰è¯¥ç‚¹æœ€å¤§æ”»å‡»åŠ›å’Œç­‰äºè¯¥ç‚¹å½“å‰æœ€å¤§æ”»å‡»åŠ›ï¼Œå°äºçš„æƒ…å†µä¸å¤„ç†
 				if(atkPower[k][i][j] > maxAtk)
 				{
 					maxAtk = atkPower[k][i][j];
@@ -434,9 +435,9 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				else if(atkPower[k][i][j] == maxAtk)
 					equalCount += 1;
 			}
-			//ÏÂÃæ´¦Àí×î´ó¹¥»÷Á¦¼õÈ¥·ÀÓùÁ¦´óÓÚãĞÖµµÄÇé¿ö£¬
-			//Èç¹û´ïµ½×î´ó¹¥»÷Á¦µÄÍæ¼ÒÖ»ÓĞÒ»¸ö£¬ÔòÔÚ¸Ã¾Ö¸Ä±äËùÊôµØÍ¼£¨tmpGlobalMap£©ÖĞ¼ÇÂ¼
-			//Èô³¬¹ıÒ»¸ö£¬´ò³ÉÖĞÁ¢
+			//ä¸‹é¢å¤„ç†æœ€å¤§æ”»å‡»åŠ›å‡å»é˜²å¾¡åŠ›å¤§äºé˜ˆå€¼çš„æƒ…å†µï¼Œ
+			//å¦‚æœè¾¾åˆ°æœ€å¤§æ”»å‡»åŠ›çš„ç©å®¶åªæœ‰ä¸€ä¸ªï¼Œåˆ™åœ¨è¯¥å±€æ”¹å˜æ‰€å±åœ°å›¾ï¼ˆtmpGlobalMapï¼‰ä¸­è®°å½•
+			//è‹¥è¶…è¿‡ä¸€ä¸ªï¼Œæ‰“æˆä¸­ç«‹
 			if(maxAtk > defPower[i][j] + SUPPESS_LIMIT)
 				if(equalCount == 1)
 				{
@@ -449,14 +450,14 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					changeMap[i][j] = true;
 				}
 		}
-	//¼ÆËãÁ¬Í¨ĞÔ,²¢¸üĞÂGlobalMap
+	//è®¡ç®—è¿é€šæ€§,å¹¶æ›´æ–°GlobalMap
 	for(TMap i = 0; i <cols; ++i)
 		for(TMap j = 0; j < rows; ++j)
 		{
-			//Ê×ÏÈÅĞ¶ÏÕâ¸öµãÔÚÕâ»ØºÏÓĞÃ»ÓĞ·¢Éú±ä»¯£¬Èç¹ûÃ»ÓĞ£¬Õâ¸öµØ·½²»´¦Àí
+			//é¦–å…ˆåˆ¤æ–­è¿™ä¸ªç‚¹åœ¨è¿™å›åˆæœ‰æ²¡æœ‰å‘ç”Ÿå˜åŒ–ï¼Œå¦‚æœæ²¡æœ‰ï¼Œè¿™ä¸ªåœ°æ–¹ä¸å¤„ç†
 			if(changeMap[i][j])
 			{
-				//µ±¸ÃµãËùÊô·¢Éú±ä»¯ºó£¬ÔòÏÈÅĞ¶ÏÊÇ·ñÖĞÁ¢£¬Èç¹ûÖĞÁ¢£¬¸ÄÎªÖĞÁ¢½áÊøÕâ´ÎÑ­»·
+				//å½“è¯¥ç‚¹æ‰€å±å‘ç”Ÿå˜åŒ–åï¼Œåˆ™å…ˆåˆ¤æ–­æ˜¯å¦ä¸­ç«‹ï¼Œå¦‚æœä¸­ç«‹ï¼Œæ”¹ä¸ºä¸­ç«‹ç»“æŸè¿™æ¬¡å¾ªç¯
 				TMask connection = false;
 				TPosition curPos = {i, j};
 				if(tmpGlobalMap[i][j] == NEUTRAL_PLAYER_ID)
@@ -464,15 +465,15 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 					globalMap[i][j] = NEUTRAL_PLAYER_ID;
 					changeMap[i][j] = false;
 				}
-				//·ñÔò£¬ÅĞ¶Ï±ä»¯²¿·ÖµÄÁ¬Í¨ĞÔ£¬Á¬Í¨ĞÔÓÃbfsÅĞ¶Ï
-				//²ßÂÔÊÇÅĞ¶Ïµ±Ç°×ø±êÖÜÎ§µÄËÄ¸ö×ø±ê·ÅÈë¶ÓÁĞ£¬È»ºó´Ó¶ÔÁĞÍ·¿ªÊ¼ÅĞ¶Ï
-				//Èç¹û¶ÓÁĞÍ·Ëù¶ÔÓ¦×ø±êµÄplayerIdºÍtmpGlobalMapÖĞÕıÔÚÅĞ¶ÏµÄÕâµã£¬ÔòÅĞ¶ÏÁªÍ¨£¬½áÊøÕâÂÖÑ­»·
-				//·ñÔòÅĞ¶Ï¶ÓÁĞÍ·ÔÚtmpGlobalMapÖĞµÄidÊÇ·ñºÍÕıÔÚÅĞ¶ÏµÄÕâµãÏàÍ¬£¬Èç¹ûÊÇ£¬½«¶ÓÁĞÍ·ÖÜÎ§µÄËÄ¸öµã·ÅÈë¶ÓÁĞ£¬ÅĞ¶Ï¶ÓÁĞÖĞÏÂÒ»µã
-				//·ñÔò£¬ÅĞ¶Ï¶ÓÁĞÖĞÏÂÒ»µã
-				//ÎªÁË·ÀÖ¹ÖØ¸´ÅĞ¶Ï£¬³ıÁË×î¿ªÊ¼¼ÓÈëµÄËÄ¸öµãÍâ£¬ËùÓĞ½øÈë¶ÓÁĞµÄµãchangeMap±äÁ¿»á±»ÖÃÎªfalse¡£
-				else//bfs,°´ÕÕx-1£¬x+1, y-1, y+1Ë³ĞòÈç¶ÓÁĞ
+				//å¦åˆ™ï¼Œåˆ¤æ–­å˜åŒ–éƒ¨åˆ†çš„è¿é€šæ€§ï¼Œè¿é€šæ€§ç”¨bfsåˆ¤æ–­
+				//ç­–ç•¥æ˜¯åˆ¤æ–­å½“å‰åæ ‡å‘¨å›´çš„å››ä¸ªåæ ‡æ”¾å…¥é˜Ÿåˆ—ï¼Œç„¶åä»å¯¹åˆ—å¤´å¼€å§‹åˆ¤æ–­
+				//å¦‚æœé˜Ÿåˆ—å¤´æ‰€å¯¹åº”åæ ‡çš„playerIdå’ŒtmpGlobalMapä¸­æ­£åœ¨åˆ¤æ–­çš„è¿™ç‚¹ï¼Œåˆ™åˆ¤æ–­è”é€šï¼Œç»“æŸè¿™è½®å¾ªç¯
+				//å¦åˆ™åˆ¤æ–­é˜Ÿåˆ—å¤´åœ¨tmpGlobalMapä¸­çš„idæ˜¯å¦å’Œæ­£åœ¨åˆ¤æ–­çš„è¿™ç‚¹ç›¸åŒï¼Œå¦‚æœæ˜¯ï¼Œå°†é˜Ÿåˆ—å¤´å‘¨å›´çš„å››ä¸ªç‚¹æ”¾å…¥é˜Ÿåˆ—ï¼Œåˆ¤æ–­é˜Ÿåˆ—ä¸­ä¸‹ä¸€ç‚¹
+				//å¦åˆ™ï¼Œåˆ¤æ–­é˜Ÿåˆ—ä¸­ä¸‹ä¸€ç‚¹
+				//ä¸ºäº†é˜²æ­¢é‡å¤åˆ¤æ–­ï¼Œé™¤äº†æœ€å¼€å§‹åŠ å…¥çš„å››ä¸ªç‚¹å¤–ï¼Œæ‰€æœ‰è¿›å…¥é˜Ÿåˆ—çš„ç‚¹changeMapå˜é‡ä¼šè¢«ç½®ä¸ºfalseã€‚
+				else//bfs,æŒ‰ç…§x-1ï¼Œx+1, y-1, y+1é¡ºåºå¦‚é˜Ÿåˆ—
 				{
-					//ÏÈÌí¼Ó½øÈ¥ÖÜÎ§µÄËÄ¸öµã
+					//å…ˆæ·»åŠ è¿›å»å‘¨å›´çš„å››ä¸ªç‚¹
 					list[list_length++] = curPos;
 					changeMap[i][j] = false;
 					if(i > 0)
@@ -499,11 +500,11 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 						bfs_queue[tail].y = j + 1;
 						tail++;
 					}
-					while(head != tail)//bfsÖÕÖ¹Ìõ¼ş£¬µ±¶ÓÁĞ¿ÕÁËÒÔºóÍ£Ö¹
+					while(head != tail)//bfsç»ˆæ­¢æ¡ä»¶ï¼Œå½“é˜Ÿåˆ—ç©ºäº†ä»¥ååœæ­¢
 					{
 						TMap m = bfs_queue[head].x;
 						TMap n = bfs_queue[head].y;
-						//ÅĞ¶ÏÊÇGlobalMapÖĞÊÇ·ñÎªÖĞÁ¢id
+						//åˆ¤æ–­æ˜¯GlobalMapä¸­æ˜¯å¦ä¸ºä¸­ç«‹id
 						if(globalMap[m][n] != NEUTRAL_PLAYER_ID)
 						{
 							if(diplomacy[globalMap[m][n]][tmpGlobalMap[i][j]] == Allied)
@@ -550,7 +551,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 						head++;
 					}
 				}
-				//½«¼ì²âµ½µÄµã¼ÓÉÏ
+				//å°†æ£€æµ‹åˆ°çš„ç‚¹åŠ ä¸Š
 				if(connection){
 					for(TMap k = 0; k < list_length; ++k)
 						globalMap[list[k].x][list[k].y] = tmpGlobalMap[i][j];
@@ -559,7 +560,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			}
 		}
 
-	//¸üĞÂÊ×¶¼
+	//æ›´æ–°é¦–éƒ½
 	for(TMap i = 0; i < playerSize; ++i)
 	{
 		TPosition tmpPos = NewCapitalList[i];
@@ -573,17 +574,18 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			playerCapital[i] = invalidPos;
 	}
 
-		//¼ì²â°üÎ§
-	//newIsSiegedPlayerÊı×éÖĞ0´ú±í»¹Î´¼ÓÈëbfsÖĞ£¬
-	//1´ú±íÒÑ¾­¼ÓÈë£¨¿ÉÄÜÎ´ÅĞ¶Ï£¬Ò²¿ÉÄÜÅĞ¶ÏÁË²»ÁªÍ¨£©£¬
-	//2´ú±íÁªÍ¨
+		//æ£€æµ‹åŒ…å›´
+	//newIsSiegedPlayeræ•°ç»„ä¸­0ä»£è¡¨è¿˜æœªåŠ å…¥bfsä¸­ï¼Œ
+
+	//1ä»£è¡¨å·²ç»åŠ å…¥ï¼ˆå¯èƒ½æœªåˆ¤æ–­ï¼Œä¹Ÿå¯èƒ½åˆ¤æ–­äº†ä¸è”é€šï¼‰ï¼Œ
+	//2ä»£è¡¨è”é€š
 	for(TMap i = 0; i < playerCapital.size(); ++i)
 	{
 		if(isPosValid(playerCapital[i]))
 		{
 			TMap xPos = playerCapital[i].x, yPos = playerCapital[i].y;
 			newIsSiegedPlayer[xPos][yPos] = 2;
-			//ÔÙ×öÒ»´Îbfs£¬ÀûÓÃ¾²Ì¬µÄbfsÊı×é
+			//å†åšä¸€æ¬¡bfsï¼Œåˆ©ç”¨é™æ€çš„bfsæ•°ç»„
 			head = tail = 0;
 			if(xPos > 0 && newIsSiegedPlayer[xPos - 1][yPos] == 0)
 			{
@@ -611,6 +613,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				bfs_queue[tail].x = xPos;
 				bfs_queue[tail].y = yPos + 1;
 				newIsSiegedPlayer[xPos][yPos + 1] = 1;
+
 				tail++;
 			}
 			while(head != tail)
@@ -647,6 +650,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							bfs_queue[tail].x = x_pos;
 							bfs_queue[tail].y = y_pos + 1;
 							newIsSiegedPlayer[x_pos][y_pos + 1] = 1;
+
 							tail++;
 						}
 					}
@@ -666,7 +670,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				}
 		}
 	}
-	//ÉÏÃæÒ»²¿·ÖÊÇ°ÑËùÓĞµÄ°üÀ¨Í¬ÃËµÄÁ¬Í¨È«²¿ËãÉÏÁË£¬ÏÂÃæµ¥¶À¼õÈ¥Ê×¶¼²»ºÏ·¨µÄ
+	//ä¸Šé¢ä¸€éƒ¨åˆ†æ˜¯æŠŠæ‰€æœ‰çš„åŒ…æ‹¬åŒç›Ÿçš„è¿é€šå…¨éƒ¨ç®—ä¸Šäº†ï¼Œä¸‹é¢å•ç‹¬å‡å»é¦–éƒ½ä¸åˆæ³•çš„
 	for(TMap i = 0; i < cols; ++i)
 		for(TMap j = 0; j < rows; ++j)
 		{
@@ -678,9 +682,12 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				isSieged[i][j] = true;
 			else
 				isSieged[i][j] = false;
+			else
+				isSieged[i][j] = true;
 		}
     return false;
 }
+
 
 bool Game::isPlayer(TId id)
 {
@@ -696,8 +703,6 @@ bool Game::ProducingPhase()
         playerArea[id] = 0;
         // lowest income
         playerIncome[id] = 1;
-        // corruption 
-        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
     }
     // map income 
     for (TMap i=0; i<cols; i++)
@@ -714,6 +719,8 @@ bool Game::ProducingPhase()
 
     for (TId id=0; id<playerSize; ++id)
 	{
+        // corruption 
+        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
         // city income
 		if (isPosValid(playerCapital[id]))
 		{

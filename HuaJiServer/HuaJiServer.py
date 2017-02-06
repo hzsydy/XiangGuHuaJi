@@ -33,6 +33,8 @@ viewer_list=[]
 
 curr_round_count = 0
 
+log_file = open("server_log.txt", "w")
+
 # kill a player
 def killPlayer(player_id):
     if player_id<0 or player_id>=PLAYER_COUNT_MAX:
@@ -67,6 +69,11 @@ def sendToAll(data, push_flag=False):
     if not push_flag and (status == ServerStatus.Ready or status == ServerStatus.Bidding):
         print "[Warning] Server ought to keep silent before `ServerStatus.Playing`"
         return
+    
+    try:
+        log_file.write(data+"\r\n")
+    except:
+        print "[Warning] log file not ready."
 
     for i in range(PLAYER_COUNT_MAX):
         if player_status_list[i]==PlayerStatus.OK:
@@ -81,12 +88,14 @@ def sendToAll(data, push_flag=False):
         except:
             deleteConnection(s,a,n) 
 
-# send XghjAction.NextRound to all 
-def sendNextRound():
-    print "[Info] Everyone go ahead!"
+# send XghjAction.sendNewGame to all 
+def sendNewGame():
+    print "[Info] New Game"
     global curr_round_count
+    curr_round_count = 0
+    content = str(PLAYER_COUNT_MAX)
     obj = XghjObject()
-    obj.set(XghjSender.Server, XghjAction.NextRound, "Everyone go ahead!")
+    obj.set(XghjSender.Server, XghjAction.NewGame, content)
     obj.round = curr_round_count
 
     sendToAll(obj.toString(), True)
@@ -158,7 +167,7 @@ def checkNewConnection(sock, addr):
             # keep him
             valid = True
             userName = first_obj.content
-            viewer_list.append((sock, addrs, userName))
+            viewer_list.append((sock, addr, userName))
         else:
             # ?? sender
             obj.content = "[Error] unidentified sender."
@@ -305,7 +314,7 @@ if "__main__"==__name__:
     
     # bidding
     print "[Game] Bidding. Stop accepting connections."
-    sendNextRound()
+    sendNewGame()
     biddingPhase()
 
     # game main phase
@@ -317,3 +326,5 @@ if "__main__"==__name__:
     
     status = ServerStatus.GameOver
 
+    log_file.close()
+    
