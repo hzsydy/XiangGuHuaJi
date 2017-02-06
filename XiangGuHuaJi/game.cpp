@@ -306,8 +306,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	static TPosition list[1000];
 	int list_length = 0;
 
-	//basemap类对象，用于调用函数
-
 	//存储钱是否够的数组
 	vector<TMask> moneyEnough(playerSize);
 
@@ -339,9 +337,13 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 		changeMap[i].resize(rows, false);
 
 	//判断连通性用到的
-	vector<vector<TMask>> newIsSieged(cols);
+	vector<vector<int>> newIsSiegedPlayer(cols);
 	for(int i = 0; i < cols; ++i)
-		newIsSieged[i].resize(rows, true);
+		newIsSiegedPlayer[i].resize(rows, 0);
+
+	vector<vector<TMask>> newIsSiegedAll(cols);
+	for(int i = 0; i < cols; ++i)
+		newIsSiegedAll[i].resize(rows, true);
 
 	//开始执行命令队列的内容
 	for(TMilitary i = 0; i < playerSize;++i)
@@ -571,37 +573,44 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			playerCapital[i] = invalidPos;
 	}
 
-	//检测包围
+		//检测包围
+	//newIsSiegedPlayer数组中0代表还未加入bfs中，
+	//1代表已经加入（可能未判断，也可能判断了不联通），
+	//2代表联通
 	for(TMap i = 0; i < playerCapital.size(); ++i)
 	{
 		if(isPosValid(playerCapital[i]))
 		{
 			TMap xPos = playerCapital[i].x, yPos = playerCapital[i].y;
-			newIsSieged[xPos][yPos] = false;
+			newIsSiegedPlayer[xPos][yPos] = 2;
 			//再做一次bfs，利用静态的bfs数组
 			head = tail = 0;
-			if(xPos > 0 && newIsSieged[xPos - 1][yPos])
+			if(xPos > 0 && newIsSiegedPlayer[xPos - 1][yPos] == 0)
 			{
 				bfs_queue[tail].x = xPos - 1;
 				bfs_queue[tail].y = yPos;
+				newIsSiegedPlayer[xPos - 1][yPos] = 1;
 				tail++;
 			}
-			if(xPos + 1 < cols && newIsSieged[xPos + 1][yPos])
+			if(xPos + 1 < cols && newIsSiegedPlayer[xPos + 1][yPos] == 0)
 			{
 				bfs_queue[tail].x = xPos + 1;
 				bfs_queue[tail].y = yPos;
+				newIsSiegedPlayer[xPos + 1][yPos] = 1;
 				tail++;
 			}
-			if(yPos > 0 && newIsSieged[xPos][yPos - 1])
+			if(yPos > 0 && newIsSiegedPlayer[xPos][yPos - 1] == 0)
 			{
 				bfs_queue[tail].x = xPos;
 				bfs_queue[tail].y = yPos - 1;
+				newIsSiegedPlayer[xPos][yPos - 1] = 1;
 				tail++;
 			}
-			if(yPos + 1 < rows && newIsSieged[xPos][yPos + 1])
+			if(yPos + 1 < rows && newIsSiegedPlayer[xPos][yPos + 1] == 0)
 			{
 				bfs_queue[tail].x = xPos;
 				bfs_queue[tail].y = yPos + 1;
+				newIsSiegedPlayer[xPos][yPos + 1] = 1;
 				tail++;
 			}
 			while(head != tail)
@@ -609,37 +618,52 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				TMap x_pos = bfs_queue[head].x, y_pos = bfs_queue[head].y;
 				if(globalMap[x_pos][y_pos] != NEUTRAL_PLAYER_ID)
 				{
-					if(diplomacy[i][globalMap[x_pos][y_pos]])
+					if(diplomacy[i][globalMap[x_pos][y_pos]] == Allied)
 					{
-						newIsSieged[x_pos][y_pos] = false;
-						if(x_pos > 0 && newIsSieged[x_pos - 1][y_pos])
+						newIsSiegedPlayer[x_pos][y_pos] = 2;
+						if(x_pos > 0 && newIsSiegedPlayer[x_pos - 1][y_pos] == 0)
 						{
 							bfs_queue[tail].x = x_pos - 1;
 							bfs_queue[tail].y = y_pos;
+							newIsSiegedPlayer[x_pos - 1][y_pos] = 1;
 							tail++;
 						}
-						if(x_pos + 1< cols && newIsSieged[x_pos + 1][y_pos])
+						if(x_pos + 1< cols && newIsSiegedPlayer[x_pos + 1][y_pos] == 0)
 						{
 							bfs_queue[tail].x = x_pos + 1;
 							bfs_queue[tail].y = y_pos;
+							newIsSiegedPlayer[x_pos + 1][y_pos] = 1;
 							tail++;
 						}
-						if(y_pos > 0 && newIsSieged[x_pos][y_pos - 1])
+						if(y_pos > 0 && newIsSiegedPlayer[x_pos][y_pos - 1] == 0)
 						{
 							bfs_queue[tail].x = x_pos;
 							bfs_queue[tail].y = y_pos - 1;
+							newIsSiegedPlayer[x_pos][y_pos - 1] = 1;
 							tail++;
 						}
-						if(y_pos + 1 < rows && newIsSieged[x_pos][y_pos + 1])
+						if(y_pos + 1 < rows && newIsSiegedPlayer[x_pos][y_pos + 1] == 0)
 						{
 							bfs_queue[tail].x = x_pos;
 							bfs_queue[tail].y = y_pos + 1;
+							newIsSiegedPlayer[x_pos][y_pos + 1] = 1;
 							tail++;
 						}
 					}
 				}
+				else
+				{
+					newIsSiegedPlayer[x_pos][y_pos] = 2;
+				}
 				head++;
 			}
+			for(int j = 0; j < cols; ++j)
+				for(int k = 0; k < rows; ++k)
+				{
+					if(newIsSiegedPlayer[j][k] == 2)
+						newIsSiegedAll[j][k] = false;
+					newIsSiegedPlayer[j][k] = 0;
+				}
 		}
 	}
 	//上面一部分是把所有的包括同盟的连通全部算上了，下面单独减去首都不合法的
@@ -648,12 +672,14 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 		{
 			if(globalMap[i][j] == NEUTRAL_PLAYER_ID)
 				isSieged[i][j] = false;
-			else if(isPosValid(playerCapital[globalMap[i][j]]))
-				isSieged[i][j] = newIsSieged[i][j];
+			else if(newIsSiegedAll[i][j])
+				isSieged[i][j] = true;
+			else if(!isPosValid(playerCapital[globalMap[i][j]]))
+				isSieged[i][j] = true;
 			else
 				isSieged[i][j] = false;
 		}
-    return false; //TODO
+    return false;
 }
 
 bool Game::isPlayer(TId id)
