@@ -554,7 +554,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				//将检测到的点加上
 				if(connection){
 					for(TMap k = 0; k < list_length; ++k)
-						globalMap[list[k].x][list[k].y] = tmpGlobalMap[i][j];
+						globalMap[list[k].x][list[k].y] = tmpGlobalMap[list[k].x][list[k].y];
 				}
 				list_length = 0;
 			}
