@@ -306,9 +306,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	static TPosition list[1000];
 	int list_length = 0;
 
-	//存储钱是否够的数组
-	vector<TMask> moneyEnough(playerSize);
-
 	//防御力的数组
 	vector<vector<float> > defPower(cols);
 	for(TMap i = 0; i < cols; ++i)
@@ -348,15 +345,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	//开始执行命令队列的内容
 	for(TMilitary i = 0; i < playerSize;++i)
 	{
-		//判断钱是否够用
-		for(TMilitary j = 0; j < MilitaryCommandList[i].size(); ++j)
-		{
-			bombSumCost += MilitaryCommandList[i][j].bomb_size*UNIT_BOMB_COST;
-		}
-		if(bombSumCost > playerSaving[i])
-			moneyEnough[i] = false;
-		else
-			moneyEnough[i] = true;
 		bombSumCost = 0;
 		//攻击力和防御力
 		for(TMilitary j = 0; j <= MilitaryCommandList[i].size(); ++j)
@@ -393,8 +381,19 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				TMap xPos, yPos;
 				xPos = MilitaryCommandList[i][j].place.x;
 				yPos = MilitaryCommandList[i][j].place.y;
-				//加了一条放置地点合法性的判断
+				//首先判断钱是否够用,如果已经超过预算了，跳过后续放置炸弹部分，直接到首都影响一块
+				bombSumCost += MilitaryCommandList[i][j].bomb_size*UNIT_BOMB_COST;
+				if(bombSumCost > playerSaving[i])
+				{
+					bombSumCost = playerSaving[i];
+					j = MilitaryCommandList[i].size();
+					break;
+				}
+				//加了一条放置地点合法性的判断，不在地图内，此次放置无效
 				if(xPos<0||xPos>=cols||yPos<0||yPos>=rows)
+					continue;
+				//如果放置在了中立地区，或者放在非自己以及同盟区域，则此次放置无效
+				if(globalMap[xPos][yPos] == NEUTRAL_PLAYER_ID || diplomacy[i][globalMap[xPos][yPos]] != Allied)
 					continue;
 				TMilitary atk = map.getMapAtk()[xPos][yPos];
 				for(TMap k = inf(xPos), m = (MILITARY_KERNEL_SIZE - 1)-(xPos - k); k < sup(xPos, cols); ++k, ++m)
@@ -412,6 +411,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				}
 			}
 		}
+		playerSaving[i] -= bombSumCost;
 	}
 	//计算战争结果
 	for(TMap i = 0; i <cols; ++i)
