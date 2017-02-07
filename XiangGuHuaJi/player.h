@@ -13,6 +13,9 @@
 #include "ai.h"
 
 #ifdef _MSC_VER
+// Du 2017.2.6
+// EXCLUDE windows sockets
+#define WIN32_LEAN_AND_MEAN
 #include"windows.h"
 #define __FUCK_LOADDLL(x) LoadLibraryA(x)
 #define __FUCK_CLOSEDLL(x) FreeLibrary(x)
