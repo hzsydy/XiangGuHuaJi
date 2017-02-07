@@ -15,11 +15,16 @@
 #include<string>
 #include<sstream>
 
-#include "definition.h"
-#include "game.h"
 
 #include "xghj_protocol.h"
 #include "military_kernel_reader.h"
+
+//Start with boost/asio.hpp and put windows.h after it.
+//妈的这是什么傻逼设计
+
+#include "definition.h"
+#include "game.h"
+#include "player.h"
 
 using namespace std;
 using namespace XGHJ;
