@@ -342,6 +342,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	for(int i = 0; i < cols; ++i)
 		newIsSiegedAll[i].resize(rows, true);
 
+
 	//开始执行命令队列的内容
 	for(TMilitary i = 0; i < playerSize;++i)
 	{
@@ -575,6 +576,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
 		//检测包围
 	//newIsSiegedPlayer数组中0代表还未加入bfs中，
+
 	//1代表已经加入（可能未判断，也可能判断了不联通），
 	//2代表联通
 	for(TMap i = 0; i < playerCapital.size(); ++i)
@@ -611,6 +613,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 				bfs_queue[tail].x = xPos;
 				bfs_queue[tail].y = yPos + 1;
 				newIsSiegedPlayer[xPos][yPos + 1] = 1;
+
 				tail++;
 			}
 			while(head != tail)
@@ -647,6 +650,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							bfs_queue[tail].x = x_pos;
 							bfs_queue[tail].y = y_pos + 1;
 							newIsSiegedPlayer[x_pos][y_pos + 1] = 1;
+
 							tail++;
 						}
 					}
@@ -682,6 +686,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     return false;
 }
 
+
 bool Game::isPlayer(TId id)
 {
     return id >= 0 && id < playerSize;
@@ -696,8 +701,6 @@ bool Game::ProducingPhase()
         playerArea[id] = 0;
         // lowest income
         playerIncome[id] = 1;
-        // corruption 
-        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
     }
     // map income 
     for (TMap i=0; i<cols; i++)
@@ -714,6 +717,8 @@ bool Game::ProducingPhase()
 
     for (TId id=0; id<playerSize; ++id)
 	{
+        // corruption 
+        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
         // city income
 		if (isPosValid(playerCapital[id]))
 		{
@@ -876,22 +881,39 @@ Info Game::generateInfo(TId playerid) const
 
 void Game::DiscoverCountry()
 {
-	for (TMap i = 0; i <cols; ++i)
-		for (TMap j = 0; j < rows; ++j)
-			for (int fi = -1; fi <= 1; fi += 2)
-				for (int fj = -1; fj <= 1; fj += 2)
-					for (int k = 1; k <= FIELD_BOUNDARY; ++k)
-						for (int pi = 0; pi <= k; ++pi)
-						{
-							int pj = k - pi;
-							int si = i + fi * pi;
-							int sj = j + fj * pj;
-							if (si >= 0 && si < cols && sj >= 0 && sj < rows)
-								if (globalMap[i][j] != globalMap[si][sj] && globalMap[i][j] < playerSize && globalMap[si][sj] < playerSize)
-									if (diplomacy[globalMap[i][j]][globalMap[si][sj]] == Undiscovered)
-										diplomacy[globalMap[i][j]][globalMap[si][sj]] = Neutral;
-						}
+    for (TMap i = 0; i <cols; ++i)
+        for (TMap j = 0; j < rows; ++j)
+            for (int fi = -1; fi <= 1; fi += 2)
+                for (int fj = -1; fj <= 1; fj += 2)
+                    for (int k = 1; k <= FIELD_BOUNDARY; ++k)
+                        for (int pi = 0; pi <= k; ++pi)
+                        {
+                            int pj = k - pi;
+                            int si = i + fi * pi;
+                            int sj = j + fj * pj;
+                            if (si >= 0 && si < cols && sj >= 0 && sj < rows)
+                                if (globalMap[i][j] != globalMap[si][sj] && globalMap[i][j] < playerSize && globalMap[si][sj] < playerSize)
+                                {
+                                    for (int qt = 0; qt < playerSize; ++qt)
+                                    {
+                                        if (qt != globalMap[i][j])
+                                        {
+                                            if (diplomacy[globalMap[i][j]][qt] == Allied)
+                                            {
+                                                if (diplomacy[qt][globalMap[si][sj]] == Undiscovered)
+                                                    diplomacy[qt][globalMap[si][sj]] = Neutral;
+                                                if (diplomacy[globalMap[si][sj]][qt] == Undiscovered)
+                                                    diplomacy[globalMap[si][sj]][qt] = Neutral;
+                                            }
+                                        }
+
+                                    }
+                                    if (diplomacy[globalMap[i][j]][globalMap[si][sj]] == Undiscovered)
+                                        diplomacy[globalMap[i][j]][globalMap[si][sj]] = Neutral;
+                                }
+                        }
 }
+
 
 TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
 {

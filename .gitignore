@@ -11,7 +11,9 @@ TestAi/
 *.swp
 fuck*
 test*
-
+log_*.txt
+log.txt
+server_log.txt
 
 # Compiled Object files
 *.slo
