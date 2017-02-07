@@ -81,7 +81,7 @@ namespace XGHJ
                 if (player.isValid())
                 {
                     cout << "Calling Player " << (int)id << "'s birthplacePrice() method" << endl;
-                    players_[id].run(price);
+                    players_[id].run(price, &(game_.map));
                 }
                 else
                 {
@@ -111,7 +111,7 @@ namespace XGHJ
                 if (player.isValid())
                 {
                     cout << "Calling Player " << (int)id << "'s birthplacePrice() method" << endl;
-                    players_[id].run(pos, posChoosed);
+                    players_[id].run(pos, posChoosed, &(game_.map));
                 }
                 else
                 {

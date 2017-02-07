@@ -122,7 +122,7 @@ int getNumber() {
 
 }
 
-TMoney birthplacePrice(void)
+TMoney birthplacePrice(BaseMap* map)
 {
     SetColor(Gray);
     printf("price for birthprice >>> ");
@@ -132,7 +132,7 @@ TMoney birthplacePrice(void)
     return t;
 }
 
-TPosition birthplace(vector<TPosition> posSelected)
+TPosition birthplace(vector<TPosition> posSelected, BaseMap* map)
 {
     SetColor(Gray);
     printf("Birthplaces choosed:");

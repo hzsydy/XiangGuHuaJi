@@ -8,7 +8,7 @@ namespace XGHJ
 {
 
 inline float x2plusy2(float x, float y){return x*x+y*y;}
-
+inline float absDist(TPosition p1, TPosition p2){return abs(p1.x-p2.x)+abs(p1.y-p2.y);}
 
 Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
@@ -29,8 +29,9 @@ Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
 			globalMap[i][j] = NEUTRAL_PLAYER_ID;
 			isSieged[i][j] = false;
 		}
-	}
-	playerCapital.resize(playerSize);
+    }
+    playerCapital.resize(playerSize);
+    playerCapital.assign(playerSize, invalidPos);
 	playerArea.resize(playerSize);
 	diplomacy.resize(playerSize);
 	roundToJusifyWar.resize(playerSize);
@@ -861,6 +862,7 @@ Info Game::generateInfo(TId playerid) const
 	info.map = &map;
 	info.rows = rows;
 	info.cols = cols;
+    info.militaryKernel = MilitaryKernel;
 	info.playerInfo = vector<PlayerInfo>(playerSize);
 	for (TId id=0; id<playerSize; id++)
 	{
@@ -944,6 +946,13 @@ bool Game::canSetGlobalMapPos(TPosition pos, TId id)
     if (globalMap[pos.x][pos.y] != NEUTRAL_PLAYER_ID)
     {
         return false;
+    }
+    for (TId i=0; i<id; i++)
+    {
+        if (absDist(playerCapital[i], pos)<MIN_ABS_DIST_BETWEEN_CAP)
+        {
+            return false;
+        }
     }
     return true;
 }

@@ -88,6 +88,8 @@ const static TId		NEUTRAL_PLAYER_ID = 233;
 const static TId		UNKNOWN_PLAYER_ID = 213;
 const static TId		PEKING_UNIVERSITY_ID = 0;
 
+const static TMap		MIN_ABS_DIST_BETWEEN_CAP = 3;
+
 
 struct PlayerInfo
 {    
@@ -118,6 +120,8 @@ struct Info
 	TRound round;
 
 	BaseMap* map;
+
+    vector<vector<float> > militaryKernel;
 
 	vector<PlayerInfo> playerInfo;
 	vector<vector<MapPointInfo> > mapPointInfo;

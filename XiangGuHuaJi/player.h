@@ -35,8 +35,8 @@ namespace XGHJ {
 using namespace std;
 
 typedef void (*TPlayerAi)(Info& info); 
-typedef TMoney (*TBirthplacePrice)(void);
-typedef TPosition (*TBirthplace)(vector<TPosition> posSelected);
+typedef TMoney (*TBirthplacePrice)(BaseMap* map);
+typedef TPosition (*TBirthplace)(vector<TPosition> posSelected, BaseMap* map);
 
 class Player
 {
@@ -46,8 +46,8 @@ public:
     ~Player();
 
     bool run(Info &info);
-    bool run(TMoney &price);
-    bool run(TPosition &pos, vector<TPosition> &posSelected);
+    bool run(TMoney &price, BaseMap* map);
+    bool run(TPosition &pos, vector<TPosition> &posSelected, BaseMap* map);
 
     bool load();
 

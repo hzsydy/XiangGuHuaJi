@@ -28,8 +28,8 @@ using namespace XGHJ;
 using namespace XGHJ_Client;
 
 
-const string server_ip = "166.111.72.13";
-//const string server_ip = "127.0.0.1";
+//const string server_ip = "166.111.72.13";
+const string server_ip = "127.0.0.1";
 const int server_port = 9999;
 const TId playerSize = 4;
 
@@ -151,7 +151,7 @@ int main(int argc, char** argv)
         cout << "[Game] bidding" << endl;
 
         // calc price
-        my_player.run(my_price);
+        my_player.run(my_price, &(game.map));
         bidPrice[my_player_id] = my_price;
 
         // send my price
@@ -180,7 +180,7 @@ int main(int argc, char** argv)
             pos.y = getNumber(&p);
             posUnaccessible.push_back(pos);
         }
-        my_player.run(my_pos, posUnaccessible);
+        my_player.run(my_pos, posUnaccessible, &(game.map));
 
         // send my_pos
         sprintf(buffer, "%d %d", my_pos.x, my_pos.y);

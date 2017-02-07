@@ -76,11 +76,11 @@ bool Player::run(Info &info)
     return true;
 }
 
-bool Player::run(TMoney &price)
+bool Player::run(TMoney &price, BaseMap* map)
 {
     try
     {
-        price = birthplacePrice();
+        price = birthplacePrice(map);
         if (price>INITIAL_PLAYER_MONEY) price = INITIAL_PLAYER_MONEY;
     }
     catch(exception e)
@@ -93,11 +93,11 @@ bool Player::run(TMoney &price)
     return true;
 }
 
-bool Player::run(TPosition &pos, vector<TPosition> &posSelected)
+bool Player::run(TPosition &pos, vector<TPosition> &posSelected, BaseMap* map)
 {
     try
     {
-        pos = birthplace(posSelected);
+        pos = birthplace(posSelected, map);
     }
     catch(exception e)
     {
