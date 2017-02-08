@@ -88,7 +88,9 @@ const static TId		NEUTRAL_PLAYER_ID = 233;
 const static TId		UNKNOWN_PLAYER_ID = 213;
 const static TId		PEKING_UNIVERSITY_ID = 0;
 
-const static TMap		MIN_ABS_DIST_BETWEEN_CAP = 3;
+const static TMap		MIN_ABS_DIST_BETWEEN_CAP = 3;//首都之间的最小街道距离
+
+const static float      UNIT_AREA_ALLY_COST = 0.2f;//维持与单位大小国家之间的同盟需要的维持费用。
 
 
 struct PlayerInfo

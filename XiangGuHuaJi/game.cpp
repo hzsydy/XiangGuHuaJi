@@ -114,12 +114,6 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
 	//TODO
-	//外交
-
-	//读取DiplomaticCommandMap
-	//更新Diplomacy（记得战争需要造WAR_JUSTIFY_TIME回合，不要忘了维护列表）
-	//记得扣钱（造借口要扣WAR_JUSTIFY_PRICE的钱）
-
 	//实现次要函数Game::getWarList
 
 	for (TId i = 0; i < playerSize-1; ++i)
@@ -132,7 +126,6 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 						playerSaving[i] -= WAR_JUSTIFY_PRICE;
 					else
 						DiplomaticCommandMap[i][j] = KeepNeutral;
-
 				}
 				if (DiplomaticCommandMap[j][i] == JustifyWar)
 				{
@@ -141,6 +134,22 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 					else
 						DiplomaticCommandMap[j][i] = KeepNeutral;
 				}
+                if (DiplomaticCommandMap[i][j] == FormAlliance)
+                {
+                    int m = (int)(UNIT_AREA_ALLY_COST*playerArea[j]);
+                    if (playerSaving[i] >= m)
+                        playerSaving[i] -= m;
+                    else
+                        DiplomaticCommandMap[i][j] = KeepNeutral;
+                }
+                if (DiplomaticCommandMap[j][i] == FormAlliance)
+                {
+                    int m = (int)(UNIT_AREA_ALLY_COST*playerArea[i]);
+                    if (playerSaving[j] >= m)
+                        playerSaving[j] -= m;
+                    else
+                        DiplomaticCommandMap[j][i] = KeepNeutral;
+                }
 				if (DiplomaticCommandMap[i][j] == Backstab)
 				{
 					if (backstabUsed[i] == false)
@@ -808,9 +817,9 @@ PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
 
 TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 {
-	//TODO
 	if (globalMap[x][y] == playerId) return true;
-	if (globalMap[x][y] != NEUTRAL_PLAYER_ID && (diplomacy[playerId][globalMap[x][y]] == Neutral || diplomacy[playerId][globalMap[x][y]] == Allied))
+	//if (globalMap[x][y] != NEUTRAL_PLAYER_ID && (diplomacy[playerId][globalMap[x][y]] == Neutral || diplomacy[playerId][globalMap[x][y]] == Allied))
+    if (globalMap[x][y] != NEUTRAL_PLAYER_ID && (diplomacy[playerId][globalMap[x][y]] == Allied))
 		return true;
 	for (int fi = -1; fi <= 1; fi += 2)
 		for (int fj = -1; fj <= 1; fj += 2)
