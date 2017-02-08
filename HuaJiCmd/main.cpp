@@ -28,46 +28,40 @@ std::string replaceAll( std::string const& original, std::string const& from, st
     return results;
 }
 
-const string  config_filename =
-#ifdef _MSC_VER
-    "../config_msvc.ini";
-#endif
-#ifdef __GNUC__
-    "../config_linux.ini";
-#endif    
-
-
-
 int main(int argc, char** argv) 
 {
-	vector<Player>  players;
-    string          map_filename; 
-    string          mknl_filename; 
-	vector<string>  players_filename;
-	if (argc == 1) 
-    {
-        ifstream ifs(config_filename.c_str());    
-        if(!ifs){
-            cout<<"Failed to load \""<< config_filename << "\". Aborted. " << endl;
-            return -1;
-        }
-        ifs >> map_filename;   
-        ifs >> mknl_filename;   
-        while (!ifs.eof())         
-        {
-            string player_filename;
-            ifs >> player_filename; 
-            if (!player_filename.empty()) players_filename.push_back(player_filename);
-        }
+    string  config_filename = "../config_msvc.ini";
+
+    if (argc ==2) {
+        config_filename = argv[1];
     }
-	else
-	{
+    else if (argc>=2) {
 		cout<<"usage:												"<<endl
 			<<"XiangGuHuaji						Load config file	"<<endl
 		;
 	}
 
-    
+
+	vector<Player>  players;
+    string          map_filename; 
+    string          mknl_filename; 
+	vector<string>  players_filename;
+
+    ifstream ifs(config_filename.c_str());    
+    if(!ifs){
+        cout<<"Failed to load \""<< config_filename << "\". Aborted. " << endl;
+        return -1;
+    }
+    ifs >> map_filename;   
+    ifs >> mknl_filename;   
+    while (!ifs.eof())         
+    {
+        string player_filename;
+        ifs >> player_filename; 
+        if (!player_filename.empty()) players_filename.push_back(player_filename);
+    }
+
+
     if (players_filename.size()==0) 
     {
         cout << "No player ai file's names inputed. Aborted. " << endl;

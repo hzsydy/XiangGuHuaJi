@@ -577,7 +577,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
 		//检测包围
 	//newIsSiegedPlayer数组中0代表还未加入bfs中，
-
 	//1代表已经加入（可能未判断，也可能判断了不联通），
 	//2代表联通
 	for(TMap i = 0; i < playerCapital.size(); ++i)
@@ -665,7 +664,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 			for(int j = 0; j < cols; ++j)
 				for(int k = 0; k < rows; ++k)
 				{
-					if(newIsSiegedPlayer[j][k] == 2)
+					if(newIsSiegedPlayer[j][k] == 2 && globalMap[j][k] == i)
 						newIsSiegedAll[j][k] = false;
 					newIsSiegedPlayer[j][k] = 0;
 				}
@@ -675,11 +674,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 	for(TMap i = 0; i < cols; ++i)
 		for(TMap j = 0; j < rows; ++j)
 		{
-			if(globalMap[i][j] == NEUTRAL_PLAYER_ID)
-				isSieged[i][j] = false;
-			else if(newIsSiegedAll[i][j])
-				isSieged[i][j] = true;
-			else if(!isPosValid(playerCapital[globalMap[i][j]]))
+			if(newIsSiegedAll[i][j] && globalMap[i][j] != NEUTRAL_PLAYER_ID)
 				isSieged[i][j] = true;
 			else
 				isSieged[i][j] = false;

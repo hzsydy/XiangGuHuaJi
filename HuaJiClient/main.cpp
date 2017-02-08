@@ -33,23 +33,17 @@ const string server_ip = "127.0.0.1";
 const int server_port = 9999;
 const TId playerSize = 4;
 
-string config_filename =
-#ifdef _MSC_VER
-    "../config_msvc.ini";
-#endif
-#ifdef __GNUC__
-    "../config_linux.ini";
-#endif    
-
-
-
 int main(int argc, char** argv) 
 {
-    if (argc>=2) {
+    string config_filename = "../config_msvc.ini";
+
+    if (argc ==2) {
+        config_filename = argv[1];
+    }
+    else if (argc>=2) {
 		cout<<"usage:												"<<endl
-			<<"XiangGuHuaji						Load config file	"<<endl
+			<<"HuaJiClient						Load config file	"<<endl
 		;
-        return -1;
 	}
 
     char buffer[1024];
