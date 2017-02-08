@@ -8,7 +8,7 @@ namespace XGHJ
 {
 
 inline float x2plusy2(float x, float y){return x*x+y*y;}
-inline float absDist(TPosition p1, TPosition p2){return abs(p1.x-p2.x)+abs(p1.y-p2.y);}
+inline int absDist(TPosition p1, TPosition p2){return abs(p1.x-p2.x)+abs(p1.y-p2.y);}
 
 Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
@@ -862,6 +862,7 @@ Info Game::generateInfo(TId playerid) const
 	info.map = &map;
 	info.rows = rows;
 	info.cols = cols;
+    info.backstabUsed = backstabUsed[playerid];
     info.militaryKernel = MilitaryKernel;
 	info.playerInfo = vector<PlayerInfo>(playerSize);
 	for (TId id=0; id<playerSize; id++)

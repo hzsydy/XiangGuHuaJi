@@ -119,6 +119,8 @@ struct Info
 	TMap cols;
 	TRound round;
 
+    bool backstabUsed;
+
 	BaseMap* map;
 
     vector<vector<float> > militaryKernel;
