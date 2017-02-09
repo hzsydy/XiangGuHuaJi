@@ -262,6 +262,43 @@ namespace WorldEditor
             }
         }
 
+        private void 加载地形分布表ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string localFilePath = String.Empty;
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "地形csv(*.csv)|*.csv|所有文件(*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.RestoreDirectory = true;
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                localFilePath = openFileDialog.FileName.ToString();
+                int rows = -1;
+                int cols = -1;
+                int[,] table = CSVParser.readIntTable(localFilePath, ref rows, ref cols);
+                if (table != null)
+                {
+                    if (rows == map.rows && cols == map.cols)
+                    {
+                        for (int i=0;i<cols;i++)
+                        {
+                            for (int j = 0; j < rows;j++ )
+                            {
+                                map.landscape[i, j] = landscapes[table[i, j]];
+                            }
+                        }
+                        DrawMap();
+                    }
+                    else
+                    {
+                        MessageBox.Show("csv文件的行列数和地图长宽不对应");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("加载csv文件出现错误");
+                }
+            }
+        }
         
     }
 }

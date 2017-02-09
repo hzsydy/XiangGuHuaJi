@@ -33,6 +33,9 @@
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItemLoadRes = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItemSaveRes = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.textBoxRows = new System.Windows.Forms.TextBox();
             this.buttonNew = new System.Windows.Forms.Button();
@@ -48,9 +51,8 @@
             this.labelPosY = new System.Windows.Forms.Label();
             this.labelPosX = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItemLoadRes = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItemSaveRes = new System.Windows.Forms.ToolStripMenuItem();
+            this.加载地形分布表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.保存地形分布表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -75,7 +77,9 @@
             this.saveToolStripMenuItem,
             this.toolStripMenuItem2,
             this.ToolStripMenuItemLoadRes,
-            this.ToolStripMenuItemSaveRes});
+            this.ToolStripMenuItemSaveRes,
+            this.加载地形分布表ToolStripMenuItem,
+            this.保存地形分布表ToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.fileToolStripMenuItem.Text = "文件";
@@ -100,6 +104,26 @@
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.saveToolStripMenuItem.Text = "保存";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(166, 22);
+            this.toolStripMenuItem2.Text = "------------------";
+            // 
+            // ToolStripMenuItemLoadRes
+            // 
+            this.ToolStripMenuItemLoadRes.Name = "ToolStripMenuItemLoadRes";
+            this.ToolStripMenuItemLoadRes.Size = new System.Drawing.Size(166, 22);
+            this.ToolStripMenuItemLoadRes.Text = "加载资源分布表";
+            this.ToolStripMenuItemLoadRes.Click += new System.EventHandler(this.ToolStripMenuItemLoadRes_Click);
+            // 
+            // ToolStripMenuItemSaveRes
+            // 
+            this.ToolStripMenuItemSaveRes.Name = "ToolStripMenuItemSaveRes";
+            this.ToolStripMenuItemSaveRes.Size = new System.Drawing.Size(166, 22);
+            this.ToolStripMenuItemSaveRes.Text = "保存资源分布表";
+            this.ToolStripMenuItemSaveRes.Click += new System.EventHandler(this.ToolStripMenuItemSaveRes_Click);
             // 
             // groupBox1
             // 
@@ -248,25 +272,18 @@
             this.pictureBox1.TabStop = false;
             this.pictureBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseClick);
             // 
-            // toolStripMenuItem2
+            // 加载地形分布表ToolStripMenuItem
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(166, 22);
-            this.toolStripMenuItem2.Text = "------------------";
+            this.加载地形分布表ToolStripMenuItem.Name = "加载地形分布表ToolStripMenuItem";
+            this.加载地形分布表ToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.加载地形分布表ToolStripMenuItem.Text = "加载地形分布表";
+            this.加载地形分布表ToolStripMenuItem.Click += new System.EventHandler(this.加载地形分布表ToolStripMenuItem_Click);
             // 
-            // ToolStripMenuItemLoadRes
+            // 保存地形分布表ToolStripMenuItem
             // 
-            this.ToolStripMenuItemLoadRes.Name = "ToolStripMenuItemLoadRes";
-            this.ToolStripMenuItemLoadRes.Size = new System.Drawing.Size(166, 22);
-            this.ToolStripMenuItemLoadRes.Text = "加载资源分布表";
-            this.ToolStripMenuItemLoadRes.Click += new System.EventHandler(this.ToolStripMenuItemLoadRes_Click);
-            // 
-            // ToolStripMenuItemSaveRes
-            // 
-            this.ToolStripMenuItemSaveRes.Name = "ToolStripMenuItemSaveRes";
-            this.ToolStripMenuItemSaveRes.Size = new System.Drawing.Size(166, 22);
-            this.ToolStripMenuItemSaveRes.Text = "保存资源分布表";
-            this.ToolStripMenuItemSaveRes.Click += new System.EventHandler(this.ToolStripMenuItemSaveRes_Click);
+            this.保存地形分布表ToolStripMenuItem.Name = "保存地形分布表ToolStripMenuItem";
+            this.保存地形分布表ToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.保存地形分布表ToolStripMenuItem.Text = "保存地形分布表";
             // 
             // MainForm
             // 
@@ -318,6 +335,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemLoadRes;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemSaveRes;
+        private System.Windows.Forms.ToolStripMenuItem 加载地形分布表ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 保存地形分布表ToolStripMenuItem;
 
     }
 }

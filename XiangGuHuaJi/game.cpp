@@ -377,8 +377,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 							//这两个for循环用来计算首都出提供的攻击力和防御力，两个for循环的范围为高斯核矩阵的大小
 							//这里分为三种情况，对中立地区施加攻，对同盟施加防御力和对敌对势力施加攻击力
 							if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
-								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
-							else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
+                                atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
+							else if((diplomacy[i][globalMap[k][l]] == Allied) && (!isSieged[k][l]))
 								defPower[k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);
 							else if(diplomacy[i][globalMap[k][l]] == AtWar)
 								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
@@ -944,9 +944,9 @@ TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
 
 bool Game::canSetGlobalMapPos(TPosition pos, TId id)
 {
-    //if (pos.x<0) return false;
+    if (pos.x<0) return false;
     if (pos.x>cols-1) return false;
-    //if (pos.y<0) return false;
+    if (pos.y<0) return false;
     if (pos.y>rows-1) return false;
     if (globalMap[pos.x][pos.y] != NEUTRAL_PLAYER_ID)
     {
