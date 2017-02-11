@@ -107,7 +107,7 @@ namespace XGHJ
             {
                 TId id = std::get<1>(bidPriceTuple[i]);
                 Player& player = players_[id];
-                TPosition pos = invalidPos;
+                TPosition pos = INVALID_POSITION;
                 if (player.isValid())
                 {
                     cout << "Calling Player " << (int)id << "'s birthplacePrice() method" << endl;

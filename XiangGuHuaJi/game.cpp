@@ -1,14 +1,18 @@
-/* XiangGuHuaJi 2016, game.cpp
+ï»¿/* XiangGuHuaJi 2016, game.cpp
  * 
  */
 
 #include "game.h"
 
+#include <queue>
+
 namespace XGHJ 
 {
 
+using namespace std;
+
 inline float x2plusy2(float x, float y){return x*x+y*y;}
-inline int absDist(TPosition p1, TPosition p2){return abs(p1.x-p2.x)+abs(p1.y-p2.y);}
+inline int absDist(TPosition p1, TPosition p2){return abs((int)p1.x-(int)p2.x)+abs((int)p1.y-(int)p2.y);}
 
 Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
@@ -31,7 +35,7 @@ Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
 		}
     }
     playerCapital.resize(playerSize);
-    playerCapital.assign(playerSize, invalidPos);
+    playerCapital.assign(playerSize, INVALID_POSITION);
 	playerArea.resize(playerSize);
 	diplomacy.resize(playerSize);
 	roundToJusifyWar.resize(playerSize);
@@ -83,8 +87,8 @@ bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
         }
         else
         {
-            playerCapital[i] = invalidPos;
-            //ÄÇ¾ÍÖ±½Ó¸ÉËÀ°É »¬»ü¿©
+            playerCapital[i] = INVALID_POSITION;
+            //é‚£å°±ç›´æ¥å¹²æ­»å§ æ»‘ç¨½å’¯
             isPlayerAlive[i] = false;
         }
         playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
@@ -113,9 +117,6 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
 //Diplomacy Phase (Deal with DiplomaticCommandMap)
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
-	//TODO
-	//ÊµÏÖ´ÎÒªº¯ÊıGame::getWarList
-
 	for (TId i = 0; i < playerSize-1; ++i)
 		for (TId j = i+1; j < playerSize; ++j)
 			if (i != j && diplomacy[i][j] != Undiscovered)
@@ -284,9 +285,14 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 
 vector<TId> Game::getWarList(TId id) const
 {
-	vector<TId> wl;
-	//TODO
-	return wl;
+    vector<TId> wl;
+    for (TId i = 0; i < playerSize; ++i)
+    {
+        if (id != i && diplomacy[id][i] == AtWar)
+        wl.push_back(i);
+    }
+    return wl;
+
 }
 
 TMap Game::inf(TMap pos)
@@ -305,392 +311,256 @@ TMap Game::sup(TMap pos, TMap max)
 		return max;
 }
 
-bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList)
+bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList) 
 {
-	//¶ÁÈ¡MilitaryCommandList²¢ÇÒ¿ÛUNIT_BOMB_COSTµÄÇ®
-	TMoney bombSumCost = 0;
+    // å½±å“åŠ›å›¾
+    vector<vector<vector<TMilitary> > > player_influence_map(playerSize,
+        vector<vector<TMilitary> >(cols, 
+        vector<TMilitary>(rows, 0)));
+    // é˜²å¾¡åŠ›å›¾
+    vector<vector<TMilitary> > map_defense(cols,
+        vector<TMilitary>(rows, 0));
+    // å‡»ç ´å›¾
+    vector<vector<TId> > map_new_owner(cols, 
+        vector<TId>(rows, UNKNOWN_PLAYER_ID));
+    
+    // bfsç”¨çš„é˜Ÿåˆ—
+    queue<TPosition> q;
 
-	//¾²Ì¬Êı×é£¬ÓÃÓÚ¹¹ÔìbfsµÄÕ»
-	static TPosition bfs_queue[1000000];
-	int head = 0, tail = 0;
-	static TPosition list[1000];
-	int list_length = 0;
-
-	//·ÀÓùÁ¦µÄÊı×é
-	vector<vector<float> > defPower(cols);
-	for(TMap i = 0; i < cols; ++i)
-	{
-		defPower[i].resize(rows, 0);
-	}
-
-	//¹¥»÷Á¦µÄÊı×é
-	vector<vector<vector<float> > > atkPower(playerSize);
-	for(TMilitary i = 0; i <playerSize; ++i)
-	{
-		atkPower[i].resize(cols);
-		for(TMilitary j = 0; j < cols; ++j)
-		{
-			atkPower[i][j].resize(rows, 0);
-		}
-	}
-
-	//±¾¾ÖÕ½Õù½á¹ûµØÍ¼
-	vector<vector<TId>> tmpGlobalMap(cols);
-	for(TId i = 0; i < cols; ++i)
-		tmpGlobalMap[i].resize(rows, UNKNOWN_PLAYER_ID);
-
-	vector<vector<TMask>> changeMap(cols);
-	for(TMap i = 0; i < cols; ++i)
-		changeMap[i].resize(rows, false);
-
-	//ÅĞ¶ÏÁ¬Í¨ĞÔÓÃµ½µÄ
-	vector<vector<int>> newIsSiegedPlayer(cols);
-	for(int i = 0; i < cols; ++i)
-		newIsSiegedPlayer[i].resize(rows, 0);
-
-	vector<vector<TMask>> newIsSiegedAll(cols);
-	for(int i = 0; i < cols; ++i)
-		newIsSiegedAll[i].resize(rows, true);
+    // åœ°å›¾è¿é€šæ€§å¤„ç†ç”¨å¸¸æ•°
+    const char NON_CONTROL = 0;
+    const char UNDER_CONTROL = 1;
+    const char NEW_POSITION = 2;
+    // å››è¿é€šæ–¹å‘
+    const int dx[] = { 0,  1,  0, -1};
+    const int dy[] = {-1,  0,  1,  0};
 
 
-	//¿ªÊ¼Ö´ĞĞÃüÁî¶ÓÁĞµÄÄÚÈİ
-	for(TMilitary i = 0; i < playerSize;++i)
-	{
-		bombSumCost = 0;
-		//¹¥»÷Á¦ºÍ·ÀÓùÁ¦
-		for(TMilitary j = 0; j <= MilitaryCommandList[i].size(); ++j)
-		{
-			//µ¥¶À¼ÆËãÊ×¶¼
-			if(j == MilitaryCommandList[i].size())
-			{
-				if(isPosValid(playerCapital[i]))
-				{
-					//ÏÂÃæÁ½¸öÊÇÊ×¶¼µÄÎ»ÖÃ×ø±ê£¬ÒÔ¼°Ê×¶¼´¦µØĞÎµÄ¹¥»÷Á¦
-					TMap capXPos, capYPos;
-					capXPos = playerCapital[i].x;
-					capYPos = playerCapital[i].y;
-					TMilitary atk = map.getMapAtk()[capXPos][capYPos];
-					for(TMap k = inf(capXPos), m = (MILITARY_KERNEL_SIZE - 1)-(capXPos - k); k < sup(capXPos, cols); ++k, ++m)
-					{
-						for(TMap l = inf(capYPos), n = (MILITARY_KERNEL_SIZE - 1)-(capYPos - l); l < sup(capYPos, rows); ++l, ++n)
-						{
-							//ÕâÁ½¸öforÑ­»·ÓÃÀ´¼ÆËãÊ×¶¼³öÌá¹©µÄ¹¥»÷Á¦ºÍ·ÀÓùÁ¦£¬Á½¸öforÑ­»·µÄ·¶Î§Îª¸ßË¹ºË¾ØÕóµÄ´óĞ¡
-							//ÕâÀï·ÖÎªÈıÖÖÇé¿ö£¬¶ÔÖĞÁ¢µØÇøÊ©¼Ó¹¥£¬¶ÔÍ¬ÃËÊ©¼Ó·ÀÓùÁ¦ºÍ¶ÔµĞ¶ÔÊÆÁ¦Ê©¼Ó¹¥»÷Á¦
-							if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
-                                atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
-							else if((diplomacy[i][globalMap[k][l]] == Allied) && (!isSieged[k][l]))
-								defPower[k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);
-							else if(diplomacy[i][globalMap[k][l]] == AtWar)
-								atkPower[i][k][l] += playerIncome[i]*CAPITAL_INFLUENCE*MilitaryKernel[m][n]*atk;
-						}	
-					}
-				}
-			}
-			else
-			{
-				//ÕâÊÇ¶ÔÓÚÕ¨µ¯·ÅÖÃµãµÄ¼ÆËã£¬ºÍÉÏÃæÍêÈ«ÏàÍ¬
-				TMap xPos, yPos;
-				xPos = MilitaryCommandList[i][j].place.x;
-				yPos = MilitaryCommandList[i][j].place.y;
-				//Ê×ÏÈÅĞ¶ÏÇ®ÊÇ·ñ¹»ÓÃ,Èç¹ûÒÑ¾­³¬¹ıÔ¤ËãÁË£¬Ìø¹ıºóĞø·ÅÖÃÕ¨µ¯²¿·Ö£¬Ö±½Óµ½Ê×¶¼Ó°ÏìÒ»¿é
-				bombSumCost += MilitaryCommandList[i][j].bomb_size*UNIT_BOMB_COST;
-				if(bombSumCost > playerSaving[i])
-				{
-					bombSumCost = playerSaving[i];
-					j = MilitaryCommandList[i].size();
-					break;
-				}
-				//¼ÓÁËÒ»Ìõ·ÅÖÃµØµãºÏ·¨ĞÔµÄÅĞ¶Ï£¬²»ÔÚµØÍ¼ÄÚ£¬´Ë´Î·ÅÖÃÎŞĞ§
-				if(xPos<0||xPos>=cols||yPos<0||yPos>=rows)
-					continue;
-				//Èç¹û·ÅÖÃÔÚÁËÖĞÁ¢µØÇø£¬»òÕß·ÅÔÚ·Ç×Ô¼ºÒÔ¼°Í¬ÃËÇøÓò£¬Ôò´Ë´Î·ÅÖÃÎŞĞ§
-				if(globalMap[xPos][yPos] == NEUTRAL_PLAYER_ID || diplomacy[i][globalMap[xPos][yPos]] != Allied)
-					continue;
-				TMilitary atk = map.getMapAtk()[xPos][yPos];
-				for(TMap k = inf(xPos), m = (MILITARY_KERNEL_SIZE - 1)-(xPos - k); k < sup(xPos, cols); ++k, ++m)
-				{
-					for(TMap l = inf(yPos), n = (MILITARY_KERNEL_SIZE - 1)-(yPos - l); l < sup(yPos, rows); ++l, ++n)
-					{
-		
-						if(globalMap[k][l] == NEUTRAL_PLAYER_ID)
-							atkPower[i][k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*atk;
-						else if((diplomacy[i][globalMap[k][l]] == Allied) && (globalMap[k][l] != i || !isSieged[k][l]))
-							defPower[k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*(map.getMapDef()[k][l]);
-						else if(diplomacy[i][globalMap[k][l]] == AtWar)
-							atkPower[i][k][l] += MilitaryCommandList[i][j].bomb_size*MilitaryKernel[m][n]*atk;
-					}
-				}
-			}
-		}
-		playerSaving[i] -= bombSumCost;
-	}
-	//¼ÆËãÕ½Õù½á¹û
-	for(TMap i = 0; i <cols; ++i)
-		for(TMap j = 0; j < rows; ++j)
-		{
-			//¹ØÓÚ×ø±êµÄ¼ÆËã£¬ÔÚÃ¿Ò»¸ö×ø±ê³ö±£´æÒ»¸ö×î´ó¹¥»÷Á¦£¬ºÍ´ïµ½×î´ó¹¥»÷Á¦µÄÍæ¼ÒµÄ¸öÊı£¬ÒÔ¼°×î´ó¹¥»÷Á¦Íæ¼ÒµÄID
-			float maxAtk = 0;
-			TMilitary equalCount = 0;
-			TId maxAtkId = UNKNOWN_PLAYER_ID;
-			for(TMilitary k = 0; k < playerSize; ++k)
-			{
-				//ÓÉÓÚ¹¥»÷Á¦Ã¿¸öÍæ¼Òµ¥¶À¼ÆËã£¬ËùÒÔ½øĞĞÒ»¸ök´ÎÑ­»·
-				//·ÖÁ½ÖÖÇé¿ö£¬µ±Ç°Íæ¼Ò¹¥»÷Á¦´óÓÚµ±Ç°¸Ãµã×î´ó¹¥»÷Á¦ºÍµÈÓÚ¸Ãµãµ±Ç°×î´ó¹¥»÷Á¦£¬Ğ¡ÓÚµÄÇé¿ö²»´¦Àí
-				if(atkPower[k][i][j] > maxAtk)
-				{
-					maxAtk = atkPower[k][i][j];
-					equalCount = 1;
-					maxAtkId = k;
-				}
-				else if(atkPower[k][i][j] == maxAtk)
-					equalCount += 1;
-			}
-			//ÏÂÃæ´¦Àí×î´ó¹¥»÷Á¦¼õÈ¥·ÀÓùÁ¦´óÓÚãĞÖµµÄÇé¿ö£¬
-			//Èç¹û´ïµ½×î´ó¹¥»÷Á¦µÄÍæ¼ÒÖ»ÓĞÒ»¸ö£¬ÔòÔÚ¸Ã¾Ö¸Ä±äËùÊôµØÍ¼£¨tmpGlobalMap£©ÖĞ¼ÇÂ¼
-			//Èô³¬¹ıÒ»¸ö£¬´ò³ÉÖĞÁ¢
-			if(maxAtk > defPower[i][j] + SUPPESS_LIMIT)
-				if(equalCount == 1)
-				{
-					tmpGlobalMap[i][j] = maxAtkId;
-					changeMap[i][j] = true;
-				}
-				else
-				{
-					tmpGlobalMap[i][j] = NEUTRAL_PLAYER_ID;
-					changeMap[i][j] = true;
-				}
-		}
-	//¼ÆËãÁ¬Í¨ĞÔ,²¢¸üĞÂGlobalMap
-	for(TMap i = 0; i <cols; ++i)
-		for(TMap j = 0; j < rows; ++j)
-		{
-			//Ê×ÏÈÅĞ¶ÏÕâ¸öµãÔÚÕâ»ØºÏÓĞÃ»ÓĞ·¢Éú±ä»¯£¬Èç¹ûÃ»ÓĞ£¬Õâ¸öµØ·½²»´¦Àí
-			if(changeMap[i][j])
-			{
-				//µ±¸ÃµãËùÊô·¢Éú±ä»¯ºó£¬ÔòÏÈÅĞ¶ÏÊÇ·ñÖĞÁ¢£¬Èç¹ûÖĞÁ¢£¬¸ÄÎªÖĞÁ¢½áÊøÕâ´ÎÑ­»·
-				TMask connection = false;
-				TPosition curPos = {i, j};
-				if(tmpGlobalMap[i][j] == NEUTRAL_PLAYER_ID)
-				{
-					globalMap[i][j] = NEUTRAL_PLAYER_ID;
-					changeMap[i][j] = false;
-				}
-				//·ñÔò£¬ÅĞ¶Ï±ä»¯²¿·ÖµÄÁ¬Í¨ĞÔ£¬Á¬Í¨ĞÔÓÃbfsÅĞ¶Ï
-				//²ßÂÔÊÇÅĞ¶Ïµ±Ç°×ø±êÖÜÎ§µÄËÄ¸ö×ø±ê·ÅÈë¶ÓÁĞ£¬È»ºó´Ó¶ÔÁĞÍ·¿ªÊ¼ÅĞ¶Ï
-				//Èç¹û¶ÓÁĞÍ·Ëù¶ÔÓ¦×ø±êµÄplayerIdºÍtmpGlobalMapÖĞÕıÔÚÅĞ¶ÏµÄÕâµã£¬ÔòÅĞ¶ÏÁªÍ¨£¬½áÊøÕâÂÖÑ­»·
-				//·ñÔòÅĞ¶Ï¶ÓÁĞÍ·ÔÚtmpGlobalMapÖĞµÄidÊÇ·ñºÍÕıÔÚÅĞ¶ÏµÄÕâµãÏàÍ¬£¬Èç¹ûÊÇ£¬½«¶ÓÁĞÍ·ÖÜÎ§µÄËÄ¸öµã·ÅÈë¶ÓÁĞ£¬ÅĞ¶Ï¶ÓÁĞÖĞÏÂÒ»µã
-				//·ñÔò£¬ÅĞ¶Ï¶ÓÁĞÖĞÏÂÒ»µã
-				//ÎªÁË·ÀÖ¹ÖØ¸´ÅĞ¶Ï£¬³ıÁË×î¿ªÊ¼¼ÓÈëµÄËÄ¸öµãÍâ£¬ËùÓĞ½øÈë¶ÓÁĞµÄµãchangeMap±äÁ¿»á±»ÖÃÎªfalse¡£
-				else//bfs,°´ÕÕx-1£¬x+1, y-1, y+1Ë³ĞòÈç¶ÓÁĞ
-				{
-					//ÏÈÌí¼Ó½øÈ¥ÖÜÎ§µÄËÄ¸öµã
-					list[list_length++] = curPos;
-					changeMap[i][j] = false;
-					if(i > 0)
-					{
-						bfs_queue[tail].x = i - 1;
-						bfs_queue[tail].y = j;
-						tail++;
-					}
-					if(i + 1 < cols)
-					{
-						bfs_queue[tail].x = i + 1;
-						bfs_queue[tail].y = j;
-						tail++;
-					}
-					if(j > 0)
-					{
-						bfs_queue[tail].x = i;
-						bfs_queue[tail].y = j - 1;
-						tail++;
-					}
-					if(j + 1 < rows)
-					{
-						bfs_queue[tail].x = i;
-						bfs_queue[tail].y = j + 1;
-						tail++;
-					}
-					while(head != tail)//bfsÖÕÖ¹Ìõ¼ş£¬µ±¶ÓÁĞ¿ÕÁËÒÔºóÍ£Ö¹
-					{
-						TMap m = bfs_queue[head].x;
-						TMap n = bfs_queue[head].y;
-						//ÅĞ¶ÏÊÇGlobalMapÖĞÊÇ·ñÎªÖĞÁ¢id
-						if(globalMap[m][n] != NEUTRAL_PLAYER_ID)
-						{
-							if(diplomacy[globalMap[m][n]][tmpGlobalMap[i][j]] == Allied)
-							{
-								head = tail = 0;
-								connection = true;
-								break;
-							}
-						}
-						else if(tmpGlobalMap[m][n] != UNKNOWN_PLAYER_ID)
-						{
-							if(tmpGlobalMap[m][n]!=NEUTRAL_PLAYER_ID && diplomacy[tmpGlobalMap[i][j]][tmpGlobalMap[m][n]] == Allied)
-							{
-								curPos.x = m;
-								curPos.y = n;
-								list[list_length++] = curPos;
-								changeMap[m][n] = false;
-								if(m > 0 && (changeMap[m - 1][n]||globalMap[m - 1][n] != NEUTRAL_PLAYER_ID))
-								{
-									bfs_queue[tail].x = m - 1;
-									bfs_queue[tail].y = n;
-									tail++;
-								}
-								if(m + 1< cols && (changeMap[m + 1][n]||globalMap[m + 1][n] != NEUTRAL_PLAYER_ID))
-								{
-									bfs_queue[tail].x = m + 1;
-									bfs_queue[tail].y = n;
-									tail++;
-								}
-								if(n > 0 && (changeMap[m][n - 1]||globalMap[m][n - 1] != NEUTRAL_PLAYER_ID))
-								{
-									bfs_queue[tail].x = m;
-									bfs_queue[tail].y = n - 1;
-									tail++;
-								}
-								if(n + 1< rows && (changeMap[m][n + 1]||globalMap[m][n + 1] != NEUTRAL_PLAYER_ID))
-								{
-									bfs_queue[tail].x = m;
-									bfs_queue[tail].y = n + 1;
-									tail++;
-								}
-							}
-						}
-						head++;
-					}
-				}
-				//½«¼ì²âµ½µÄµã¼ÓÉÏ
-				if(connection){
-					for(TMap k = 0; k < list_length; ++k)
-						globalMap[list[k].x][list[k].y] = tmpGlobalMap[list[k].x][list[k].y];
-				}
-				list_length = 0;
-			}
-		}
+    // æ£€æŸ¥MilitaryCommandListæˆ˜äº‰æŒ‡ä»¤æ˜¯å¦å¯è¡Œ;  å¹¶æ‰£é™¤æˆ˜äº‰æ‰€èŠ±çš„é’±; æœ€åç”Ÿæˆæ­¤ç©å®¶çš„å½±å“åŠ›å›¾;
+    for (TId id = 0; id<playerSize; ++id) {
+        vector<TMilitaryCommand>& tmc_list = MilitaryCommandList[id];
+        size_t i = 0;
 
-	//¸üĞÂÊ×¶¼
-	for(TMap i = 0; i < playerSize; ++i)
-	{
-		TPosition tmpPos = NewCapitalList[i];
-		if(tmpPos.x >= cols ||tmpPos.y >= rows)
-			playerCapital[i] = invalidPos;
-        else if(globalMap[tmpPos.x][tmpPos.y]>=playerSize)
-            playerCapital[i] = invalidPos;
-		else if(diplomacy[i][globalMap[tmpPos.x][tmpPos.y]] == Allied)
-			playerCapital[i] = tmpPos;
-		else
-			playerCapital[i] = invalidPos;
-	}
+        // æ£€æŸ¥å†›äº‹æŒ‡ä»¤
+        for (i=0; i<tmc_list.size(); ++i) {
+            TMilitaryCommand& tmc = tmc_list[i];
 
-		//¼ì²â°üÎ§
-	//newIsSiegedPlayerÊı×éÖĞ0´ú±í»¹Î´¼ÓÈëbfsÖĞ£¬
-	//1´ú±íÒÑ¾­¼ÓÈë£¨¿ÉÄÜÎ´ÅĞ¶Ï£¬Ò²¿ÉÄÜÅĞ¶ÏÁË²»ÁªÍ¨£©£¬
-	//2´ú±íÁªÍ¨
-	for(TMap i = 0; i < playerCapital.size(); ++i)
-	{
-		if(isPosValid(playerCapital[i]))
-		{
-			TMap xPos = playerCapital[i].x, yPos = playerCapital[i].y;
-			newIsSiegedPlayer[xPos][yPos] = 2;
-			//ÔÙ×öÒ»´Îbfs£¬ÀûÓÃ¾²Ì¬µÄbfsÊı×é
-			head = tail = 0;
-			if(xPos > 0 && newIsSiegedPlayer[xPos - 1][yPos] == 0)
-			{
-				bfs_queue[tail].x = xPos - 1;
-				bfs_queue[tail].y = yPos;
-				newIsSiegedPlayer[xPos - 1][yPos] = 1;
-				tail++;
-			}
-			if(xPos + 1 < cols && newIsSiegedPlayer[xPos + 1][yPos] == 0)
-			{
-				bfs_queue[tail].x = xPos + 1;
-				bfs_queue[tail].y = yPos;
-				newIsSiegedPlayer[xPos + 1][yPos] = 1;
-				tail++;
-			}
-			if(yPos > 0 && newIsSiegedPlayer[xPos][yPos - 1] == 0)
-			{
-				bfs_queue[tail].x = xPos;
-				bfs_queue[tail].y = yPos - 1;
-				newIsSiegedPlayer[xPos][yPos - 1] = 1;
-				tail++;
-			}
-			if(yPos + 1 < rows && newIsSiegedPlayer[xPos][yPos + 1] == 0)
-			{
-				bfs_queue[tail].x = xPos;
-				bfs_queue[tail].y = yPos + 1;
-				newIsSiegedPlayer[xPos][yPos + 1] = 1;
+            // æ£€æŸ¥ä½ç½®
+            if (tmc.place.x >= cols || tmc.place.y >= rows) { tmc.bomb_size = 0; continue; }
+            TId t_owner = globalMap[tmc.place.x][tmc.place.y];
+            if (t_owner == NEUTRAL_PLAYER_ID) { tmc.bomb_size = 0; continue; }
+            if (diplomacy[id][t_owner] != Allied) { tmc.bomb_size = 0; continue; }
 
-				tail++;
-			}
-			while(head != tail)
-			{
-				TMap x_pos = bfs_queue[head].x, y_pos = bfs_queue[head].y;
-				if(globalMap[x_pos][y_pos] != NEUTRAL_PLAYER_ID)
-				{
-					if(diplomacy[i][globalMap[x_pos][y_pos]] == Allied)
-					{
-						newIsSiegedPlayer[x_pos][y_pos] = 2;
-						if(x_pos > 0 && newIsSiegedPlayer[x_pos - 1][y_pos] == 0)
-						{
-							bfs_queue[tail].x = x_pos - 1;
-							bfs_queue[tail].y = y_pos;
-							newIsSiegedPlayer[x_pos - 1][y_pos] = 1;
-							tail++;
-						}
-						if(x_pos + 1< cols && newIsSiegedPlayer[x_pos + 1][y_pos] == 0)
-						{
-							bfs_queue[tail].x = x_pos + 1;
-							bfs_queue[tail].y = y_pos;
-							newIsSiegedPlayer[x_pos + 1][y_pos] = 1;
-							tail++;
-						}
-						if(y_pos > 0 && newIsSiegedPlayer[x_pos][y_pos - 1] == 0)
-						{
-							bfs_queue[tail].x = x_pos;
-							bfs_queue[tail].y = y_pos - 1;
-							newIsSiegedPlayer[x_pos][y_pos - 1] = 1;
-							tail++;
-						}
-						if(y_pos + 1 < rows && newIsSiegedPlayer[x_pos][y_pos + 1] == 0)
-						{
-							bfs_queue[tail].x = x_pos;
-							bfs_queue[tail].y = y_pos + 1;
-							newIsSiegedPlayer[x_pos][y_pos + 1] = 1;
+            // æ£€æŸ¥é‡‘é¢
+            if (tmc.bomb_size <0) tmc.bomb_size = 0;
+            if (tmc.bomb_size > playerSaving[id]) { // out of cash
+                tmc.bomb_size = playerSaving[id]; 
+                playerSaving[id] = 0; break;
+            }
+            playerSaving[id] -= tmc.bomb_size;
+        }
+        // æ¸…é™¤å‰©ä½™çš„æŒ‡ä»¤
+        ++i;
+        if (i<tmc_list.size()) 
+            for (; i<tmc_list.size(); ++i) tmc_list[i].bomb_size = 0;
 
-							tail++;
-						}
-					}
-				}
-				else
-				{
-					newIsSiegedPlayer[x_pos][y_pos] = 2;
-				}
-				head++;
-			}
-			for(int j = 0; j < cols; ++j)
-				for(int k = 0; k < rows; ++k)
-				{
-					if(newIsSiegedPlayer[j][k] == 2 && globalMap[j][k] == i)
-						newIsSiegedAll[j][k] = false;
-					newIsSiegedPlayer[j][k] = 0;
-				}
-		}
-	}
-	//ÉÏÃæÒ»²¿·ÖÊÇ°ÑËùÓĞµÄ°üÀ¨Í¬ÃËµÄÁ¬Í¨È«²¿ËãÉÏÁË£¬ÏÂÃæµ¥¶À¼õÈ¥Ê×¶¼²»ºÏ·¨µÄ
-	for(TMap i = 0; i < cols; ++i)
-		for(TMap j = 0; j < rows; ++j)
-		{
-			if(newIsSiegedAll[i][j] && globalMap[i][j] != NEUTRAL_PLAYER_ID)
-				isSieged[i][j] = true;
-			else
-				isSieged[i][j] = false;
-		}
-    return false;
+        // æ·»åŠ æ— æ¶ˆè€—çš„é¦–éƒ½è‡ªå«æŒ‡ä»¤
+        if (playerCapital[id].x < cols && playerCapital[id].y < rows) {
+            TMilitaryCommand tmc;
+            tmc.place = playerCapital[id];
+            tmc.bomb_size = playerIncome[id] * CAPITAL_INFLUENCE;
+            tmc_list.push_back(tmc);
+        }
+
+        // ç”ŸæˆPlayerSizeå¼ å½±å“åŠ›å›¾
+        vector<vector<TMilitary> >& map = player_influence_map[id];
+        for (int i=0; i<tmc_list.size(); ++i) {
+            TMilitaryCommand& tmc = tmc_list[i];
+            int x = 0, y = 0;
+            if (tmc.bomb_size<=0) continue;
+            for (int n=0; n<2*MILITARY_KERNEL_SIZE-1; ++n)
+                for (int m=0; m<2*MILITARY_KERNEL_SIZE-1; ++m) {
+                    x = tmc.place.x + n - MILITARY_KERNEL_SIZE + 1; if (x<0) continue; if (x>=cols) continue;
+                    y = tmc.place.y + m - MILITARY_KERNEL_SIZE + 1; if (y<0) continue; if (y>=rows) continue;
+                    map[x][y] += MilitaryKernel[n][m] * tmc.bomb_size;
+                }
+        }       
+    }
+
+    // (å‚è€ƒæ–­è¡¥æ€§) ç”Ÿæˆ1å¼ é˜²å¾¡åŠ›å›¾;  1å¼ å‡»ç ´å›¾
+    for (TMap x=0; x<cols; ++x)
+        for (TMap y=0; y<rows; ++y) {
+            TId owner = globalMap[x][y];
+
+            // è®¡ç®— éæ–­è¡¥ ä¸” æœ‰ä¸» é¢†åœŸçš„å®ˆå¤‡åŠ›
+            if (!isSieged[x][y] && owner < playerSize) {
+                // ç´¯åŠ åŒç›Ÿå½±å“åŠ›
+                for (TId id=0; id<playerSize; ++id) 
+                    if (diplomacy[id][owner] == Allied) 
+                        map_defense[x][y] += player_influence_map[id][x][y];
+                // é˜²å®ˆç³»æ•°
+                map_defense[x][y] *= map.getMapDef()[x][y];
+            } 
+            else {
+                // æ–­è¡¥å’Œæ— ä¸»åœ°çš„å®ˆå¤‡åŠ›ä¸º 0
+                map_defense[x][y] = 0;
+            }
+
+            // æ”»å‡»é—¨é™
+            TMilitary attack_threshold = map_defense[x][y] + SUPPESS_LIMIT;
+            // æœ€å¼ºæ”»å‡»
+            TMilitary best_attack = 0;  
+            TId best_owner = UNKNOWN_PLAYER_ID;
+            // æ¬¡å¼ºæ”»å‡»
+            TMilitary second_attack = 0;
+            
+            // æ”»å‡»ç³»æ•°
+            TMilitary atk_ratio = map.getMapAtk()[x][y];
+
+            // é€ä¸ªæ£€æŸ¥æ”»å‡»æ–¹
+            for (TId id=0; id<playerSize; ++id) 
+                if (owner == NEUTRAL_PLAYER_ID || diplomacy[owner][id] == AtWar) {
+                    TMilitary attack = player_influence_map[id][x][y] * atk_ratio;
+                    if (attack >= attack_threshold && attack > best_attack) {
+                        second_attack = best_attack;
+                        best_attack = attack; 
+                        best_owner = id;
+                    }
+                    else if (attack > second_attack) {
+                        second_attack = attack;
+                    }
+                }
+            // å‡»ç ´åˆ¤å®š
+            if (best_owner!=UNKNOWN_PLAYER_ID) {
+                if (best_attack >= second_attack+SUPPESS_LIMIT)
+                    map_new_owner[x][y] = best_owner; // æ”»å‡»ç»å¯¹ä¼˜åŠ¿è€…æ”»å 
+                else 
+                    map_new_owner[x][y] = NEUTRAL_PLAYER_ID; // æ”»å‡»æ²¡æœ‰æ‹‰å¼€ï¼Œå˜æˆæ— ä¸»ä¹‹åœ°
+            }
+        }
+
+    // æ£€æŸ¥å‡»ç ´å›¾çš„è¿é€šæ€§
+    for (TId id=0; id<playerSize; ++id) {
+        // è¿é€šæ€§åˆ¤å®šç”¨åœ°å›¾
+        vector<vector<char> > map(cols,
+            vector<char>(rows, NON_CONTROL));
+
+        // åˆå§‹åŒ–åœ°å›¾
+        for (TMap x=0; x<cols; ++x)
+            for (TMap y=0; y<rows; ++y) {
+                TId owner = globalMap[x][y];
+                if (owner<playerSize && diplomacy[id][owner] == Allied) {
+                    TPosition p = {x,y};
+                    map[x][y] = UNDER_CONTROL;
+                    q.push(p);
+                }
+                else if (map_new_owner[x][y] == id) {
+                    map[x][y] = NEW_POSITION;
+                }
+            }
+        
+        // å¼€å§‹bfsè¿›è¡Œè¿é€šæ€§åˆ¤å®š
+        while(!q.empty()) {
+            TPosition p = q.front();
+            q.pop();
+            for (size_t i=0; i<4; ++i) {
+                int x = p.x + dx[i]; if (x<0 || x>=cols) continue;
+                int y = p.y + dy[i]; if (y<0 || y>=rows) continue;
+                if (map[x][y] == NEW_POSITION) {
+                    TPosition p = {x,y};
+                    map[x][y] = UNDER_CONTROL;
+                    q.push(p);
+                }
+            }
+        }
+
+        // ç¡®è®¤è¿é€šæ€§
+        for (TMap x=0; x<cols; ++x)
+            for (TMap y=0; y<rows; ++y) 
+                if (map_new_owner[x][y] == id && map[x][y] != UNDER_CONTROL) 
+                    map_new_owner[x][y] = NEUTRAL_PLAYER_ID; // ç«åŠ›è¶³å¤Ÿå¤§ä½†æ˜¯äºå·±æ–¹é¢†åœŸä¸è¿é€šï¼ŒåŒæ ·æ˜¯ç‚¸æˆä¸­ç«‹
+    }
+
+    // æ›´æ–°ä¸–ç•Œåœ°å›¾
+    for (TMap x=0; x<cols; ++x)
+        for (TMap y=0; y<rows; ++y) 
+            if (map_new_owner[x][y] != UNKNOWN_PLAYER_ID) 
+                globalMap[x][y] = map_new_owner[x][y];
+
+    // æ›´æ–°é¦–éƒ½
+    for (TId id = 0; id<playerSize; ++id) {
+        TPosition p = NewCapitalList[id];
+
+        // è‡ªåŠ¨ä¿®æ­£è¿è§„çš„é¦–éƒ½æŒ‡ä»¤
+        if (!(p.x<cols && p.y<rows)) p = playerCapital[id];
+
+        // ä½ç½®æœ‰æ•ˆæ€§æ£€æŸ¥
+        if (p.x<cols && p.y<rows) { 
+            int owner = globalMap[p.x][p.y];
+            if (diplomacy[id][owner] != Allied) p = INVALID_POSITION;
+        } 
+        else p = INVALID_POSITION;
+
+        // æ›´æ–°é¦–éƒ½
+        playerCapital[id] = p;
+
+    }
+
+    // (è¿›è¡ŒPlayerSizeæ¬¡ï¼Œé’ˆå¯¹é¦–éƒ½å’Œå†›é€šçš„bfs)æ›´æ–° æ–­è¡¥æ€§ 
+    // åˆå§‹åŒ–ï¼šå…¨éƒ¨æ–­è¡¥
+    for (TMap x=0; x<cols; ++x)
+        for (TMap y=0; y<rows; ++y) 
+            isSieged[x][y] = globalMap[x][y]<playerSize;
+    // åˆ¤å®š
+    for (TId id = 0; id<playerSize; ++id) {
+        TPosition p = playerCapital[id];
+        if (p.x<cols && p.y<rows) {
+            vector<vector<char> > map(cols, 
+                vector<char>(rows, NON_CONTROL));
+            // ç¡®è®¤å†›é€šåŒºåŸŸ
+            for (TMap x=0; x<cols; ++x)
+                for (TMap y=0; y<rows; ++y) {
+                    TId owner = globalMap[x][y];   
+                    if (owner<playerSize && diplomacy[id][owner]==Allied) map[x][y] = NEW_POSITION;
+                }
+            // åŒç›Ÿé¦–éƒ½
+            for (TId uid=0; uid<playerSize; ++uid) 
+                if (diplomacy[id][uid]==Allied && playerCapital[uid].x<cols && playerCapital[uid].y<rows) {
+                    map[playerCapital[uid].x][playerCapital[uid].y] = UNDER_CONTROL;
+                    q.push(playerCapital[uid]);
+                }
+            // å¼€å§‹bfs
+            while (!q.empty()) {
+                TPosition p = q.front();
+                q.pop();
+                for (size_t i=0; i<4; ++i) {
+                    int x = p.x + dx[i]; if (x<0 || x>=cols) continue;
+                    int y = p.y + dy[i]; if (y<0 || y>=rows) continue;
+                    if (map[x][y] == NEW_POSITION) {
+                        TPosition p = {x,y};
+                        map[x][y] = UNDER_CONTROL;
+                        q.push(p);
+                    }
+                }
+            }
+            // ç¡®è®¤ æ–­è¡¥
+            for (TMap x=0; x<cols; ++x)
+                for (TMap y=0; y<rows; ++y)
+                    if (globalMap[x][y]==id && map[x][y]==UNDER_CONTROL) isSieged[x][y] = false;
+        }
+        else {
+            // é¦–éƒ½ä¸å­˜åœ¨æ—¶ï¼Œå·±æ–¹é¢†åœŸå…¨éƒ¨å¤±å®ˆ
+        }
+    }
+
+    //DEBUG
+    for (int id=0; id<playerSize; ++id) {
+        cout << "capital " << id << ": " << (int)playerCapital[id].x << " " << (int)playerCapital[id].y << endl;
+    }
+    //end of DEBUG
+
+    return true;
 }
-
 
 bool Game::isPlayer(TId id)
 {
@@ -798,7 +668,7 @@ PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
 	{
 		p.isUnion = false;
 		p.saving = 0;
-		p.capital = invalidPos;
+		p.capital = INVALID_POSITION;
 	}
 	if (p.dipStatus != Undiscovered)
 	{

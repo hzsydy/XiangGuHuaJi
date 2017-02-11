@@ -69,7 +69,11 @@ int main(int argc, char** argv)
     }
 
     Map map = Map();
-	map.load(map_filename);    
+	if (!map.easy_load(map_filename)) {
+        cout << "Map failed" << endl;
+        system("pause");
+        return -1;
+    }
 
     for (size_t i=0; i<players_filename.size(); ++i)
     {
