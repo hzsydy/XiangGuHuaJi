@@ -66,7 +66,7 @@ namespace XGHJ
                 cout << "-=-=-=-=-=-=-=-=-=-=-= GAME ENDS ! =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
                 //TODO:GET WINNER
 			}
-			isValid_ = game_.isValid;
+			isValid_ = game_.isValid();
 		}
 		else
         {
@@ -140,7 +140,7 @@ namespace XGHJ
         //check if killed
         for (TId i=0; i<playerSize; ++i)
         {
-            if (!game_.isPlayerAlive[i])
+            if (!game_.isAlive(i))
             {
                 players_[i].kill();
             }

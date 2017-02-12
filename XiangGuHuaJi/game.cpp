@@ -16,7 +16,7 @@ inline int absDist(TPosition p1, TPosition p2){return abs((int)p1.x-(int)p2.x)+a
 
 Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
 	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
-      round(0), isValid(true), isPlayerAlive(playersize), playerIncome(playersize, 0), 
+      round(0), _isValid(true), isPlayerAlive(playersize), playerIncome(playersize, 0), 
       MilitaryKernel(militaryKernel)
 {
 	rows = map.getRows();
@@ -109,9 +109,9 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
 
     ++round;
     if (CheckWinner()) 
-        isValid=false;
+        _isValid=false;
 
-    return isValid;    
+    return _isValid;    
 }
 
 //Diplomacy Phase (Deal with DiplomaticCommandMap)
@@ -497,7 +497,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         // 位置有效性检查
         if (p.x<cols && p.y<rows) { 
             int owner = globalMap[p.x][p.y];
-            if (diplomacy[id][owner] != Allied) p = INVALID_POSITION;
+            if (!isPlayer(owner)) p = INVALID_POSITION;
+            else if (diplomacy[id][owner] != Allied) p = INVALID_POSITION;
         } 
         else p = INVALID_POSITION;
 
@@ -562,7 +563,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     return true;
 }
 
-bool Game::isPlayer(TId id)
+bool Game::isPlayer(TId id) const
 {
     return id >= 0 && id < playerSize;
 }
@@ -687,6 +688,8 @@ PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
 
 TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 {
+    if (!isPlayer(playerId)) return true;
+
 	if (globalMap[x][y] == playerId) return true;
 	//if (globalMap[x][y] != NEUTRAL_PLAYER_ID && (diplomacy[playerId][globalMap[x][y]] == Neutral || diplomacy[playerId][globalMap[x][y]] == Allied))
     if (globalMap[x][y] != NEUTRAL_PLAYER_ID && (diplomacy[playerId][globalMap[x][y]] == Allied))
@@ -710,6 +713,13 @@ TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 MapPointInfo Game::getMapPointInfo(TMap x, TMap y, TId playerId) const
 {
 	MapPointInfo mp;
+
+    if (playerId == UNKNOWN_PLAYER_ID) {
+        mp.isVisible = true;
+        mp.isSieged = isSieged[x][y];
+        mp.owner = globalMap[x][y];
+    }
+
 	mp.isVisible = isPointVisible(x, y, playerId);
 	if (mp.isVisible)
 	{
@@ -754,6 +764,16 @@ Info Game::generateInfo(TId playerid) const
 		}
 	}
 	return info;
+}
+
+vector<vector<MapPointInfo> > Game::getGlobalMap(TId id) const
+{
+    vector<vector<MapPointInfo> > map(cols,
+        vector<MapPointInfo>(rows));
+    for (TMap i = 0; i < cols; ++i)
+        for (TMap j = 0; j < rows; ++j)
+            map[i][j] = getMapPointInfo(i, j, id);
+    return map;
 }
 
 void Game::DiscoverCountry()
