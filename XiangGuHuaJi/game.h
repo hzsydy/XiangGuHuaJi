@@ -37,10 +37,15 @@ public:
     inline TMap getCols() const { return cols; }
     inline TMap getRows() const { return rows; }
     inline int getMapChecksum() const { return map_checksum; }
-	inline TRound getRound() const {return round ;}
-	inline TId getPlayerSize() const {return playerSize ;}
+    inline TRound getRound() const { return round; }
+    inline TId getPlayerSize() const { return playerSize; }
     inline bool isValid() const { return _isValid;}
     inline bool isAlive(TId id) const { if (isPlayer(id)) return isPlayerAlive[id]; else return false;}
+    inline vector<vector<TDiplomaticStatus> > getDiplomacy() const { return diplomacy; }
+    inline vector<TMoney> getPlayerSaving() const { return playerSaving; }
+    inline vector<TMoney> getPlayerIncome() const { return playerIncome; }
+    inline vector<TId> getPlayerRanking() const { return player_ranking; }
+   
 
     Map& map; 
 
@@ -50,7 +55,8 @@ protected:
     int                 map_checksum;
 	TMap				rows,cols;
 	TId                 playerSize;
-	//ÐèÒª±£´æµ½ÏÂ»ØºÏµÄÖÐ¼ä±äÁ¿
+    TId                 aliveCnt;
+	//ï¿½ï¿½Òªï¿½ï¿½ï¿½æµ½ï¿½Â»ØºÏµï¿½ï¿½Ð¼ï¿½ï¿½ï¿½ï¿½ï¿½
 	TRound								round;
 	vector<vector<TId> >				globalMap;//ownership of the lands
 	vector<vector<TMask> >				isSieged;
@@ -61,22 +67,23 @@ protected:
 	vector<vector<int>>					roundToJusifyWar;
 	vector<bool>						backstabUsed;
     vector<TMoney>                      playerIncome;
+    vector<TId>                         player_ranking;
 
-	//Ò»Ð©´ÎÒªº¯Êý
+	//Ò»Ð©ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
 	vector<TId> getWarList(TId id) const;
     TMask isPointVisible(TMap x, TMap y, TId playerId) const;
     void DiscoverCountry() ;
     TDiplomaticCommand getDefaultCommand(TDiplomaticStatus ds) const;
 private:
-	//¹©¾üÊÂ²¿·ÖÊ¹ÓÃµÄ¸ßË¹ºË
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Â²ï¿½ï¿½ï¿½Ê¹ï¿½ÃµÄ¸ï¿½Ë¹ï¿½ï¿½
 	vector<vector<float> > MilitaryKernel;
-	//ÓÎÏ·Ö÷Á÷³Ì
+	//ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     bool DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap);
     bool MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList);
     bool ProducingPhase();
     bool CheckWinner();
     void UpdateMapChecksum();
-	//ÄãÃÇ×Ô¼ºÌí¼ÓµÄÐ¡º¯ÊýÇëÐ´ÔÚÕâÀï
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½Óµï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	TMap inf(TMap pos);
 	TMap sup(TMap pos, TMap max);
     bool canSetGlobalMapPos(TPosition pos, TId id);
