@@ -1,7 +1,11 @@
 
+// boost::asio::io_service io_service;
+// XghjProtocolSocket xs(io_service, server_ip, server_port);
+// if (!xs.isValid()) { }
+// io_service.run();
+
+
 #include "xghj_protocol.h"
-
-
 
 namespace XGHJ_Client
 {

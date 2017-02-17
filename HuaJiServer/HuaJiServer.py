@@ -20,14 +20,12 @@ class PlayerStatus(Enum):
     OK = 0
     Error = 1
 
-player_status_list = [PlayerStatus.OK, PlayerStatus.OK, \
-                      PlayerStatus.OK, PlayerStatus.OK]
-
 status = ServerStatus.Ready
 
-PLAYER_COUNT_MAX = 4
+PLAYER_COUNT_MAX = 8
 player_count=0
 
+player_status_list = [PlayerStatus.OK]*PLAYER_COUNT_MAX
 player_list=[]
 viewer_list=[]
 
@@ -298,6 +296,18 @@ def mainPhase():
     curr_round_count = curr_round_count+1
     return True
 
+# stop listening after the `Ready` phase
+def stopListening(s):
+    obj = XghjObject()
+    obj.set(XghjSender.Server, XghjAction.Error, "Sorry the game is not ready.")
+    while True:
+        sock, addr = s.accept()
+        try:
+            sock.send(obj.toString())
+        except:
+            print "[Warning] failed to send back to a tourist"
+
+# main
 if "__main__"==__name__: 
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # TCP socket
@@ -309,8 +319,9 @@ if "__main__"==__name__:
     while status==ServerStatus.Ready:
         sock, addr = s.accept()
         checkNewConnection(sock, addr)
-        #t = threading.Thread(target=checkNewConnection, args=(sock, addr))
-        #t.start()
+        
+    t = threading.Thread(target=stopListening, args=(s,))
+    t.start()
     
     # bidding
     print "[Game] Bidding. Stop accepting connections."

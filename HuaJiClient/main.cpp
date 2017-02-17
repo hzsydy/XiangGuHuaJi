@@ -27,14 +27,33 @@ using namespace std;
 using namespace XGHJ;
 using namespace XGHJ_Client;
 
+void load_web_file(string filename, string& server_ip, int& server_port) {
+    ifstream ifs(filename);
+    
+    if (!ifs.is_open()){
+        server_ip = "127.0.0.1";
+        server_port = 9999;
+        return;
+    }
 
-//const string server_ip = "166.111.72.13";
-const string server_ip = "127.0.0.1";
-const int server_port = 9999;
-const TId playerSize = 4;
+    try{
+        ifs >> server_ip;
+        ifs >> server_port;
+    }
+    catch(exception e){
+        cerr << e.what() << endl;
+        return;
+    }
+
+}
 
 int main(int argc, char** argv) 
 {
+    string server_ip = "127.0.0.1";
+    int server_port = 9999;
+    TId playerSize = 8;
+
+    string web_filename = "../web.ini";
     string config_filename = "../config_msvc.ini";
 
     if (argc ==2) {
@@ -45,6 +64,11 @@ int main(int argc, char** argv)
 			<<"HuaJiClient						Load config file	"<<endl
 		;
 	}
+
+
+    load_web_file(web_filename, server_ip, server_port);
+
+    // ------------------------------------------------------------------------------------
 
     char buffer[1024];
     string          map_filename;       // map filename 
@@ -71,7 +95,7 @@ int main(int argc, char** argv)
 
     // load map
     Map map = Map();
-    if (!map.load(map_filename)) {
+    if (!map.easy_load(map_filename)) {
         cout << "[Error] Failed to load map \"" << map_filename << "\". Aborted. " << endl;
         SHUTDOWN;
     }
@@ -93,7 +117,7 @@ int main(int argc, char** argv)
     io_service.run();
 
     // and start/join a new game
-    XghjObject obj(XghjObject::Player, XghjObject::NewGame, "simple client");
+    XghjObject obj(XghjObject::Player, XghjObject::NewGame, player_filename);
     xs.send(obj);
     // recv echo and get my_player_id
     obj = xs.getObj();
@@ -114,9 +138,6 @@ int main(int argc, char** argv)
         SHUTDOWN;
     }
 
-    // load game
-    Game game(map, militaryKernel, 4);
-
     // waiting for the start
     cout << "[Info] I'm ready. Waiting for the start." << endl;
     obj = xs.getObj();
@@ -125,28 +146,30 @@ int main(int argc, char** argv)
         cout << "[Error][recv] "<< obj.content << endl;
         SHUTDOWN;
     }
+    playerSize = atoi(obj.content.c_str());
     ofs << obj.content << endl;
 
 
+    // load game
+    Game game(map, militaryKernel, playerSize);
+
     // ---------------------------------------------------
-    char *p;
     TId count = 0;
 
     // Round 0
     {
-        vector<TMoney> bidPrice(playerSize);
-        vector<TPosition> bidPosition(playerSize);
-        
+        vector<TMoney> bidPrice;
+        vector<TPosition> bidPosition;
         vector<TPosition> posUnaccessible;
+
         TMoney my_price = 0;
-        TPosition my_pos = invalidPos;
+        TPosition my_pos = INVALID_POSITION;
 
 
         cout << "[Game] bidding" << endl;
 
         // calc price
         my_player.run(my_price, &(game.map));
-        bidPrice[my_player_id] = my_price;
 
         // send my price
         sprintf(buffer, "%d", my_price);
@@ -157,22 +180,16 @@ int main(int argc, char** argv)
         // recv full bidPrice
         obj = xs.getObj();
         ofs << obj.content << endl;
-        sprintf(buffer, "%s", obj.content.c_str());
-        p = buffer;
-        for (TId id=0; id<playerSize; ++id){
-            bidPrice[id] = getNumber(&p);
+        if (!obj.getBidPrice(bidPrice, playerSize)) {
+            cerr << "[Error] get bid price list" << endl;
+            SHUTDOWN;
         }
         
         // wait for posUnaccessible
         obj = xs.getObj();  
-        sprintf(buffer, "%s", obj.content.c_str());
-        p = buffer;
-        int n = getNumber(&p);
-        for (int i=0; i<n; ++i) {
-            TPosition pos;
-            pos.x = getNumber(&p);
-            pos.y = getNumber(&p);
-            posUnaccessible.push_back(pos);
+        if (!obj.getBidPosUnaccessible(posUnaccessible)) {
+            cerr << "[Error] get pos unaccessible" << endl;
+            SHUTDOWN;
         }
         my_player.run(my_pos, posUnaccessible, &(game.map));
 
@@ -184,13 +201,9 @@ int main(int argc, char** argv)
         // recv full bidPosition
         obj = xs.getObj(); 
         ofs << obj.content << endl;
-        sprintf(buffer, "%s", obj.content.c_str());
-        p = buffer;
-        for (int player_id=0; player_id<playerSize; ++player_id) {
-            TPosition pos;
-            pos.x = getNumber(&p);
-            pos.y = getNumber(&p);
-            bidPosition[player_id] = pos;
+        if (!obj.getBidPosition(bidPosition, playerSize)) {
+            cerr << "[Error] get bid position list" << endl;
+            SHUTDOWN;
         }
 
         // Round 0 finished !!!
@@ -199,16 +212,10 @@ int main(int argc, char** argv)
     }
 
 
-    // wait and calc pos
-
-
     while (true) {
 
-        cout << "[Game] Round " << game.getRound() << endl;
 
-        vector<vector<TMilitaryCommand> > MilitaryCommandMap(playerSize);
-		vector<vector<TDiplomaticCommand> > DiplomaticCommandMap(playerSize);
-		vector<TPosition > NewCapitalList(playerSize);
+        cout << "[Game] Round " << game.getRound() << endl;
 
         // my turn!
         Info my_info = game.generateInfo(my_player_id);
@@ -228,7 +235,6 @@ int main(int argc, char** argv)
         ss<<" -1";
         ss<<" "<<(int)my_info.newCapital.x
           <<" "<<(int)my_info.newCapital.y;
-
         obj = XghjObject(XghjObject::Player, XghjObject::OK, ss.str());
         obj.sender_id = my_player_id;
         obj.round = game.getRound();
@@ -250,33 +256,12 @@ int main(int argc, char** argv)
 
         ofs << obj.content << endl;
 
-        ss.str("");
-        ss << obj.content;
-        for (int player_id=0; player_id<playerSize; ++player_id) {
-            vector<TDiplomaticCommand> player_dipt_command(playerSize);
-            vector<TMilitaryCommand> player_military_command;
-            TPosition player_new_capital;
-            int t;
-
-            for (int i=0; i<playerSize; ++i){
-                ss >> t; player_dipt_command[i] = (TDiplomaticCommand)t;
-            }
-
-            while (true) {
-                TMilitaryCommand tmc;
-                ss >> t;
-                if (t==-1) break; tmc.place.x = t;
-                ss >> t; tmc.place.y = t;
-                ss >> t; tmc.bomb_size = t;
-                player_military_command.push_back(tmc);
-            }
-
-            ss >> t; player_new_capital.x = t;
-            ss >> t; player_new_capital.y = t;
-
-            DiplomaticCommandMap[player_id] = player_dipt_command;
-            MilitaryCommandMap[player_id] = player_military_command;
-            NewCapitalList[player_id] = player_new_capital;
+        vector<vector<TMilitaryCommand> > MilitaryCommandMap;
+		vector<vector<TDiplomaticCommand> > DiplomaticCommandMap;
+		vector<TPosition > NewCapitalList;
+        if (!obj.getMilitaryCommand(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList, playerSize)) {
+            cerr << "[Error] get military command" << endl;
+            SHUTDOWN;
         }
 
 		if (!game.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList))
@@ -286,10 +271,7 @@ int main(int argc, char** argv)
 		}
     }
 
-
-#ifdef _MSC_VER
     system("pause");
-#endif
 
 	return 0;
 
