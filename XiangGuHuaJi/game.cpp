@@ -566,12 +566,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         }
     }
 
-    //DEBUG
-    for (int id=0; id<playerSize; ++id) {
-        cout << "capital " << id << ": " << (int)playerCapital[id].x << " " << (int)playerCapital[id].y << endl;
-    }
-    //end of DEBUG
-
     return true;
 }
 
