@@ -4,49 +4,168 @@
 > 规则：Du <br>
 > 鸣谢：Pierre ;Starlight 
 >
-> 版本：version 3 update 6
+> 版本：version 4 update 1
 
-## Getting Started——三分钟开始**百团大战**！
+## Getting Started —— 快速了解**百团大战**！
 
+![](Data\logo.png)
 
-“**百团大战**”是清华大学一项盛大的**社团**宣传活动。
+> “**百团大战**”是清华大学一项盛大的**社团**宣传活动。也是第14届新生C的主题。
 
-本届自动化系新生C语言比赛，以“百团大战”为主题。参赛选手编写Ai代码，在清华地图的不同位置上，进行**社团活动**的安排，不断宣传和发展自己的社团，赢取更多的**社团领土** ，最终获得更多的**社团成员**。
+本届自动化系新生C语言比赛以“百团大战”为主题。参赛选手编写Ai代码，在清华地图上，进行**社团活动**的安排，不断宣传和发展自己的社团，赢取更多的**社团领土和社员**，夺取清华第一社团的桂冠。
 
 一个社团具有以下属性：
 
 - 基本
     - 资源 Saving 
-    - 成员人数 Member 
-        - 每回合每个社团成员为社团生产1单位资源。
+    - 社员人数 Member 
+        - 1个社员1回合生产1资源。
 - 地图 Map
     - 社团领土 Area   
-        - 清华地图被分割为二维25\*35个格子。
-        - 1个格子最多属于1个社团。无主的格子通过*招新*就变成了社团领土。
-        - 每个格子上的每个时刻都有固定数目的同学。社团领土直接决定社团人数，即每个领土格子上的同学人数累加。
+        - 清华地图分成25\*35个格子。游戏的目标是占领尽量多的清华地图。
+        - 1个格子最多属于1个社团。无主的格子通过*招新*就变成社团领土。
+        - 社团领土决定社团人数，即每个领土格子上的同学人数累加。不同类型格子上的同学人数是固定的。
     - 社团总部 Capital
         - 1个社团有1个总部，占1个格子，要设在己方/友方社团领土上。
-        - 社团总部是*内联*活动的关键要素。
+        - 社团总部是*内联*的关键要素，~~是社团的灵魂~~，~~信仰的来源~~！
 - 社团关系 Diplomacy
-    - 友好 Allied
-        - 社团间的合作关系。双方不会互抢社员。双方活动的*内联*对双方同时生效并可累加。
     - 中立 Neutral 
-        - 默认的社团关系。双方不会互抢社员。双方社团只相互看到一些基本信息。
+        - 默认的社团关系。双方不会互抢社员。双方只相互看到一些基本信息。
+    - 友好 Allied
+        - 社团间的合作关系。双方不会互抢社员。双方分享大多数信息。*内联*对对方同时生效并累加。
     - 敌对 AtWar
-        - 特殊的社团关系，需要特殊行动(背刺)或者一段时间的宣战之后才能建立。双方的*招新*对敌方有效，可以互抢社员。
+        - 特殊的社团关系，需要特殊行动(背刺)，或者一段时间的宣战之后才能建立。此时*招新*对对方社员生效，因此可以互抢社员。
 - 社团活动 Campaign/Military 
-    - 举办活动必须指定活动地点和活动规模。
-        - 活动地点必须是己方/友方社团领土。
-        - 活动规模正比于消耗资源，也正比于产生的效果。
+    - 举办社团活动必须指定 活动地点 和 活动规模。
+        - 活动地点 必须是己方/友方社团领土。
+        - 活动规模 正比于消耗资源，也正比于产生的效果。
     - 社团活动有2个效果：
-        - *招新(攻击)*：对周围敌对/中立区域产生影响，将周围敌对/中立区域上的同学变成我们的社员。
-        - *内联(防守)*：对周围己方/友方区域产生影响，防止这些区域上的社员被敌对社团抢走。
+        - *招新(攻击)*：对附近敌对/中立土地产生影响，将土地上同学变成我们的社员。
+        - *内联(防守)*：对附近己方/友方土地产生影响，防止土地上的社员被敌对社团抢走。
         - 不同区域的*招新(攻击)/内联(防守)* 效果是不同的，例如 *道路* 上的同学特别容易被 *招新(攻击)* 而改变社团，而 *教学楼* 里的同学只要稍微进行一下*内联(防守)*，就能留在社团里。
 
-现在，作为一名光荣的**社团社长**，你会如何在这百团大战中，与各路社团斗智斗勇，力争清华第一社团呢？
+现在，作为一名光荣的**社团社长**，你会如何在这 领土/资源/外交 的混战中，与各路社团斗智斗勇，力争清华第一社团呢？
 
-百团大战，已经开始，期待你的表现！
+百团大战，现在已经开始。期待你的表现！
 
+
+## 选手进阶手册
+
+这是一款以**兵棋**为灵感的游戏，需要同时进行~~外交~~社团关系和~~军事~~活动安排两大策略的选择。
+
+### Ai实现
+
+
+你的AI需要实现以下这些函数或功能
+
+- `TMoney birthplacePrice(BaseMap* map);` 决定为了*先手选择*出生地点而愿意*舍弃*的资源量。
+- `TPosition birthplace(vector<TPosition> posSelected, BaseMap* map);` 在看了前面ai选择的出生地点之后，决定自己的出生地点。
+- `void player_ai(Info& info);`
+    - `vector<TDiplomaticCommand> DiplomaticCommandList;` 外交指令
+    - `vector<TMilitaryCommand> MilitaryCommandList;` 整个游戏的核心，选择正确的位置和规模，举办活动
+    - `TPosition newCapital;` 找一个安全的位置放置社团总部，~~保护你们的信仰~~
+
+这个游戏的完整规则比较复杂，建议从sample ai为模板直接修改。
+
+### 游戏流程一览 
+
+在观看几场示例对战之后，在进入清华·百团大战之前，我们先确定一下游戏流程：
+
+- 出生竞价阶段(第0回合) 选手自行选择出生地点
+    - 主逻辑逐个调用选手实现的 `TMoney birthplacePrice(BaseMap* map);` 函数，得到Ai为了*先手选择*出生地点而愿意*舍弃*的资源量。
+    - 主逻辑按照竞价高低，分别调用选手的 `TPosition birthplace(vector<TPosition> posSelected, BaseMap* map);` 函数，给出当前已经被选择的出生地点，得到此玩家选择的出生地点。
+- 主阶段(第1回合~第50回合)
+    - 主逻辑调用选手的 `void player_ai(Info& info);`，给出此玩家可知的游戏信息，并得到操作指令
+    - 关于`Info`，你需要修改以下3组成员变量
+        - `vector<TDiplomaticCommand> DiplomaticCommandList;` 即社团外交操作
+        - `vector<TMilitaryCommand> MilitaryCommandList;` 即本回合要进行的社团活动列表
+        - `TPosition newCapital;` 即下回合新的社团总部的位置
+    - 主逻辑在收集了所有社团的指令后，开始进行主逻辑：
+        - 外交阶段。更新所有社团的外交关系。
+        - 活动阶段。更新社团领土，社团总人数。
+        - 更新社团总部位置。尝试将社团总部放在你此回合指定的地方。
+        - 更新地图信息。所有领土检查自己是否能通过己方/友方领土连接到己方/友方总部，若发现无法连接到总部，则这些领土上的同学~~因为失去了信仰而陷入深深的迷茫~~，*下回合*这些领土上的同学不计算*内联*。
+        - 生产阶段。社团每个人上交1资源。
+
+
+
+### 活动影响力 & 领土判定
+
+在介绍地形之前，先介绍一下活动影响力 & 领土判定公式：
+
+每个活动都会对9\*9的区域产生**影响力**，形状如图：水平和竖直方向上的影响力数值比较高，对角线方向上衰减很快。
+
+```
+ 0.05  0.1  0.1  0.2  0.4  0.2  0.1  0.1  0.05 
+ 0.1   0.1  0.2  0.3  0.7  0.3  0.2  0.1  0.1  
+ 0.1   0.2  0.3  0.5  0.8  0.5  0.3  0.2  0.1  
+ 0.2   0.3  0.5  0.8  0.9  0.8  0.5  0.3  0.2  
+ 0.4   0.7  0.8  0.9  1.0  0.9  0.8  0.7  0.4  
+ 0.2   0.3  0.5  0.8  0.9  0.8  0.5  0.3  0.2  
+ 0.1   0.2  0.3  0.5  0.8  0.5  0.3  0.2  0.1  
+ 0.1   0.1  0.2  0.3  0.7  0.3  0.2  0.1  0.1  
+ 0.05  0.1  0.1  0.2  0.4  0.2  0.1  0.1  0.05 
+```
+
+对每个格子，地形攻击系数`atk`，地形防守系数`def`；
+记这个格子上的*招新*影响力的值为`atk_influ`，*内联*影响力总和的值为`def_influ`，则
+
+```
+atk * atk_influ - def * def_influ > 400 
+``` 
+
+即为*招新*成功~
+
+### 清华地图攻略
+
+![](Data\map.png)
+
+这是我们使用的清华地形图。不同的地形有完全不同的特性，以下分别介绍：
+
+- 社员密集的地形
+    - 宿舍： 攻/防 20/20  社员数 8  
+        - 宿舍集中在地图的东北，资源最丰富。攻守均衡。
+    - 教学楼： 攻/防 20/30  社员数 5
+        - 教学楼分布在地图的核心地带（左下角北大那里也有一点）。防守能力优秀，资源量也很丰富。是可靠的防守据点。
+    - 操场： 攻/防 30/20  社员数 5
+        - 操场主要分布在宿舍区，清华附中/西操/照澜院南部也有一定的分布。在游戏的初期很容易攻击下来，资源量也很高，但不利于防守。地图东北大面积的操场，是进攻宿舍区的关键路线。
+- 攻防鲜明的地形
+    - 道路：  攻/防 30/10  社员数 2
+        - 道路遍布学校各地，几乎无法防守。利用道路的特性切断敌方，是非常有效的进攻手段。
+    - 水：  攻/防 20/0  社员数 0
+        - 水是无敌的。
+    - 桥：  攻/防 10/15  社员数 2
+        - 桥是关键的防守位置，守住桥就可以把对手封锁在河对岸。地图的西北角万人/图书馆可以用这样的思路防守。注意，拿下一座桥，至少要在相邻的格子进行规模 `400 / 10 / 0.9 = 45` 的社团活动。
+    - 桥两岸的道路：  攻/防 15/15  社员数 2
+        - 桥左右2格的防守能力也不错，桥不会轻易离开你的控制。
+- 其他地形
+    - 草： 攻/防 10/10  社员数 1
+        - 并不推荐占领这样的地形。不过在必要的时候，草的防御力也不错。
+    - 居民区/商业区： 攻/防 20/20  社员数 1
+        - 到这些区域进行宣传就是扰民了。不过大片大片占领的话，还是能为你提供不少社员的。
+
+### 竞价 选出生点 指南
+
+`TMoney birthplacePrice(BaseMap* map);` 
+
+出生竞价。根据自己Ai的特点，这里直接返回一个整数就可以了。
+第1回合的经济非常重要，建议手上多留一些钱。
+
+`TPosition birthplace(vector<TPosition> posSelected, BaseMap* map);` 
+
+ **注意** 出生地点之间的曼哈顿距离不能超过 `MIN_ABS_DIST_BETWEEN_CAP`。
+
+竞价流程继续。这里你可以知道哪些点已经被选出来了，所以也有一定的后手优势。
+
+在选择出生点时，不要距离其他Ai太近，尽量选择资源比较丰富的区域。若没有富裕的区域，选不那么富裕但是空旷的区域也不错，总之小心不要在开局就被其他多个Ai包围。
+
+### 外交 指南
+
+### 活动 指南
+
+### 总部 指南
+
+---
 
 ## 选手接口（或曰definition.h简介）
 
@@ -56,25 +175,25 @@
 //definition.h
 struct Info
 {
-	TId id;//选手的编号
-	TId playerSize;//总的选手数目（包括死亡的数目）
-	TMap rows;//地图的行数（高度）
-	TMap cols;//地图的列数（宽度）
-	TRound round;//当前的轮数（从第一轮开始。第0轮是选择出生点的虚拟轮次）
+    TId id;//选手的编号
+    TId playerSize;//总的选手数目（包括死亡的数目）
+    TMap rows;//地图的行数（高度）
+    TMap cols;//地图的列数（宽度）
+    TRound round;//当前的轮数（从第一轮开始。第0轮是选择出生点的虚拟轮次）
     
     //地图。注意地图传的是一个指针。请使用->符来调用地图。
     //示例：vector<vector<TMoney> > mapRes = map->getMapRes()；
-	BaseMap* map;
+    BaseMap* map;
 
     //以下使用了C++ STL库Vector.大家当一维/二维数组使用它就可以了，可以把它当成一个动态数组来用
     //示例：MapPointInfo mpi = mapPointInfo[x][y]；表示第(x,y)点的MapPointInfo
-	vector<PlayerInfo> playerInfo;//玩家信息列表
-	vector<vector<MapPointInfo> > mapPointInfo;//地图信息列表
+    vector<PlayerInfo> playerInfo;//玩家信息列表
+    vector<vector<MapPointInfo> > mapPointInfo;//地图信息列表
   
     //这三个是你填充在info里面，回传给程序的部分
-	vector<TMilitaryCommand> MilitaryCommandList;//军事指令列表
-	vector<TDiplomaticCommand> DiplomaticCommandList;//外交态度指令列表
-	TPosition newCapital;//下回合的新首都
+    vector<TMilitaryCommand> MilitaryCommandList;//军事指令列表
+    vector<TDiplomaticCommand> DiplomaticCommandList;//外交态度指令列表
+    TPosition newCapital;//下回合的新首都
 };
 ```
 
@@ -84,23 +203,23 @@ struct Info
 //definition.h
 struct PlayerInfo
 {    
-	TDiplomaticStatus dipStatus; //你和该AI的外交状态
-	bool isVisible; // this player is visible to you ; you two share basic info.
-	bool isUnion;   // this player has reached an alliance with you ; you two share all info.
-	//以下四个是你至少isVisible才能知道的信息
-	int mapArea; // area size of this player's land
-	vector<TId> warList;//player at war
-	//以下两个是你至少isUnion才能知道的信息
-	TMoney saving; // resource of this player
-	TPosition capital;//capital
+    TDiplomaticStatus dipStatus; //你和该AI的外交状态
+    bool isVisible; // this player is visible to you ; you two share basic info.
+    bool isUnion;   // this player has reached an alliance with you ; you two share all info.
+    //以下四个是你至少isVisible才能知道的信息
+    int mapArea; // area size of this player's land
+    vector<TId> warList;//player at war
+    //以下两个是你至少isUnion才能知道的信息
+    TMoney saving; // resource of this player
+    TPosition capital;//capital
 };
 
 struct MapPointInfo
 {
-	TMask isVisible; //这个点你看不看得见
+    TMask isVisible; //这个点你看不看得见
     //如果你看得见的话，以下两个信息是确切的；不然以下两个信息没有意义
-	TId owner;//这个点的归属
-	TMask isSieged;//这个点是否已经处于被包围(isSieged)状态
+    TId owner;//这个点的归属
+    TMask isSieged;//这个点是否已经处于被包围(isSieged)状态
 };
 
 //这是一个C++中的类。类其实是结构（Struct）中比较高级的一种（你就姑且这么认为吧），完全不用在意区别。没什么区别的
@@ -109,18 +228,18 @@ struct MapPointInfo
 class BaseMap
 {
 public:
-	BaseMap(){;}
-	inline TMap getRows() const {return rows;}
-	inline TMap getCols() const {return cols;}
-	inline vector<vector<TMoney> > getMapRes() const {return MapResource_;}//获得地图各点资源的二维数组表
-	inline vector<vector<TMilitary> > getMapAtk() const {return MapAttackRatio_;}//获得地图各点攻击的二维数组表
-	inline vector<vector<TMilitary> > getMapDef() const {return MapDefenseRatio_;}//获得地图各点防御的二维数组表
+    BaseMap(){;}
+    inline TMap getRows() const {return rows;}
+    inline TMap getCols() const {return cols;}
+    inline vector<vector<TMoney> > getMapRes() const {return MapResource_;}//获得地图各点资源的二维数组表
+    inline vector<vector<TMilitary> > getMapAtk() const {return MapAttackRatio_;}//获得地图各点攻击的二维数组表
+    inline vector<vector<TMilitary> > getMapDef() const {return MapDefenseRatio_;}//获得地图各点防御的二维数组表
 protected:
      //这些元素你也访问不了 就不用关心了。
      //所以说类比较高级嘛
-	TMap	rows, cols;
-	vector<vector<TMoney> >  MapResource_;
-	vector<vector<TMilitary> > MapDefenseRatio_, MapAttackRatio_;
+    TMap    rows, cols;
+    vector<vector<TMoney> >  MapResource_;
+    vector<vector<TMilitary> > MapDefenseRatio_, MapAttackRatio_;
 };
 ```
 
@@ -139,19 +258,19 @@ enum TDiplomaticCommand
     KeepNeutral, 
     FormAlliance, 
     JustifyWar,
-	Backstab
+    Backstab
 };
 
 struct TMilitaryCommand
 {
-	TPosition place; //your goal place
-	TMilitary bomb_size;
+    TPosition place; //your goal place
+    TMilitary bomb_size;
 };
 
 struct TPosition
 {
-	TMap x;
-	TMap y;
+    TMap x;
+    TMap y;
 };
 ```
 
@@ -463,8 +582,8 @@ struct TPosition
 
     ```
     while 总人数>8:
-    	随机的将玩家分成若干个8人组（轮空的不分组）
-    	每个8人组比赛，淘汰最末1位
+        随机的将玩家分成若干个8人组（轮空的不分组）
+        每个8人组比赛，淘汰最末1位
     8人淘汰最末一位
     7人淘汰最末一位
     6人晋级
