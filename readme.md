@@ -8,7 +8,7 @@
 
 ## Getting Started —— 快速了解**百团大战**！
 
-![](Data\logo.png)
+![](Data/logo.png)
 
 > “**百团大战**”是清华大学一项盛大的**社团**宣传活动。也是第14届新生C的主题。
 
@@ -118,7 +118,7 @@ atk * atk_influ - def * def_influ > 400
 
 ### 清华地图攻略
 
-![](Data\map.png)
+![](Data/map.png)
 
 这是我们使用的清华地形图。不同的地形有完全不同的特性，以下分别介绍：
 
