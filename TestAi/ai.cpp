@@ -16,7 +16,8 @@ string dipCommStr[] = {"Keep Neutral", "Form Alliance", "Justify War", "Backstab
 #include <windows.h> 
 enum Color_t {Gray, White ,DarkRed,Red,DarkBlue, Blue, DarkGreen,Green,DarkCyan,Cyan,DarkMagenta,Magenta,DarkYellow,Yellow, None};
 
-Color_t playerColor[] = {Red, Blue, Green, Yellow};
+const int PLAYER_SIZE = 8;
+Color_t playerColor[] = {Red, Blue, Green, Yellow, Magenta, DarkMagenta, DarkYellow, Cyan};
 
 void SetColor(Color_t Fore)
 {
@@ -152,7 +153,7 @@ TPosition birthplace(vector<TPosition> posSelected, BaseMap* map)
 
 void player_ai(Info& info)
 {
-    SetColor(playerColor[info.id%4]);
+    SetColor(playerColor[info.id%PLAYER_SIZE]);
     cout << endl << "[P"<<(int)info.id<<"]'s player_ai.";
     cout << endl << "Round <" << info.round << ">";
     cout << endl << "Saving=" << info.playerInfo[info.id].saving << endl;
@@ -185,7 +186,7 @@ void player_ai(Info& info)
                 else
                 {
                     int o = (int)mpi.owner;
-                    SetColor(playerColor[o%4]);
+                    SetColor(playerColor[o%PLAYER_SIZE]);
                     owner = std::to_string(o);
                 }
                 if (mpi.isSieged) owner += "*";
@@ -213,7 +214,7 @@ void player_ai(Info& info)
             cout << "your Dip. Status to P" << (int)id <<" :" << dipStatStr[info.playerInfo[id].dipStatus] << endl;
             cout << "your Dip. Command to P" << (int)id <<" >>> ";
 
-            SetColor(playerColor[info.id%4]);
+            SetColor(playerColor[info.id%PLAYER_SIZE]);
             int input = getNumber();
             SetColor(Gray);
 
@@ -233,7 +234,7 @@ void player_ai(Info& info)
     int inputListCnt = 0;
     while (true)
     {
-        SetColor(playerColor[info.id%4]);
+        SetColor(playerColor[info.id%PLAYER_SIZE]);
         int i = getNumber();
         SetColor(Gray);
 
@@ -257,7 +258,7 @@ void player_ai(Info& info)
     
     SetColor(Gray);
     cout << "your new capital >>> ";
-    SetColor(playerColor[info.id%4]);
+    SetColor(playerColor[info.id%PLAYER_SIZE]);
     info.newCapital.x = getNumber();
     info.newCapital.y = getNumber();
     SetColor(Gray);
