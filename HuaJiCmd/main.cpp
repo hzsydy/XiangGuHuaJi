@@ -131,10 +131,6 @@ int main(int argc, char** argv)
         controller.run();
     } 
 
-#ifdef _MSC_VER
-    system("pause");
-#endif
-
 	return 0;
 
 } 

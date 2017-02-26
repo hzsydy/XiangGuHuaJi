@@ -53,7 +53,7 @@ namespace XGHJ
                 NewCapitalList[id] = info.newCapital;
 
                 for (int i=0; i<playerSize; ++i) ofs<<" "<<(int)info.DiplomaticCommandList[i];
-                for (int i=0; i<info.MilitaryCommandList.size(); ++i) 
+                for (int i=0; i<min(info.MilitaryCommandList.size(),MILITARY_COUNT_LIMIT); ++i) 
                     ofs<<" "<<(int)info.MilitaryCommandList[i].place.x 
                        <<" "<<(int)info.MilitaryCommandList[i].place.y
                        <<" "<<(int)info.MilitaryCommandList[i].bomb_size; 
