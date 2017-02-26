@@ -12,15 +12,12 @@
 
 #include "definition.h"
 
-#include "json/json.h"
-
 namespace XGHJ {
 
 class Map : public BaseMap
 {
 public:
 	Map(){;}
-	bool load(string file_name);
     bool easy_load(string file_name);
 };
 

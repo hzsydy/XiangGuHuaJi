@@ -97,11 +97,6 @@
     <ClInclude Include="map.h" />
     <ClInclude Include="player.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\thirdparty\json\VS\Jsoncpp.vcxproj">
-      <Project>{497b78a8-5a26-4837-bffe-65d95e1b14c2}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

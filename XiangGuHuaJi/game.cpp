@@ -15,56 +15,28 @@ inline float x2plusy2(float x, float y){return x*x+y*y;}
 inline int absDist(TPosition p1, TPosition p2){return abs((int)p1.x-(int)p2.x)+abs((int)p1.y-(int)p2.y);}
 
 Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
-	: map(map), playerSize(playersize), playerSaving(playersize, INITIAL_PLAYER_MONEY),
-      round(0), _isValid(true), isPlayerAlive(playersize), playerIncome(playersize, 0), 
-      MilitaryKernel(militaryKernel), aliveCnt(playersize)
+	: map(map), playerSize(playersize)
+    , playerSaving(playersize, INITIAL_PLAYER_MONEY)
+    , round(0), _isValid(true)
+    , isPlayerAlive(playersize, true)
+    , playerIncome(playersize, 0)
+    , MilitaryKernel(militaryKernel)
+    , aliveCnt(playersize)
+    , rows(map.getRows()), cols(map.getCols())
+    , globalMap(map.getCols(), vector<TId>(map.getRows(), NEUTRAL_PLAYER_ID))
+    , isSieged(map.getCols(), vector<bool>(map.getRows(), false))
+    , playerCapital(playersize, INVALID_POSITION)
+    , playerArea(playersize, 0)
+    , diplomacy(playersize, vector<TDiplomaticStatus>(playersize, Undiscovered))
+    , roundToJusifyWar(playersize, vector<int>(playersize, 0))
+    , backstabUsed(playersize, false)
+    , player_ranking(playersize)
 {
-	rows = map.getRows();
-	cols = map.getCols();
-	//init all the vectors using vector::resize
-	globalMap.resize(cols);
-	isSieged.resize(cols);
-	for (TMap i=0; i<cols; i++)
-	{
-		globalMap[i].resize(rows);
-		isSieged[i].resize(rows);
-		for (TMap j=0; j<rows; j++)
-		{
-			globalMap[i][j] = NEUTRAL_PLAYER_ID;
-			isSieged[i][j] = false;
-		}
-    }
-    playerCapital.resize(playerSize);
-    playerCapital.assign(playerSize, INVALID_POSITION);
-	playerArea.resize(playerSize);
-	diplomacy.resize(playerSize);
-	roundToJusifyWar.resize(playerSize);
-	backstabUsed.resize(playerSize);
-	for (TId i=0; i<playersize; i++)
-	{
-		diplomacy[i].resize(playerSize);
-		roundToJusifyWar[i].resize(playerSize);
-        isPlayerAlive[i] = true;
-		playerArea[i] = 0;
-		backstabUsed[i] = false;
-		for (TId j=0; j<playersize; j++)
-		{
-			roundToJusifyWar[i][j] = 0;
-			if (i == j)
-			{
-				diplomacy[i][j] = Allied;
-			}
-			else
-			{
-				diplomacy[i][j] = Undiscovered;
-			}
-		}
-	}
-    player_ranking.resize(playerSize);
+    
+    for (TId id=0; id<playersize; ++id) diplomacy[id][id] = Allied;
     for (int i = 0; i < playerSize; ++i) player_ranking[i] = i;
 
     printVecMat<float>(militaryKernel, "MilitaryKernel");
-	const float pi = 3.1416f;
 }
 
 Game::~Game()
@@ -75,27 +47,30 @@ Game::~Game()
 // Round<0>
 bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
 {
-	round = 0;
-	++round;
 
-    for (TId i=0; i<playerSize; i++)
-    {
+    for (TId i=0; i<playerSize; i++) {        
+        TPosition& capital = posChoosed[i];
+        
+        // take bid price
         playerArea[i] = 1;
-        TPosition capital = posChoosed[i];
-        if (canSetGlobalMapPos(capital, i))
-        {
+        playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
+
+        // check birth place
+        if (canSetGlobalMapPos(capital, i)) {
             globalMap[capital.x][capital.y] = i;
             playerCapital[i] = capital;
         }
-        else
-        {
+        else {
+            // invalid birth place
             playerCapital[i] = INVALID_POSITION;
-            //那就直接干死吧 滑稽咯
-            isPlayerAlive[i] = false;
+            isPlayerAlive[i] = false; 
         }
-        playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
+        
     }
     DiscoverCountry();
+
+    round = 1;
+
 	return true;
 }
 
@@ -110,10 +85,15 @@ bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
     UpdateMapChecksum();
 
     ++round;
-    if (CheckWinner()) 
-        _isValid=false;
+    if (CheckWinner()) _isValid=false;
 
     return _isValid;    
+}
+
+void Game::StartWar(TId a, TId b) {
+    if (a==b || !isPlayer(a) || !isPlayer(b)) return;
+    roundToJusifyWar[a][b] = roundToJusifyWar[b][a] = 0;
+    diplomacy[a][b] = diplomacy[b][a] = AtWar;
 }
 
 //Diplomacy Phase (Deal with DiplomaticCommandMap)
@@ -123,81 +103,47 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 		for (TId j = i+1; j < playerSize; ++j)
 			if (i != j && diplomacy[i][j] != Undiscovered)
 			{
-				if (DiplomaticCommandMap[i][j] == JustifyWar)
-				{
-					if (playerSaving[i] - WAR_JUSTIFY_PRICE >= 0)
-						playerSaving[i] -= WAR_JUSTIFY_PRICE;
-					else
-						DiplomaticCommandMap[i][j] = KeepNeutral;
-				}
-				if (DiplomaticCommandMap[j][i] == JustifyWar)
-				{
-					if (playerSaving[j] - WAR_JUSTIFY_PRICE >= 0)
-						playerSaving[j] -= WAR_JUSTIFY_PRICE;
-					else
-						DiplomaticCommandMap[j][i] = KeepNeutral;
-				}
-                if (DiplomaticCommandMap[i][j] == FormAlliance)
-                {
-                    int m = (int)(UNIT_AREA_ALLY_COST*playerArea[j]);
-                    if (playerSaving[i] >= m)
-                        playerSaving[i] -= m;
-                    else
-                        DiplomaticCommandMap[i][j] = KeepNeutral;
+                // check JustifyWar
+				if (DiplomaticCommandMap[i][j] == JustifyWar) 
+					if (playerSaving[i] - WAR_JUSTIFY_PRICE >= 0) playerSaving[i] -= WAR_JUSTIFY_PRICE; else DiplomaticCommandMap[i][j] = KeepNeutral;
+				if (DiplomaticCommandMap[j][i] == JustifyWar) 
+					if (playerSaving[j] - WAR_JUSTIFY_PRICE >= 0) playerSaving[j] -= WAR_JUSTIFY_PRICE; else DiplomaticCommandMap[j][i] = KeepNeutral;
+
+                // check FormAlliance
+                if (DiplomaticCommandMap[i][j] == FormAlliance) {
+                    int m = (int)(UNIT_AREA_ALLY_COST*playerIncome[j]);
+                    if (playerSaving[i] >= m) playerSaving[i] -= m; else DiplomaticCommandMap[i][j] = KeepNeutral;
                 }
-                if (DiplomaticCommandMap[j][i] == FormAlliance)
-                {
-                    int m = (int)(UNIT_AREA_ALLY_COST*playerArea[i]);
-                    if (playerSaving[j] >= m)
-                        playerSaving[j] -= m;
-                    else
-                        DiplomaticCommandMap[j][i] = KeepNeutral;
+                if (DiplomaticCommandMap[j][i] == FormAlliance) {
+                    int m = (int)(UNIT_AREA_ALLY_COST*playerIncome[i]);
+                    if (playerSaving[j] >= m) playerSaving[j] -= m; else DiplomaticCommandMap[j][i] = KeepNeutral;
                 }
-				if (DiplomaticCommandMap[i][j] == Backstab)
-				{
-					if (backstabUsed[i] == false)
-						backstabUsed[i] = true;
-					else 
-						DiplomaticCommandMap[i][j] = KeepNeutral;
-				}
+
+                // check Backstab
+				if (DiplomaticCommandMap[i][j] == Backstab) 
+					if (backstabUsed[i] == false) backstabUsed[i] = true; else DiplomaticCommandMap[i][j] = KeepNeutral;
 				if (DiplomaticCommandMap[j][i] == Backstab)
-				{
-					if (backstabUsed[j] == false)
-						backstabUsed[j] = true;
-					else 
-						DiplomaticCommandMap[j][i] = KeepNeutral;
-				}
+					if (backstabUsed[j] == false) backstabUsed[j] = true; else DiplomaticCommandMap[j][i] = KeepNeutral;
+				
+
+                // now check all 
 				switch (DiplomaticCommandMap[i][j])
 				{
 				case KeepNeutral:
 					roundToJusifyWar[i][j] = 0;
 					switch (DiplomaticCommandMap[j][i])
 					{
-					case KeepNeutral:
-						roundToJusifyWar[j][i] = 0;
-						diplomacy[i][j] = diplomacy[j][i] = Neutral;
-						break;
-					case FormAlliance:
-						roundToJusifyWar[j][i] = 0;
-						diplomacy[i][j] = diplomacy[j][i] = Neutral;
-						break;
+					case KeepNeutral: case FormAlliance:
+						roundToJusifyWar[j][i] = 0;	diplomacy[i][j] = diplomacy[j][i] = Neutral; break;
 					case JustifyWar:
-						if (diplomacy[i][j] != AtWar)
-						{
+						if (diplomacy[i][j] != AtWar) {
 							++roundToJusifyWar[j][i];
-							if (roundToJusifyWar[j][i] >= WAR_JUSTIFY_TIME)
-							{
-								roundToJusifyWar[j][i] = 0;
-								diplomacy[i][j] = diplomacy[j][i] = AtWar;
-							}
-							else
-								diplomacy[i][j] = diplomacy[j][i] = Neutral;
+							if (roundToJusifyWar[j][i] >= WAR_JUSTIFY_TIME) StartWar(i, j);
+							else diplomacy[i][j] = diplomacy[j][i] = Neutral;
 						}
 						break;
 					case Backstab:
-						roundToJusifyWar[j][i] = 0;
-						diplomacy[i][j] = diplomacy[j][i] = AtWar;
-						break;
+						StartWar(i, j);
 					}
 					break;
 				case FormAlliance:
@@ -205,81 +151,43 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 					switch (DiplomaticCommandMap[j][i])
 					{
 					case KeepNeutral:
-						roundToJusifyWar[j][i] = 0;
-						diplomacy[i][j] = diplomacy[j][i] = Neutral;
-						break;
+						roundToJusifyWar[j][i] = 0; diplomacy[i][j] = diplomacy[j][i] = Neutral; break;
 					case FormAlliance:
-						roundToJusifyWar[j][i] = 0;
-						diplomacy[i][j] = diplomacy[j][i] = Allied;
-						break;
+						roundToJusifyWar[j][i] = 0; diplomacy[i][j] = diplomacy[j][i] = Allied; break;
 					case JustifyWar:
-						if (diplomacy[i][j] != AtWar)
-						{
+						if (diplomacy[i][j] != AtWar) {
 							++roundToJusifyWar[j][i];
-							if (roundToJusifyWar[j][i] >= WAR_JUSTIFY_TIME)
-							{
-								roundToJusifyWar[j][i] = 0;
-								diplomacy[i][j] = diplomacy[j][i] = AtWar;
-							}
-							else
-								diplomacy[i][j] = diplomacy[j][i] = Neutral;
+							if (roundToJusifyWar[j][i] >= WAR_JUSTIFY_TIME) StartWar(i, j);
+							else diplomacy[i][j] = diplomacy[j][i] = Neutral;
 						}
 						break;
 					case Backstab:
-						roundToJusifyWar[j][i] = 0;
-						diplomacy[i][j] = diplomacy[j][i] = AtWar;
-						break;
+						StartWar(i, j); break;
 					}
 					break;
 				case JustifyWar:
-					if (diplomacy[i][j] != AtWar)
-					{
-						switch (DiplomaticCommandMap[j][i])
-						{
-						case KeepNeutral:
-							++roundToJusifyWar[i][j];
-							roundToJusifyWar[j][i] = 0;
-							if (roundToJusifyWar[i][j]>= WAR_JUSTIFY_TIME)
-							{
-								roundToJusifyWar[i][j] = 0;
-								diplomacy[i][j] = diplomacy[j][i] = AtWar;
-							}
-							else
-								diplomacy[i][j] = diplomacy[j][i] = Neutral;
-							break;
-						case FormAlliance:
-							++roundToJusifyWar[i][j];
-							roundToJusifyWar[j][i] = 0;
-							if (roundToJusifyWar[i][j]>= WAR_JUSTIFY_TIME)
-							{
-								roundToJusifyWar[i][j] = 0;
-								diplomacy[i][j] = diplomacy[j][i] = AtWar;
-							}
-							else
-								diplomacy[i][j] = diplomacy[j][i] = Neutral;
-							break;
-						case JustifyWar:
-							++roundToJusifyWar[i][j];
-							++roundToJusifyWar[j][i];
-							if (roundToJusifyWar[i][j]>= WAR_JUSTIFY_TIME || roundToJusifyWar[j][i]>= WAR_JUSTIFY_TIME)
-							{
-								roundToJusifyWar[i][j] = roundToJusifyWar[j][i] = 0;
-								diplomacy[i][j] = diplomacy[j][i] = AtWar;
-							}
-							else
-								diplomacy[i][j] = diplomacy[j][i] = Neutral;
-							break;
-						case Backstab:
-							roundToJusifyWar[i][j] = roundToJusifyWar[j][i] = 0;
-							diplomacy[i][j] = diplomacy[j][i] = AtWar;
-							break;
-						}
-					}				
+					if (diplomacy[i][j] != AtWar) 
+                    {
+                        ++roundToJusifyWar[i][j];
+						if (roundToJusifyWar[i][j]>= WAR_JUSTIFY_TIME) StartWar(i, j);
+                        else {
+						    switch (DiplomaticCommandMap[j][i]) 
+                            {
+						    case KeepNeutral: case FormAlliance:
+							    roundToJusifyWar[j][i] = 0; diplomacy[i][j] = diplomacy[j][i] = Neutral; break;
+						    case JustifyWar:
+							    ++roundToJusifyWar[j][i];
+							    if (roundToJusifyWar[j][i]>= WAR_JUSTIFY_TIME) StartWar(i, j);
+							    else diplomacy[i][j] = diplomacy[j][i] = Neutral;
+							    break;
+						    case Backstab:
+							    StartWar(i, j); break;
+						    }
+					    }		
+                    }
 					break;
 				case Backstab:
-					roundToJusifyWar[i][j] = roundToJusifyWar[j][i] = 0;
-					diplomacy[i][j] = diplomacy[j][i] = AtWar;
-					break;
+					StartWar(i, j); break;
 				}
 			}
     return true; //TODO
@@ -288,29 +196,12 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
 vector<TId> Game::getWarList(TId id) const
 {
     vector<TId> wl;
-    for (TId i = 0; i < playerSize; ++i)
-    {
+    for (TId i = 0; i < playerSize; ++i) {
         if (id != i && diplomacy[id][i] == AtWar)
         wl.push_back(i);
     }
     return wl;
 
-}
-
-TMap Game::inf(TMap pos)
-{
-	if(pos >= MILITARY_KERNEL_SIZE - 1)
-		return (pos + 1 - MILITARY_KERNEL_SIZE);
-	else
-		return 0;
-}
-
-TMap Game::sup(TMap pos, TMap max)
-{
-	if(pos + MILITARY_KERNEL_SIZE <= max)
-		return (pos + MILITARY_KERNEL_SIZE);
-	else
-		return max;
 }
 
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList) 
@@ -330,9 +221,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     vector<vector<TId> > map_new_owner(cols, 
         vector<TId>(rows, UNKNOWN_PLAYER_ID));
 
-    // bfs用的队列
-    queue<TPosition> q;
-
     // 地图连通性处理用常数
     const char NON_CONTROL = 0;
     const char UNDER_CONTROL = 1;
@@ -346,24 +234,30 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     for (TId id = 0; id<playerSize; ++id) {
         vector<TMilitaryCommand>& tmc_list = MilitaryCommandList[id];
         size_t i = 0;
+        int valid_comm_cnt = 0;
 
         // 检查军事指令
         for (i=0; i<tmc_list.size(); ++i) {
             TMilitaryCommand& tmc = tmc_list[i];
+            TId t_owner;
 
             // 检查位置
             if (tmc.place.x >= cols || tmc.place.y >= rows) { tmc.bomb_size = 0; continue; }
-            TId t_owner = globalMap[tmc.place.x][tmc.place.y];
-            if (t_owner == NEUTRAL_PLAYER_ID) { tmc.bomb_size = 0; continue; }
-            if (diplomacy[id][t_owner] != Allied) { tmc.bomb_size = 0; continue; }
+            t_owner = globalMap[tmc.place.x][tmc.place.y];
+            if (t_owner == NEUTRAL_PLAYER_ID || diplomacy[id][t_owner] != Allied) { tmc.bomb_size = 0; continue; }
 
             // 检查金额
-            if (tmc.bomb_size <0) tmc.bomb_size = 0;
-            if (tmc.bomb_size > playerSaving[id]) { // out of cash
+            if (tmc.bomb_size <0) { tmc.bomb_size = 0; continue; }
+            if (tmc.bomb_size > playerSaving[id]) { 
+                // out of cash
                 tmc.bomb_size = playerSaving[id]; 
                 playerSaving[id] = 0; break;
             }
             playerSaving[id] -= tmc.bomb_size;
+            
+            // 不能同时放置超过MILITARY_COUNT_LIMIT个活动
+            ++valid_comm_cnt;
+            if (valid_comm_cnt>MILITARY_COUNT_LIMIT) break;
         }
         // 清除剩余的指令
         ++i;
@@ -395,41 +289,40 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
     // (参考断补性) 生成1张防御力图;  1张击破图
     for (TMap x=0; x<cols; ++x)
-        for (TMap y=0; y<rows; ++y) {
+        for (TMap y = 0; y < rows; ++y) {
+            // 领主
             TId owner = globalMap[x][y];
+            // 攻击门限
+            TMilitary attack_threshold;
+            // 最强攻击
+            TMilitary best_attack = 0;
+            TId best_owner = UNKNOWN_PLAYER_ID;
+            // 次强攻击
+            TMilitary second_attack = 0;
+            // 攻击系数
+            TMilitary atk_ratio = MapAtk[x][y];
 
             // 计算 非断补 且 有主 领土的守备力
-            if (!isSieged[x][y] && owner < playerSize) {
+            if (!isSieged[x][y] && isPlayer(owner)) {
                 // 累加同盟影响力
-                for (TId id=0; id<playerSize; ++id) 
-                    if (diplomacy[id][owner] == Allied) 
+                for (TId id = 0; id < playerSize; ++id)
+                    if (diplomacy[id][owner] == Allied)
                         map_defense[x][y] += player_influence_map[id][x][y];
                 // 防守系数
                 map_defense[x][y] *= MapDef[x][y];
-            } 
+            }
             else {
                 // 断补和无主地的守备力为 0
                 map_defense[x][y] = 0;
             }
 
-            // 攻击门限
-            TMilitary attack_threshold = map_defense[x][y] + SUPPESS_LIMIT;
-            // 最强攻击
-            TMilitary best_attack = 0;  
-            TId best_owner = UNKNOWN_PLAYER_ID;
-            // 次强攻击
-            TMilitary second_attack = 0;
-            
-            // 攻击系数
-            TMilitary atk_ratio = MapAtk[x][y];
-
-            // 逐个检查攻击方
-            for (TId id=0; id<playerSize; ++id) 
+            // 逐个检查攻击方，得到最强的2个攻击者
+            for (TId id = 0; id < playerSize; ++id)
                 if (owner == NEUTRAL_PLAYER_ID || diplomacy[owner][id] == AtWar) {
                     TMilitary attack = player_influence_map[id][x][y] * atk_ratio;
-                    if (attack >= attack_threshold && attack > best_attack) {
+                    if (attack > best_attack) {
                         second_attack = best_attack;
-                        best_attack = attack; 
+                        best_attack = attack;
                         best_owner = id;
                     }
                     else if (attack > second_attack) {
@@ -437,12 +330,14 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
                     }
                 }
             // 击破判定
-            if (best_owner!=UNKNOWN_PLAYER_ID) {
-                if (best_attack >= second_attack+SUPPESS_LIMIT)
-                    map_new_owner[x][y] = best_owner; // 攻击绝对优势者攻占
-                else 
-                    map_new_owner[x][y] = NEUTRAL_PLAYER_ID; // 攻击没有拉开，变成无主之地
+            attack_threshold = map_defense[x][y] + SUPPESS_LIMIT;
+            if (best_attack >= attack_threshold) {
+                if (best_attack > second_attack)
+                    map_new_owner[x][y] = best_owner; // 攻击优势者攻占
+                else
+                    map_new_owner[x][y] = NEUTRAL_PLAYER_ID; // 无主之地
             }
+            else map_new_owner[x][y] = UNKNOWN_PLAYER_ID; // 保持不变
         }
 
     // 检查击破图的连通性
@@ -450,15 +345,17 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         // 连通性判定用地图
         vector<vector<char> > map(cols,
             vector<char>(rows, NON_CONTROL));
-
+        // bfs用的队列
+        queue<TPosition> q;
+        
         // 初始化地图
         for (TMap x=0; x<cols; ++x)
             for (TMap y=0; y<rows; ++y) {
                 TId owner = globalMap[x][y];
                 if (owner<playerSize && diplomacy[id][owner] == Allied) {
-                    TPosition p = {x,y};
+                    TPosition pp = {x,y};
                     map[x][y] = UNDER_CONTROL;
-                    q.push(p);
+                    q.push(pp);
                 }
                 else if (map_new_owner[x][y] == id) {
                     map[x][y] = NEW_POSITION;
@@ -473,9 +370,9 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
                 int x = p.x + dx[i]; if (x<0 || x>=cols) continue;
                 int y = p.y + dy[i]; if (y<0 || y>=rows) continue;
                 if (map[x][y] == NEW_POSITION) {
-                    TPosition p = {x,y};
+                    TPosition pp = {x,y};
                     map[x][y] = UNDER_CONTROL;
-                    q.push(p);
+                    q.push(pp);
                 }
             }
         }
@@ -509,8 +406,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         // 位置有效性检查
         if (p.x<cols && p.y<rows) { 
             int owner = globalMap[p.x][p.y];
-            if (!isPlayer(owner)) p = INVALID_POSITION;
-            else if (diplomacy[id][owner] != Allied) p = INVALID_POSITION;
+            if (!isPlayer(owner) || diplomacy[id][owner] != Allied) p = INVALID_POSITION;
         } 
         else p = INVALID_POSITION;
 
@@ -530,6 +426,9 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         if (p.x<cols && p.y<rows) {
             vector<vector<char> > map(cols, 
                 vector<char>(rows, NON_CONTROL));
+            // bfs用的队列
+            queue<TPosition> q;
+
             // 确认军通区域
             for (TMap x=0; x<cols; ++x)
                 for (TMap y=0; y<rows; ++y) {
@@ -550,9 +449,9 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
                     int x = p.x + dx[i]; if (x<0 || x>=cols) continue;
                     int y = p.y + dy[i]; if (y<0 || y>=rows) continue;
                     if (map[x][y] == NEW_POSITION) {
-                        TPosition p = {x,y};
+                        TPosition pp = {x,y};
                         map[x][y] = UNDER_CONTROL;
-                        q.push(p);
+                        q.push(pp);
                     }
                 }
             }
@@ -566,12 +465,6 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         }
     }
 
-    //DEBUG
-    for (int id=0; id<playerSize; ++id) {
-        cout << "capital " << id << ": " << (int)playerCapital[id].x << " " << (int)playerCapital[id].y << endl;
-    }
-    //end of DEBUG
-
     return true;
 }
 
@@ -583,22 +476,21 @@ bool Game::isPlayer(TId id) const
 //Producing Phase (Deal with MapResource, PlayerInfoList)
 bool Game::ProducingPhase()
 {
+
+    vector<vector<TMoney> > mapRes = map.getMapRes();
+
     //initialize
     for (TId id=0; id<playerSize; ++id)
-        if (isPlayerAlive[id])
-        {
+        if (isPlayerAlive[id]) {
             playerArea[id] = 0;
-            // lowest income
+            // lowest income 至少有社长一个人
             playerIncome[id] = 1;
         }
     // map income 
-    for (TMap i=0; i<cols; i++)
-    {
-        for (TMap j=0; j<rows; j++)
-        {
-            if (isPlayer(globalMap[i][j])) 
-            {
-                playerIncome[globalMap[i][j]] +=map.getMapRes()[i][j];
+    for (TMap i=0; i<cols; i++) {
+        for (TMap j=0; j<rows; j++) {
+            if (isPlayer(globalMap[i][j])) {
+                playerIncome[globalMap[i][j]] += mapRes[i][j];
                 playerArea[globalMap[i][j]]++;
             }
         }
@@ -607,10 +499,9 @@ bool Game::ProducingPhase()
     for (TId id=0; id<playerSize; ++id)
 	{
         // corruption 
-        playerSaving[id] = (TMoney)((1-(float)(playerArea[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
+        playerSaving[id] = (TMoney)((1-(float)(playerIncome[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
         // city income
-		if (isPosValid(playerCapital[id]))
-		{
+		if (isPosValid(playerCapital[id])) {
 			playerSaving[id] += (TMoney)(UNIT_CITY_INCOME * (float)round);
 		}
         // refresh
@@ -621,52 +512,67 @@ bool Game::ProducingPhase()
     return false; //TODO
 }
 
+void Game::killPlayer(TId id)
+{
+    if (!isPlayer(id)) return;
+    if (!isPlayerAlive[id]) return;
+
+    --aliveCnt;
+
+    playerSaving[id] = 0;
+    playerIncome[id] = 0;
+
+    isPlayerAlive[id] = false;
+    for (TId playerid=0; playerid<playerSize; playerid++) {
+        diplomacy[id][playerid] = Undiscovered;
+        diplomacy[playerid][id] = Undiscovered;
+    }
+    diplomacy[id][id] = Allied;
+
+    for (TMap x=0; x<cols; ++x)
+        for (TMap y=0; y<rows; ++y)
+            if (globalMap[x][y]==id) globalMap[x][y] = NEUTRAL_PLAYER_ID;
+
+}
+
 //Check the winner and the loser (Deal with PlayerInfoList)
 bool Game::CheckWinner()
 {
-    if (aliveCnt == 1 || round == MAX_ROUND)
-    {
-        return true;
-    }
-    else
-    {
-        for (TId id=0; id<playerSize; id++)
-        {
-            if (isPlayerAlive[id])
-            {
-                if (playerArea[id] == 0 && !isPosValid(playerCapital[id]))
-                {
-                    //welcome death
-                    --aliveCnt;
-                    player_ranking[aliveCnt] = id;
-                    playerSaving[id] = 0;
-                    playerIncome[id] = 0;
 
-                    isPlayerAlive[id] = false;
-                    for (TId playerid=0; playerid<playerSize; playerid++)
-                    {
-                        diplomacy[id][playerid] = Undiscovered;
-                        diplomacy[playerid][id] = Undiscovered;
-                    }
-                    diplomacy[id][id] = Allied;
-                }
+    for (TId id=0; id<playerSize; id++) {
+        if (isPlayerAlive[id]) {
+            if (playerArea[id] == 0 && !isPosValid(playerCapital[id])) {
+                //welcome death
+                killPlayer(id);
+                player_ranking[aliveCnt] = id;
             }
         }
-
-        // refresh the rank
-        for (int i = 0; i < aliveCnt; ++i) player_ranking[i] = UNKNOWN_PLAYER_ID;
-        for (TId id = 0; id < playerSize; ++id) 
-            if (isPlayerAlive[id]) {
-                int r = 0;
-                while (isPlayer(player_ranking[r]) && playerIncome[player_ranking[r]] > playerIncome[id]) ++r;
-                for (int i = aliveCnt - 1; i > r; --i) player_ranking[i] = player_ranking[i - 1];
-                player_ranking[r] = id;
-            }
-
-        if (aliveCnt == 1) return true;
-
-        return false;
     }
+
+    // refresh the rank
+    for (int i = 0; i < aliveCnt; ++i) player_ranking[i] = UNKNOWN_PLAYER_ID;
+    for (TId id = 0; id < playerSize; ++id) 
+        if (isPlayerAlive[id]) {
+            int r = 0;
+            while (isPlayer(player_ranking[r]) && playerIncome[player_ranking[r]] > playerIncome[id]) ++r;
+            for (int i = aliveCnt - 1; i > r; --i) player_ranking[i] = player_ranking[i - 1];
+            player_ranking[r] = id;
+        }
+    
+    // 删除苟活
+    if (round > STRICT_ROUND_START) {
+        for (int r=0; r<playerSize; ++r) {
+            TId id = player_ranking[r];
+            if (playerIncome[id] < round - STRICT_ROUND_START) {
+                killPlayer(id);
+            }
+        }
+    }
+
+    if (aliveCnt == 1 || round == MAX_ROUND)
+        return true;
+    else 
+        return false;
 }
 
 void Game::UpdateMapChecksum() {
@@ -681,30 +587,18 @@ PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
 {
 	PlayerInfo p;
 	p.dipStatus = diplomacy[playerId][id];
-	if (p.dipStatus == Allied)
-	{
-		p.isUnion = true;
-		p.saving = playerSaving[id];
-		p.capital = playerCapital[id];
-	}
-	else
-	{
-		p.isUnion = false;
-		p.saving = 0;
-		p.capital = INVALID_POSITION;
-	}
-	if (p.dipStatus != Undiscovered)
-	{
-		p.isVisible = true;
-		p.warList = getWarList(id);
-		p.mapArea = playerArea[id];
-	} 
-	else
-	{
-		p.isVisible = true;
-		p.warList = vector<TId>();
-		p.mapArea = -1;
-	}
+
+    // visible
+    p.isVisible = p.dipStatus != Undiscovered;
+    p.income = p.isVisible ? playerIncome[id] : 0;
+    p.mapArea = p.isVisible ? playerArea[id] : 0;
+    if (p.isVisible) p.warList = getWarList(id);
+    
+    // union
+    p.isUnion = p.dipStatus == Allied;
+    p.saving = p.isUnion ? playerSaving[id] : 0;
+    p.capital = p.isUnion ? playerCapital[id] : INVALID_POSITION;
+
 	return p;
 }
 
@@ -714,7 +608,7 @@ TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 
 	if (globalMap[x][y] == playerId) return true;
 	//if (globalMap[x][y] != NEUTRAL_PLAYER_ID && (diplomacy[playerId][globalMap[x][y]] == Neutral || diplomacy[playerId][globalMap[x][y]] == Allied))
-    if (globalMap[x][y] != NEUTRAL_PLAYER_ID && (diplomacy[playerId][globalMap[x][y]] == Allied))
+    if (isPlayer(globalMap[x][y]) && (diplomacy[playerId][globalMap[x][y]] == Allied))
 		return true;
 	for (int fi = -1; fi <= 1; fi += 2)
 		for (int fj = -1; fj <= 1; fj += 2)
@@ -736,23 +630,10 @@ MapPointInfo Game::getMapPointInfo(TMap x, TMap y, TId playerId) const
 {
 	MapPointInfo mp;
 
-    if (playerId == UNKNOWN_PLAYER_ID) {
-        mp.isVisible = true;
-        mp.isSieged = isSieged[x][y];
-        mp.owner = globalMap[x][y];
-    }
+    mp.isVisible = isPointVisible(x, y, playerId);
+    mp.isSieged = mp.isVisible ? isSieged[x][y] : false;
+    mp.owner = mp.isVisible ? globalMap[x][y] : UNKNOWN_PLAYER_ID;
 
-	mp.isVisible = isPointVisible(x, y, playerId);
-	if (mp.isVisible)
-	{
-		mp.owner = globalMap[x][y];
-		mp.isSieged = isSieged[x][y];
-	}
-	else
-	{
-		mp.owner = UNKNOWN_PLAYER_ID;
-		mp.isSieged = false;
-	}
 	return mp;
 }
 
@@ -860,16 +741,10 @@ bool Game::canSetGlobalMapPos(TPosition pos, TId id)
     if (pos.x>cols-1) return false;
     if (pos.y<0) return false;
     if (pos.y>rows-1) return false;
-    if (globalMap[pos.x][pos.y] != NEUTRAL_PLAYER_ID)
-    {
-        return false;
-    }
-    for (TId i=0; i<id; i++)
-    {
-        if (absDist(playerCapital[i], pos)<MIN_ABS_DIST_BETWEEN_CAP)
-        {
-            return false;
-        }
+    if (globalMap[pos.x][pos.y] != NEUTRAL_PLAYER_ID) return false;
+
+    for (TId i=0; i<id; i++) {
+        if (absDist(playerCapital[i], pos)<MIN_ABS_DIST_BETWEEN_CAP) return false;
     }
     return true;
 }

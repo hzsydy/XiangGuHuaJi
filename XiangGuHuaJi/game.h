@@ -56,7 +56,7 @@ protected:
 	TMap				rows,cols;
 	TId                 playerSize;
     TId                 aliveCnt;
-	//��Ҫ���浽�»غϵ��м�����
+	
 	TRound								round;
 	vector<vector<TId> >				globalMap;//ownership of the lands
 	vector<vector<TMask> >				isSieged;
@@ -69,23 +69,24 @@ protected:
     vector<TMoney>                      playerIncome;
     vector<TId>                         player_ranking;
 
-	//һЩ��Ҫ����
+	
 	vector<TId> getWarList(TId id) const;
     TMask isPointVisible(TMap x, TMap y, TId playerId) const;
     void DiscoverCountry() ;
     TDiplomaticCommand getDefaultCommand(TDiplomaticStatus ds) const;
 private:
-	//�����²���ʹ�õĸ�˹��
+	
 	vector<vector<float> > MilitaryKernel;
-	//��Ϸ������
+	
     bool DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap);
     bool MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList);
     bool ProducingPhase();
     bool CheckWinner();
     void UpdateMapChecksum();
-	//�����Լ����ӵ�С������д������
-	TMap inf(TMap pos);
-	TMap sup(TMap pos, TMap max);
+    
+    void killPlayer(TId id);
+    void StartWar(TId a,TId b);
+
     bool canSetGlobalMapPos(TPosition pos, TId id);
     
 };
