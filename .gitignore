@@ -14,6 +14,7 @@ test*
 log_*.txt
 log.txt
 server_log.txt
+result.txt
 
 # Compiled Object files
 *.slo

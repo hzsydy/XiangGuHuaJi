@@ -28,6 +28,15 @@ std::string replaceAll( std::string const& original, std::string const& from, st
     return results;
 }
 
+void outputResult(Game& game, vector<string> players_filename) {
+    ofstream ofs("result.txt");
+
+    vector<int> rank = game.getPlayerRanking();
+    for (size_t i=0; i<rank.size(); ++i) {
+        ofs << players_filename[rank[i]] << endl;
+    }
+}
+
 int main(int argc, char** argv) 
 {
     string  config_filename = "../config_msvc.ini";
@@ -130,6 +139,8 @@ int main(int argc, char** argv)
     {
         controller.run();
     } 
+
+    outputResult(game, players_filename);
 
 	return 0;
 
