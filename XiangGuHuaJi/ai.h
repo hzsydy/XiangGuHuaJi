@@ -7,11 +7,22 @@
 
 #include "definition.h"
 
-//AI需要实现的函数
-
+#ifdef _MSC_ER
 extern "C" _declspec(dllexport) TMoney birthplacePrice(BaseMap* map);
 extern "C" _declspec(dllexport) TPosition birthplace(vector<TPosition> posSelected, BaseMap* map);
 
 extern "C" _declspec(dllexport) void player_ai(Info& info);
+#endif
+
+
+#ifdef __GNUC__
+
+extern "C" TMoney birthplacePrice(BaseMap* map);
+extern "C" TPosition birthplace(vector<TPosition> posSelected, BaseMap* map);
+
+extern "C" void player_ai(Info& info);
+
+#endif
+
 
 #endif

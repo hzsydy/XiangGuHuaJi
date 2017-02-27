@@ -23,7 +23,7 @@
 typedef HMODULE __FUCK_DLLHANDLE;
 #endif
 #ifdef __GNUC__
-#include"dlfcn.h"
+#include<dlfcn.h>
 #define __FUCK_LOADDLL(x) dlopen(x, RTLD_LAZY)
 #define __FUCK_CLOSEDLL(x) dlclose(x)
 #define __FUCK_GETFUNC dlsym

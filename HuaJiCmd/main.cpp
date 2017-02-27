@@ -39,7 +39,14 @@ void outputResult(Game& game, vector<string> players_filename) {
 
 int main(int argc, char** argv) 
 {
-    string  config_filename = "../config_msvc.ini";
+
+    string  config_filename = 
+#ifdef _MSC_VER
+        "../config_msvc.ini";
+#endif
+#ifdef __GNUC__
+        "../config_gnu.ini";
+#endif
 
     if (argc ==2) {
         config_filename = argv[1];
@@ -80,7 +87,6 @@ int main(int argc, char** argv)
     Map map = Map();
 	if (!map.easy_load(map_filename)) {
         cout << "Map failed" << endl;
-        system("pause");
         return -1;
     }
 
@@ -133,8 +139,8 @@ int main(int argc, char** argv)
 
     Game game(map, militaryKernel, players.size());
 	Controller controller(game, players);
-
     
+
     while (controller.isValid())
     {
         controller.run();

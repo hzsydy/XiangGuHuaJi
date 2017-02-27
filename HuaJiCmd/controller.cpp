@@ -6,6 +6,8 @@
 
 #include <fstream>
 
+#define min(a,b) ((a)<(b)?(a):(b))
+
 namespace XGHJ
 {
     using namespace std;

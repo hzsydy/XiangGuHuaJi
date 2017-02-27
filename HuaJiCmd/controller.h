@@ -22,7 +22,7 @@ namespace XGHJ
 	{
 	public:
 		Controller(Game& g, vector<Player>& p) 
-			: game_(g), players_(p) 
+			: game_(g), players_(p), isValid_(true) 
 		{
 			playerSize_ = game_.getPlayerSize();
 		}
