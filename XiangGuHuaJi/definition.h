@@ -70,7 +70,7 @@ const static TRound     MAX_ROUND = 50;//轮数限额
 const static TRound     STRICT_ROUND_START = 10;
 // 外交常数
 const static TRound     WAR_JUSTIFY_TIME = 3;//从战争合理化到宣战的时间
-const static float      UNIT_AREA_ALLY_COST = 0.1f;//维持与单位大小国家之间的同盟需要的维持费用比例。
+const static float      UNIT_AREA_ALLY_COST = 0.05f;//维持与单位大小国家之间的同盟需要的维持费用比例。
 // 军事常数
 const static int        MILITARY_COUNT_LIMIT = 32; // 一回合最多进行的活动数目
 const static int		MILITARY_KERNEL_SIZE = 5;//影响力核心的大小
