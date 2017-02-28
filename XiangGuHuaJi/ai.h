@@ -7,7 +7,7 @@
 
 #include "definition.h"
 
-#ifdef _MSC_ER
+#ifdef _MSC_VER
 extern "C" _declspec(dllexport) TMoney birthplacePrice(BaseMap* map);
 extern "C" _declspec(dllexport) TPosition birthplace(vector<TPosition> posSelected, BaseMap* map);
 

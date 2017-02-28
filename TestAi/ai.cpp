@@ -35,7 +35,7 @@ bool outOfRange(int indexX, int indexY){
 		|| indexY >= rows;
 }
 //判断是否是边界
-bool checkBoarder(int x,int y, Info& info)
+bool checkBoarder(int x,int y, Info& info, vector<vector<TMilitary> >& mapAtk)
 {
     int dx[] = {1, -1,  0, 0};
     int dy[] = {0,  0, -1, 1};
@@ -46,9 +46,10 @@ bool checkBoarder(int x,int y, Info& info)
         int fx = x+dx[i];
         int fy = y+dy[i];
 		if (!outOfRange(fx,fy) )
-			if (info.mapPointInfo[fx][fy].isVisible)
-				if (info.mapPointInfo[fx][fy].owner!=info.id)
-					flag=true;
+            if (mapAtk[fx][fy]>0) // not water
+			    if (info.mapPointInfo[fx][fy].isVisible)
+				    if (info.mapPointInfo[fx][fy].owner != info.id)
+					    flag=true;
 	}
 	return flag;
 }
@@ -111,6 +112,9 @@ void player_ai(Info& info)
     size_t n = info.playerSize;
     size_t my_id = info.id;
     int money = info.playerInfo[my_id].saving;
+    vector<vector<TMilitary> > mapAtk = info.map->getMapAtk();// get map atk info if needed
+    vector<vector<TMoney> > mapRes = info.map->getMapRes();// get map money info if needed
+	vector<vector<TMilitary>> mapDef = info.map->getMapDef();//get map defence info if needed
 
 	vector<TPosition> m_border;//自己所有边界的坐标，可视作数组
 	vector<TPosition> m_map;//自己所有地盘的坐标，可视作数组
@@ -124,7 +128,7 @@ void player_ai(Info& info)
 			{
 				TPosition temp={i,j};
 				m_map.push_back(temp);
-				if (checkBoarder(i,j,info))//如果是自己的边界
+				if (checkBoarder(i,j,info,mapAtk))//如果是自己的边界
 					m_border.push_back(temp);
 			}		
 		}
