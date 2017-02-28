@@ -36,7 +36,7 @@ Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
     for (TId id=0; id<playersize; ++id) diplomacy[id][id] = Allied;
     for (int i = 0; i < playerSize; ++i) player_ranking[i] = i;
 
-    printVecMat<float>(militaryKernel, "MilitaryKernel");
+    //printVecMat<float>(militaryKernel, "MilitaryKernel");
 }
 
 Game::~Game()
