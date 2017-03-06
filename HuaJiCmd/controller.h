@@ -7,32 +7,43 @@
 
 #include <vector>
 #include <iostream>
+#include <tuple>
+#include <algorithm>
+#include <fstream>
+
 #include "definition.h"
 #include "game.h"
 #include "player.h"
-#include <tuple>
-#include <algorithm>
-
-using std::vector;
-
 
 namespace XGHJ
 {
 	class Controller 
 	{
 	public:
-		Controller(Game& g, vector<Player>& p) 
-			: game_(g), players_(p), isValid_(true) 
-		{
-			playerSize_ = game_.getPlayerSize();
-		}
+		Controller(Game& g, std::vector<Player>& p) 
+            : game_(g), players_(p)
+            , silent_mode_(false), file_output_enabled_(true)
+            , isValid_(true)
+            , playerSize_(game_.getPlayerSize())
+
+		{ }
 
 		void run();
-		inline bool isValid(){return isValid_;}
+
+        inline void setSilentMode(bool flag) { silent_mode_ = flag; } 
+        inline void setFileOutputEnabled(bool flag) { file_output_enabled_ = flag; }
+
+		inline bool isValid() const {return isValid_;}
+
 
 	protected:
 		Game& game_;
-		vector<Player>& players_;
+		std::vector<Player>& players_;
+
+        std::ofstream ofs;
+
+        bool file_output_enabled_;
+        bool silent_mode_;
 		bool isValid_;
 		TId playerSize_;
 	};

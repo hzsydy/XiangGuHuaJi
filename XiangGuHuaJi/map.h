@@ -17,7 +17,6 @@ namespace XGHJ {
 class Map : public BaseMap
 {
 public:
-	Map(){;}
     bool easy_load(string file_name);
 };
 

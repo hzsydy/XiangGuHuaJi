@@ -11,105 +11,108 @@ namespace XGHJ
 
 using namespace std;
 
-inline float x2plusy2(float x, float y){return x*x+y*y;}
 inline int absDist(TPosition p1, TPosition p2){return abs((int)p1.x-(int)p2.x)+abs((int)p1.y-(int)p2.y);}
 
+// 初始化
 Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
 	: map(map), playerSize(playersize)
     , playerSaving(playersize, INITIAL_PLAYER_MONEY)
     , round(0), _isValid(true)
     , isPlayerAlive(playersize, true)
-    , playerIncome(playersize, 0)
+    , playerIncome(playersize, 1)
     , MilitaryKernel(militaryKernel)
     , aliveCnt(playersize)
     , rows(map.getRows()), cols(map.getCols())
     , globalMap(map.getCols(), vector<TId>(map.getRows(), NEUTRAL_PLAYER_ID))
     , isSieged(map.getCols(), vector<bool>(map.getRows(), false))
     , playerCapital(playersize, INVALID_POSITION)
-    , playerArea(playersize, 0)
+    , playerArea(playersize, 1)
     , diplomacy(playersize, vector<TDiplomaticStatus>(playersize, Undiscovered))
     , roundToJusifyWar(playersize, vector<int>(playersize, 0))
     , backstabUsed(playersize, false)
     , player_ranking(playersize)
 {
     
-    for (TId id=0; id<playersize; ++id) diplomacy[id][id] = Allied;
-    for (int i = 0; i < playerSize; ++i) player_ranking[i] = i;
-
-    //printVecMat<float>(militaryKernel, "MilitaryKernel");
+    for (TId id = 0; id < playersize; ++id) diplomacy[id][id] = Allied;
+    for (int i = 0; i < playersize; ++i) player_ranking[i] = i;
 }
 
+// 解析函数
 Game::~Game()
 {
     
 }
 
-// Round<0>
+// 开局 竞价阶段
 bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
 {
 
     for (TId i=0; i<playerSize; i++) {        
         TPosition& capital = posChoosed[i];
         
-        // take bid price
-        playerArea[i] = 1;
+        // 去除竞价金额
+        if (bidPrice[i] > INITIAL_PLAYER_MONEY) bidPrice[i] = INITIAL_PLAYER_MONEY;
         playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
 
-        // check birth place
         if (canSetGlobalMapPos(capital, i)) {
+            // 设置出生点
             globalMap[capital.x][capital.y] = i;
             playerCapital[i] = capital;
         }
         else {
-            // invalid birth place
+            // 无效的出生点
             playerCapital[i] = INVALID_POSITION;
-            isPlayerAlive[i] = false; 
+            killPlayer(i);
         }
         
     }
+
     DiscoverCountry();
 
-    round = 1;
+    round = 1; // 进入第一回合
 
 	return true;
 }
 
-//Game Logic
+// 主逻辑
 bool Game::Run(vector<vector<TMilitaryCommand> > & MilitaryCommandMap,
 	vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap, 
 	vector<TPosition > &NewCapitalList)
 {
+    ++round;
+
     DiplomacyPhase(DiplomaticCommandMap);
     MilitaryPhase(MilitaryCommandMap, NewCapitalList);
     ProducingPhase();
-    UpdateMapChecksum();
+    DiscoverCountry();
 
-    ++round;
     if (CheckWinner()) _isValid=false;
+
+    UpdateMapChecksum();
 
     return _isValid;    
 }
 
+// 两个玩家开始战争
 void Game::StartWar(TId a, TId b) {
     if (a==b || !isPlayer(a) || !isPlayer(b)) return;
     roundToJusifyWar[a][b] = roundToJusifyWar[b][a] = 0;
     diplomacy[a][b] = diplomacy[b][a] = AtWar;
 }
 
-//Diplomacy Phase (Deal with DiplomaticCommandMap)
+// 外交阶段
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
 	for (TId i = 0; i < playerSize-1; ++i)
 		for (TId j = i+1; j < playerSize; ++j)
-			if (i != j && diplomacy[i][j] != Undiscovered)
-			{
-                // check JustifyWar
+			if (i != j && diplomacy[i][j] != Undiscovered) {
+                // JustifyWar 费用
 				if (DiplomaticCommandMap[i][j] == JustifyWar) 
 					if (playerSaving[i] - WAR_JUSTIFY_PRICE >= 0) playerSaving[i] -= WAR_JUSTIFY_PRICE; else DiplomaticCommandMap[i][j] = KeepNeutral;
 				if (DiplomaticCommandMap[j][i] == JustifyWar) 
 					if (playerSaving[j] - WAR_JUSTIFY_PRICE >= 0) playerSaving[j] -= WAR_JUSTIFY_PRICE; else DiplomaticCommandMap[j][i] = KeepNeutral;
 
-                // check FormAlliance
+                // FormAlliance 费用
                 if (DiplomaticCommandMap[i][j] == FormAlliance) {
                     int m = (int)(UNIT_AREA_ALLY_COST*playerIncome[j]);
                     if (playerSaving[i] >= m) playerSaving[i] -= m; else DiplomaticCommandMap[i][j] = KeepNeutral;
@@ -119,76 +122,35 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
                     if (playerSaving[j] >= m) playerSaving[j] -= m; else DiplomaticCommandMap[j][i] = KeepNeutral;
                 }
 
-                // check Backstab
+                // Backstab 费用（一次性）
 				if (DiplomaticCommandMap[i][j] == Backstab) 
 					if (backstabUsed[i] == false) backstabUsed[i] = true; else DiplomaticCommandMap[i][j] = KeepNeutral;
 				if (DiplomaticCommandMap[j][i] == Backstab)
 					if (backstabUsed[j] == false) backstabUsed[j] = true; else DiplomaticCommandMap[j][i] = KeepNeutral;
 				
+                // --- --- --- ---
 
-                // now check all 
-				switch (DiplomaticCommandMap[i][j])
-				{
-				case KeepNeutral:
-					roundToJusifyWar[i][j] = 0;
-					switch (DiplomaticCommandMap[j][i])
-					{
-					case KeepNeutral: case FormAlliance:
-						roundToJusifyWar[j][i] = 0;	diplomacy[i][j] = diplomacy[j][i] = Neutral; break;
-					case JustifyWar:
-						if (diplomacy[i][j] != AtWar) {
-							++roundToJusifyWar[j][i];
-							if (roundToJusifyWar[j][i] >= WAR_JUSTIFY_TIME) StartWar(i, j);
-							else diplomacy[i][j] = diplomacy[j][i] = Neutral;
-						}
-						break;
-					case Backstab:
-						StartWar(i, j);
-					}
-					break;
-				case FormAlliance:
-					roundToJusifyWar[i][j] = 0;
-					switch (DiplomaticCommandMap[j][i])
-					{
-					case KeepNeutral:
-						roundToJusifyWar[j][i] = 0; diplomacy[i][j] = diplomacy[j][i] = Neutral; break;
-					case FormAlliance:
-						roundToJusifyWar[j][i] = 0; diplomacy[i][j] = diplomacy[j][i] = Allied; break;
-					case JustifyWar:
-						if (diplomacy[i][j] != AtWar) {
-							++roundToJusifyWar[j][i];
-							if (roundToJusifyWar[j][i] >= WAR_JUSTIFY_TIME) StartWar(i, j);
-							else diplomacy[i][j] = diplomacy[j][i] = Neutral;
-						}
-						break;
-					case Backstab:
-						StartWar(i, j); break;
-					}
-					break;
-				case JustifyWar:
-					if (diplomacy[i][j] != AtWar) 
-                    {
-                        ++roundToJusifyWar[i][j];
-						if (roundToJusifyWar[i][j]>= WAR_JUSTIFY_TIME) StartWar(i, j);
-                        else {
-						    switch (DiplomaticCommandMap[j][i]) 
-                            {
-						    case KeepNeutral: case FormAlliance:
-							    roundToJusifyWar[j][i] = 0; diplomacy[i][j] = diplomacy[j][i] = Neutral; break;
-						    case JustifyWar:
-							    ++roundToJusifyWar[j][i];
-							    if (roundToJusifyWar[j][i]>= WAR_JUSTIFY_TIME) StartWar(i, j);
-							    else diplomacy[i][j] = diplomacy[j][i] = Neutral;
-							    break;
-						    case Backstab:
-							    StartWar(i, j); break;
-						    }
-					    }		
-                    }
-					break;
-				case Backstab:
-					StartWar(i, j); break;
-				}
+                // 处理 roundToJustifyWar
+                if (DiplomaticCommandMap[i][j]!=JustifyWar) roundToJusifyWar[i][j] = 0; else ++roundToJusifyWar[i][j];
+                if (DiplomaticCommandMap[j][i]!=JustifyWar) roundToJusifyWar[j][i] = 0; else ++roundToJusifyWar[j][i];
+                // 处理 JustifyWar
+                if (DiplomaticCommandMap[i][j] == JustifyWar) {
+                    if (diplomacy[i][j]!=AtWar && roundToJusifyWar[i][j] >= WAR_JUSTIFY_TIME) { StartWar(i,j); continue; }
+                    if (diplomacy[i][j]==AtWar) { StartWar(i,j); continue; }
+                }
+                if (DiplomaticCommandMap[j][i] == JustifyWar) {
+                    if (diplomacy[j][i]!=AtWar && roundToJusifyWar[j][i] >= WAR_JUSTIFY_TIME) { StartWar(j,i); continue; }
+                    if (diplomacy[j][i]==AtWar) { StartWar(j,i); continue; }
+                }
+                // 特判 Backstab
+                if (DiplomaticCommandMap[i][j]==Backstab || DiplomaticCommandMap[j][i]==Backstab){ StartWar(i, j); continue; }
+
+                // 特判 FormAlliance
+                if (DiplomaticCommandMap[i][j]==FormAlliance && DiplomaticCommandMap[j][i]==FormAlliance) { diplomacy[i][j] = diplomacy[j][i] = Allied; continue; }
+
+                // 正常情况
+                diplomacy[i][j] = diplomacy[j][i] = Neutral;
+                
 			}
     return true; //TODO
 }
@@ -201,7 +163,6 @@ vector<TId> Game::getWarList(TId id) const
         wl.push_back(i);
     }
     return wl;
-
 }
 
 bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList, vector<TPosition > &NewCapitalList) 
@@ -221,33 +182,31 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     vector<vector<TId> > map_new_owner(cols, 
         vector<TId>(rows, UNKNOWN_PLAYER_ID));
 
-    // 地图连通性处理用常数
-    const char NON_CONTROL = 0;
-    const char UNDER_CONTROL = 1;
-    const char NEW_POSITION = 2;
     // 四连通方向
     const int dx[] = { 0,  1,  0, -1};
     const int dy[] = {-1,  0,  1,  0};
-
+    // bfs
+    const char NON_CONTROL = 0;
+    const char UNDER_CONTROL = 1;
+    const char NEW_POSITION = 2;
 
     // 检查MilitaryCommandList战争指令是否可行;  并扣除战争所花的钱; 最后生成此玩家的影响力图;
     for (TId id = 0; id<playerSize; ++id) {
         vector<TMilitaryCommand>& tmc_list = MilitaryCommandList[id];
         size_t i = 0;
-        int valid_comm_cnt = 0;
+        int valid_command_cnt = 0;
 
         // 检查军事指令
         for (i=0; i<tmc_list.size(); ++i) {
             TMilitaryCommand& tmc = tmc_list[i];
-            TId t_owner;
+            TId t_owner = globalMap[tmc.place.x][tmc.place.y];
 
             // 检查位置
-            if (tmc.place.x >= cols || tmc.place.y >= rows) { tmc.bomb_size = 0; continue; }
-            t_owner = globalMap[tmc.place.x][tmc.place.y];
-            if (t_owner == NEUTRAL_PLAYER_ID || diplomacy[id][t_owner] != Allied) { tmc.bomb_size = 0; continue; }
+            if (!map.isPosValid(tmc.place)) { tmc.bomb_size = 0; continue; }
+            if (!isPlayer(t_owner) || diplomacy[id][t_owner] != Allied) { tmc.bomb_size = 0; continue; }
 
             // 检查金额
-            if (tmc.bomb_size <0) { tmc.bomb_size = 0; continue; }
+            if (tmc.bomb_size < 0) { tmc.bomb_size = 0; continue; }
             if (tmc.bomb_size > playerSaving[id]) { 
                 // out of cash
                 tmc.bomb_size = playerSaving[id]; 
@@ -256,8 +215,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
             playerSaving[id] -= tmc.bomb_size;
             
             // 不能同时放置超过MILITARY_COUNT_LIMIT个活动
-            ++valid_comm_cnt;
-            if (valid_comm_cnt>MILITARY_COUNT_LIMIT) break;
+            ++valid_command_cnt;
+            if (valid_command_cnt>=MILITARY_COUNT_LIMIT) break;
         }
         // 清除剩余的指令
         ++i;
@@ -265,7 +224,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
             for (; i<tmc_list.size(); ++i) tmc_list[i].bomb_size = 0;
 
         // 添加无消耗的首都自卫指令
-        if (playerCapital[id].x < cols && playerCapital[id].y < rows) {
+        if (map.isPosValid(playerCapital[id])) {
             TMilitaryCommand tmc;
             tmc.place = playerCapital[id];
             tmc.bomb_size = playerIncome[id] * CAPITAL_INFLUENCE;
@@ -273,16 +232,17 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         }
 
         // 生成PlayerSize张影响力图
-        vector<vector<TMilitary> >& map = player_influence_map[id];
+        vector<vector<TMilitary> >& my_map = player_influence_map[id];
         for (int i=0; i<tmc_list.size(); ++i) {
             TMilitaryCommand& tmc = tmc_list[i];
             int x = 0, y = 0;
             if (tmc.bomb_size<=0) continue;
             for (int n=0; n<2*MILITARY_KERNEL_SIZE-1; ++n)
                 for (int m=0; m<2*MILITARY_KERNEL_SIZE-1; ++m) {
-                    x = tmc.place.x + n - MILITARY_KERNEL_SIZE + 1; if (x<0) continue; if (x>=cols) continue;
-                    y = tmc.place.y + m - MILITARY_KERNEL_SIZE + 1; if (y<0) continue; if (y>=rows) continue;
-                    map[x][y] += MilitaryKernel[n][m] * tmc.bomb_size;
+                    x = tmc.place.x + n - MILITARY_KERNEL_SIZE + 1; 
+                    y = tmc.place.y + m - MILITARY_KERNEL_SIZE + 1; 
+                    if (!map.isPosValid(x,y)) continue;
+                    my_map[x][y] += MilitaryKernel[n][m] * tmc.bomb_size;
                 }
         }       
     }
@@ -329,6 +289,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
                         second_attack = attack;
                     }
                 }
+
             // 击破判定
             attack_threshold = map_defense[x][y] + SUPPESS_LIMIT;
             if (best_attack >= attack_threshold) {
@@ -343,7 +304,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     // 检查击破图的连通性
     for (TId id=0; id<playerSize; ++id) {
         // 连通性判定用地图
-        vector<vector<char> > map(cols,
+        vector<vector<char> > my_map(cols,
             vector<char>(rows, NON_CONTROL));
         // bfs用的队列
         queue<TPosition> q;
@@ -352,13 +313,13 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         for (TMap x=0; x<cols; ++x)
             for (TMap y=0; y<rows; ++y) {
                 TId owner = globalMap[x][y];
-                if (owner<playerSize && diplomacy[id][owner] == Allied) {
-                    TPosition pp = {x,y};
-                    map[x][y] = UNDER_CONTROL;
+                if (isPlayer(owner) && diplomacy[id][owner] == Allied) {
+                    TPosition pp = {x, y};
                     q.push(pp);
+                    my_map[x][y] = UNDER_CONTROL;
                 }
                 else if (map_new_owner[x][y] == id) {
-                    map[x][y] = NEW_POSITION;
+                    my_map[x][y] = NEW_POSITION;
                 }
             }
         
@@ -367,11 +328,12 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
             TPosition p = q.front();
             q.pop();
             for (size_t i=0; i<4; ++i) {
-                int x = p.x + dx[i]; if (x<0 || x>=cols) continue;
-                int y = p.y + dy[i]; if (y<0 || y>=rows) continue;
-                if (map[x][y] == NEW_POSITION) {
+                int x = p.x + dx[i]; 
+                int y = p.y + dy[i]; 
+                if (!map.isPosValid(x,y)) continue;
+                if (my_map[x][y] == NEW_POSITION) {
                     TPosition pp = {x,y};
-                    map[x][y] = UNDER_CONTROL;
+                    my_map[x][y] = UNDER_CONTROL;
                     q.push(pp);
                 }
             }
@@ -380,8 +342,8 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         // 确认连通性
         for (TMap x=0; x<cols; ++x)
             for (TMap y=0; y<rows; ++y) 
-                if (map_new_owner[x][y] == id && map[x][y] != UNDER_CONTROL) 
-                    map_new_owner[x][y] = NEUTRAL_PLAYER_ID; // 火力足够大但是于己方领土不连通，同样是炸成中立
+                if (map_new_owner[x][y] == id && my_map[x][y] != UNDER_CONTROL) 
+                    map_new_owner[x][y] = NEUTRAL_PLAYER_ID; // 火力足够大但是于己方领土不连通，炸成中立
     }
 
     // 更新世界地图
@@ -401,10 +363,10 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         TPosition p = NewCapitalList[id];
 
         // 自动修正违规的首都指令
-        if (!(p.x<cols && p.y<rows)) p = playerCapital[id];
+        if (!map.isPosValid(p)) p = playerCapital[id];
 
         // 位置有效性检查
-        if (p.x<cols && p.y<rows) { 
+        if (map.isPosValid(p)) { 
             int owner = globalMap[p.x][p.y];
             if (!isPlayer(owner) || diplomacy[id][owner] != Allied) p = INVALID_POSITION;
         } 
@@ -419,12 +381,12 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     // 初始化：全部断补
     for (TMap x=0; x<cols; ++x)
         for (TMap y=0; y<rows; ++y) 
-            isSieged[x][y] = globalMap[x][y]<playerSize;
+            isSieged[x][y] = true;
     // 判定
     for (TId id = 0; id<playerSize; ++id) {
         TPosition p = playerCapital[id];
-        if (p.x<cols && p.y<rows) {
-            vector<vector<char> > map(cols, 
+        if (map.isPosValid(p)) {
+            vector<vector<char> > my_map(cols, 
                 vector<char>(rows, NON_CONTROL));
             // bfs用的队列
             queue<TPosition> q;
@@ -433,32 +395,34 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
             for (TMap x=0; x<cols; ++x)
                 for (TMap y=0; y<rows; ++y) {
                     TId owner = globalMap[x][y];   
-                    if (owner<playerSize && diplomacy[id][owner]==Allied) map[x][y] = NEW_POSITION;
+                    if (isPlayer(owner) && diplomacy[id][owner]==Allied) my_map[x][y] = NEW_POSITION;
                 }
             // 同盟首都
             for (TId uid=0; uid<playerSize; ++uid) 
-                if (diplomacy[id][uid]==Allied && playerCapital[uid].x<cols && playerCapital[uid].y<rows) {
-                    map[playerCapital[uid].x][playerCapital[uid].y] = UNDER_CONTROL;
+                if (diplomacy[id][uid]==Allied && map.isPosValid(playerCapital[uid])) {
+                    my_map[playerCapital[uid].x][playerCapital[uid].y] = UNDER_CONTROL;
                     q.push(playerCapital[uid]);
                 }
             // 开始bfs
-            while (!q.empty()) {
+            while(!q.empty()) {
                 TPosition p = q.front();
                 q.pop();
                 for (size_t i=0; i<4; ++i) {
-                    int x = p.x + dx[i]; if (x<0 || x>=cols) continue;
-                    int y = p.y + dy[i]; if (y<0 || y>=rows) continue;
-                    if (map[x][y] == NEW_POSITION) {
+                    int x = p.x + dx[i]; 
+                    int y = p.y + dy[i]; 
+                    if (!map.isPosValid(x,y)) continue;
+                    if (my_map[x][y] == NEW_POSITION) {
                         TPosition pp = {x,y};
-                        map[x][y] = UNDER_CONTROL;
+                        my_map[x][y] = UNDER_CONTROL;
                         q.push(pp);
                     }
                 }
             }
+
             // 确认 断补
             for (TMap x=0; x<cols; ++x)
                 for (TMap y=0; y<rows; ++y)
-                    if (globalMap[x][y]==id && map[x][y]==UNDER_CONTROL) isSieged[x][y] = false;
+                    if (globalMap[x][y]==id && my_map[x][y]==UNDER_CONTROL) isSieged[x][y] = false;
         }
         else {
             // 首都不存在时，己方领土全部失守
@@ -468,50 +432,48 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     return true;
 }
 
+// 确认ID是否为玩家
 bool Game::isPlayer(TId id) const
 {
     return id >= 0 && id < playerSize;
 }
 
-//Producing Phase (Deal with MapResource, PlayerInfoList)
+// 生产阶段
 bool Game::ProducingPhase()
 {
 
     vector<vector<TMoney> > mapRes = map.getMapRes();
 
-    //initialize
+    // 初始化
     for (TId id=0; id<playerSize; ++id)
         if (isPlayerAlive[id]) {
             playerArea[id] = 0;
-            // lowest income 至少有社长一个人
-            playerIncome[id] = 1;
+            playerIncome[id] = 1; // 至少有社长一个人
         }
-    // map income 
-    for (TMap i=0; i<cols; i++) {
-        for (TMap j=0; j<rows; j++) {
+    // 更新income，mapArea
+    for (TMap i=0; i<cols; i++) 
+        for (TMap j=0; j<rows; j++) 
             if (isPlayer(globalMap[i][j])) {
                 playerIncome[globalMap[i][j]] += mapRes[i][j];
-                playerArea[globalMap[i][j]]++;
+                ++playerArea[globalMap[i][j]];
             }
-        }
-    }
 
+    // 收入
     for (TId id=0; id<playerSize; ++id)
 	{
-        // corruption 
+        // 资金腐败
         playerSaving[id] = (TMoney)((1-(float)(playerIncome[id])*CORRUPTION_COEF) * (float) playerSaving[id]);
-        // city income
-		if (isPosValid(playerCapital[id])) {
+        // 首都低保
+		if (map.isPosValid(playerCapital[id])) 
 			playerSaving[id] += (TMoney)(UNIT_CITY_INCOME * (float)round);
-		}
-        // refresh
+        // 社员
 		playerSaving[id] += playerIncome[id];
     }
-	DiscoverCountry();
 
-    return false; //TODO
+    return true;
 }
 
+// 宣判玩家离场
 void Game::killPlayer(TId id)
 {
     if (!isPlayer(id)) return;
@@ -535,21 +497,17 @@ void Game::killPlayer(TId id)
 
 }
 
-//Check the winner and the loser (Deal with PlayerInfoList)
+// 检查玩家存活，并更新排名
 bool Game::CheckWinner()
 {
-
-    for (TId id=0; id<playerSize; id++) {
-        if (isPlayerAlive[id]) {
-            if (playerArea[id] == 0 && !isPosValid(playerCapital[id])) {
-                //welcome death
-                killPlayer(id);
-                player_ranking[aliveCnt] = id;
-            }
+    // 全灭式离场
+    for (TId id=0; id<playerSize; id++) 
+        if (isPlayerAlive[id] && playerArea[id] == 0) {
+            killPlayer(id);
+            player_ranking[aliveCnt] = id;
         }
-    }
 
-    // refresh the rank
+    // 刷新排名
     for (int i = 0; i < aliveCnt; ++i) player_ranking[i] = UNKNOWN_PLAYER_ID;
     for (TId id = 0; id < playerSize; ++id) 
         if (isPlayerAlive[id]) {
@@ -559,42 +517,40 @@ bool Game::CheckWinner()
             player_ranking[r] = id;
         }
     
-    // 删除苟活
-    if (round > STRICT_ROUND_START) {
+    // 严格模式下末位淘汰 STRICT_ROUND_START
+    if (round > STRICT_ROUND_START) 
         for (int r=0; r<playerSize; ++r) {
             TId id = player_ranking[r];
-            if (playerIncome[id] < round - STRICT_ROUND_START) {
-                killPlayer(id);
-            }
+            if (playerIncome[id] < round - STRICT_ROUND_START) killPlayer(id);
         }
-    }
-
+    
     if (aliveCnt == 1 || round == MAX_ROUND)
         return true;
     else 
         return false;
 }
 
+// 更新地图验证信息 CheckSum
 void Game::UpdateMapChecksum() {
-
     map_checksum = 47831;
     for (int i=0; i<cols; ++i)
         for (int j=0; j<rows; ++j)
             map_checksum = map_checksum * 17 + globalMap[i][j];
 }
 
+// 获取玩家信息
 PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
 {
 	PlayerInfo p;
 	p.dipStatus = diplomacy[playerId][id];
 
-    // visible
+    // 是否可见 visible
     p.isVisible = p.dipStatus != Undiscovered;
     p.income = p.isVisible ? playerIncome[id] : 0;
     p.mapArea = p.isVisible ? playerArea[id] : 0;
     if (p.isVisible) p.warList = getWarList(id);
     
-    // union
+    // 是否同盟 union
     p.isUnion = p.dipStatus == Allied;
     p.saving = p.isUnion ? playerSaving[id] : 0;
     p.capital = p.isUnion ? playerCapital[id] : INVALID_POSITION;
@@ -602,6 +558,7 @@ PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
 	return p;
 }
 
+// 点是否可见
 TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 {
     if (!isPlayer(playerId)) return true;
@@ -626,9 +583,14 @@ TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 	return false;
 }
 
+// 获取地图信息
 MapPointInfo Game::getMapPointInfo(TMap x, TMap y, TId playerId) const
 {
 	MapPointInfo mp;
+
+    mp.atk = map.getMapAtk(x,y);
+    mp.def = map.getMapDef(x,y);
+    mp.res = map.getMapRes(x,y);
 
     mp.isVisible = isPointVisible(x, y, playerId);
     mp.isSieged = mp.isVisible ? isSieged[x][y] : false;
@@ -637,6 +599,7 @@ MapPointInfo Game::getMapPointInfo(TMap x, TMap y, TId playerId) const
 	return mp;
 }
 
+// 获取整体信息
 Info Game::generateInfo(TId playerid) const
 {
 	Info info;
@@ -652,23 +615,20 @@ Info Game::generateInfo(TId playerid) const
     info.backstabUsed = backstabUsed[playerid];
     info.militaryKernel = MilitaryKernel;
 	info.playerInfo = vector<PlayerInfo>(playerSize);
-	for (TId id=0; id<playerSize; id++)
-	{
+	for (TId id=0; id<playerSize; id++) {
 		info.playerInfo[id] = getPlayerInfo(id, playerid);
         info.DiplomaticCommandList[id] = getDefaultCommand(diplomacy[playerid][id]);
 	}
-	info.mapPointInfo = vector<vector<MapPointInfo> >(cols);
+	info.mapPointInfo = vector<vector<MapPointInfo> >(cols,
+                        vector<MapPointInfo>(rows));
 	for (TMap i=0; i<cols; i++)
-	{
-		info.mapPointInfo[i] = vector<MapPointInfo>(rows);
 		for (TMap j=0; j<rows; j++)
-		{
 			info.mapPointInfo[i][j] = getMapPointInfo(i, j, playerid);
-		}
-	}
+	
 	return info;
 }
 
+// 获取全国地图
 vector<vector<MapPointInfo> > Game::getGlobalMap(TId id) const
 {
     vector<vector<MapPointInfo> > map(cols,
@@ -679,6 +639,7 @@ vector<vector<MapPointInfo> > Game::getGlobalMap(TId id) const
     return map;
 }
 
+// 国家发现
 void Game::DiscoverCountry()
 {
     for (TMap i = 0; i <cols; ++i)
@@ -714,7 +675,7 @@ void Game::DiscoverCountry()
                         }
 }
 
-
+// 默认外交指令
 TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
 {
     switch (ds)
@@ -735,17 +696,16 @@ TDiplomaticCommand Game::getDefaultCommand(TDiplomaticStatus ds) const
     return KeepNeutral;
 }
 
+// 检查出生点是否合法  MIN_ABS_DIST_BETWEEN_CAP
 bool Game::canSetGlobalMapPos(TPosition pos, TId id)
 {
-    if (pos.x<0) return false;
-    if (pos.x>cols-1) return false;
-    if (pos.y<0) return false;
-    if (pos.y>rows-1) return false;
+    if (pos.x<0 || pos.x>=cols) return false;
+    if (pos.y<0 || pos.y>=rows) return false;
     if (globalMap[pos.x][pos.y] != NEUTRAL_PLAYER_ID) return false;
 
-    for (TId i=0; i<id; i++) {
+    for (TId i=0; i<id; i++) 
         if (absDist(playerCapital[i], pos)<MIN_ABS_DIST_BETWEEN_CAP) return false;
-    }
+    
     return true;
 }
 

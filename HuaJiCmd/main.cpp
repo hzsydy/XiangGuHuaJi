@@ -7,26 +7,12 @@
 #include<string>
 #include<sstream>
 
+#include "military_kernel.h"
 #include "controller.h"
 
 using namespace std;
 using namespace XGHJ;
 
-std::string replaceAll( std::string const& original, std::string const& from, std::string const& to )
-{
-    std::string results;
-    std::string::const_iterator end = original.end();
-    std::string::const_iterator current = original.begin();
-    std::string::const_iterator next = std::search( current, end, from.begin(), from.end() );
-    while ( next != end ) {
-        results.append( current, next );
-        results.append( to );
-        current = next + from.size();
-        next = std::search( current, end, from.begin(), from.end() );
-    }
-    results.append( current, next );
-    return results;
-}
 
 void outputResult(Game& game, vector<string> players_filename) {
     ofstream ofs("result.txt");
@@ -53,8 +39,7 @@ int main(int argc, char** argv)
     }
     else if (argc>=2) {
 		cout<<"usage:												"<<endl
-			<<"XiangGuHuaji						Load config file	"<<endl
-		;
+			<<"XiangGuHuaji						Load config file	"<<endl;
 	}
 
 
@@ -63,89 +48,62 @@ int main(int argc, char** argv)
     string          mknl_filename; 
 	vector<string>  players_filename;
 
+    // load config file
     ifstream ifs(config_filename.c_str());    
-    if(!ifs){
+    if (!ifs.is_open()) {
         cout<<"Failed to load \""<< config_filename << "\". Aborted. " << endl;
         return -1;
     }
+
+    // read config file
     ifs >> map_filename;   
     ifs >> mknl_filename;   
-    while (!ifs.eof())         
-    {
+    while (!ifs.eof()) {
         string player_filename;
         ifs >> player_filename; 
         if (!player_filename.empty()) players_filename.push_back(player_filename);
     }
-
-
-    if (players_filename.size()==0) 
-    {
-        cout << "No player ai file's names inputed. Aborted. " << endl;
+    if (players_filename.size() == 0) {
+        cout << "[Error] player_ai file names expected." << endl;
         return -1;
     }
 
+    // load map
     Map map = Map();
 	if (!map.easy_load(map_filename)) {
-        cout << "Map failed" << endl;
+        cout << "[Error] failed to load map." << map_filename << endl;
         return -1;
     }
-
-    for (size_t i=0; i<players_filename.size(); ++i)
-    {
-        Player player(players_filename[i], i);
-        if (player.isValid()) players.push_back(player);
-    }
-    if (players.size() == 0)
-    {
-        cout << "No valid player ai Loaded. Aborted." << endl;
-        return -1;
-    }
-    cout <<  players.size() << " players loaded." << endl;
-
+    
+    // load kernel
     vector<vector<float> > militaryKernel;
-    {
-        ifstream ifs(mknl_filename);
-        if(!ifs){
-            cout<<"Failed to load \""<< mknl_filename << "\". Aborted. " << endl;
-            return -1;
-        }
-        string line, linereplaced;
-        stringstream ss;
-
-        militaryKernel.resize(2*MILITARY_KERNEL_SIZE-1);
-        for (int i=0; i<2*MILITARY_KERNEL_SIZE-1; i++)
-        {
-            while (!ifs.eof())
-            {
-                getline(ifs, line);
-                if (line.c_str()[0] == '|')
-                {
-                    break;
-                }
-            }
-
-            linereplaced = replaceAll(line, "|", "");
-            ss = stringstream(linereplaced);
-
-            militaryKernel[i].resize(2*MILITARY_KERNEL_SIZE-1);
-            for (int j=0; j<2*MILITARY_KERNEL_SIZE-1; j++)
-            {
-                float f = 0;
-                ss>>f;
-                militaryKernel[i][j] = f;
-            }
-        }
+    if (!loadMilitaryKernel(militaryKernel, mknl_filename)) {
+        cout << "[Error] failed to load military kernel. " << mknl_filename << endl;
+        return -1;
     }
 
+    // load players
+    for (size_t i=0; i<players_filename.size(); ++i) {
+        Player player(players_filename[i], i);
+        if (player.isValid()) 
+            players.push_back(player); 
+        else 
+            cout << "[Warning] failed to load player_ai " << players_filename[i] << endl;
+    }
+    if (players.size() <= 1) {
+        cout << "[Error] Not enough player_ais to start the game." << endl;
+        return -1;
+    }
+    cout << "[Info] " << players.size() << " players loaded." << endl;
+    
+    // game and controller
     Game game(map, militaryKernel, players.size());
 	Controller controller(game, players);
     
+    // main
+    while (controller.isValid()) controller.run();
 
-    while (controller.isValid())
-    {
-        controller.run();
-    } 
-
+    // output the result
     outputResult(game, players_filename);
 
 	return 0;
