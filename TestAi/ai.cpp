@@ -14,10 +14,8 @@ struct myMapPointInfo {
     MapPointInfo mpi;
     int border_count;
 };
-// 这里按照点的类型，以及点的周边信息，调整你的进攻/防御策略
+// 这里也可以按照点的类型，以及点的周边信息，调整你的进攻/防御策略
 int getBombSize(const myMapPointInfo& t) {
-    //if (t.mpi.atk==10 && t.mpi.def==15) return 100; // 桥梁
-    //return  t.border_count * 15 * t.mpi.def / t.mpi.atk; // 边缘的地方多放一点；守住防守高的地方；
     return 40;
 }
 
@@ -83,11 +81,13 @@ TPosition birthplace(vector<TPosition> posSelected, BaseMap* map)
 
     TPosition pos;
 	TPosition targetPos;
-	int rand_cout=0;
+	int rand_cout = 0;
 	int score=0, bestscore=-100000;
 
     srand((unsigned)time(NULL)); 
 
+    // 直接固定出生点也是不错的选择。posSelected将会给你提供很好的参考信息。
+    // 随机40次，找到其中自认为最好的出生点
 	while (rand_cout<40)
 	{
 		score = 0;
@@ -102,7 +102,7 @@ TPosition birthplace(vector<TPosition> posSelected, BaseMap* map)
 
 		for(int i=-1;i<=1;i++)  // 遍历这个点周围的情况，钱多&防高的地方有前途!
 			for(int j=-1;j<=1;j++) 
-                score += map->getMapRes(pos.x+i, pos.y+j) + map->getMapDef(pos.x+i, pos.y+j)/10;  // 越界的点自动返回0
+                score += map->getMapRes(pos.x+i, pos.y+j) + map->getMapDef(pos.x+i, pos.y+j)/10;  // 越界的点会自动返回0
 		
 		if (score>bestscore) { // 选一个最好的就行
 			targetPos=pos;
@@ -122,14 +122,9 @@ void player_ai(Info& info)
     int money = info.playerInfo[my_id].saving;
     int cols = info.map->getCols();
     int rows = info.map->getRows();
-    vector<vector<TMilitary> > mapAtk = info.map->getMapAtk();  // get map atk info if needed
-    vector<vector<TMoney> > mapRes = info.map->getMapRes();     // get map money info if needed
-	vector<vector<TMilitary>> mapDef = info.map->getMapDef();   //get map defence info if needed
 
 	vector<myMapPointInfo> m_border;  //自己所有边界的坐标和属性，可视作数组
 	vector<myMapPointInfo> m_map;     //自己所有地盘的坐标和属性，可视作数组
-
-    srand((unsigned) time(NULL));
 
 	//在决策之前，先阅读地图信息
 	for(int i=0;i<cols;i++)
@@ -167,7 +162,7 @@ void player_ai(Info& info)
             t.bomb_size = getBombSize(temp);  // 这里按照点的类型和周边信息，设计你的进攻/防御策略
 		    info.MilitaryCommandList.push_back(t); // 在军事指令里加入新的指令
 
-		    money -= t.bomb_size; // 用超出的部分会被逻辑自动修正
+		    money -= t.bomb_size; // 不用担心，违规的指令会被主逻辑自动修正
         
 	    }
 
