@@ -18,5 +18,13 @@
     <ClCompile Include="ai.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="user_toolbox.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="user_toolbox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

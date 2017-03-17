@@ -8,12 +8,12 @@
 #include "debug.hpp"
 
 
-typedef int TId;                // player id 玩家编号
+typedef int          TId;       // player id 玩家编号
 typedef unsigned int TMap;      // map size 地图尺寸
 typedef unsigned int TRound;    // round 回合数
-typedef int TMoney;         // money 钱(SAV/INC)
-typedef int TMilitary;      // military 军事计算
-typedef bool TMask;         // mask 蒙版
+typedef int          TMoney;    // money 钱(SAV/INC)
+typedef int          TMilitary; // military 军事计算
+typedef bool         TMask;     // mask 蒙版
 
 struct TPosition { TMap x, y; }; // 二维位置
 const static TPosition INVALID_POSITION = {255, 255};

@@ -62,14 +62,24 @@ bool Player::load()
 
 bool Player::run(Info &info)
 {
+#ifdef _MSC_VER
+    __try
+#endif
+#ifdef __GNUC__
     try
+#endif
     {
         player_ai(info);
     }
-    catch(exception e)
+#ifdef _MSC_VER
+    __except(EXCEPTION_EXECUTE_HANDLER)
+#endif
+#ifdef __GNUC__
+    catch(...)
+#endif
     {
         cout << "[ERROR] Player " <<  (int)id << " raised an exception in run()." <<  endl;
-        cout << e.what() << endl;
+        //cout << e.what() << endl;
         Valid = false;
 		return false;
     }
@@ -78,15 +88,25 @@ bool Player::run(Info &info)
 
 bool Player::run(TMoney &price, BaseMap* map)
 {
+#ifdef _MSC_VER
+    __try
+#endif
+#ifdef __GNUC__
     try
+#endif
     {
         price = birthplacePrice(map);
         if (price>INITIAL_PLAYER_MONEY) price = INITIAL_PLAYER_MONEY;
     }
-    catch(exception e)
+#ifdef _MSC_VER
+    __except(EXCEPTION_EXECUTE_HANDLER)
+#endif
+#ifdef __GNUC__
+    catch(...)
+#endif
     {
         cout << "[ERROR] Player " <<  (int)id << " raised an exception in birthplacePrice()." <<  endl;
-        cout << e.what() << endl;
+        //cout << e.what() << endl;
         Valid = false;
         return false;
     }
@@ -95,14 +115,25 @@ bool Player::run(TMoney &price, BaseMap* map)
 
 bool Player::run(TPosition &pos, vector<TPosition> &posSelected, BaseMap* map)
 {
+
+//#ifdef _MSC_VER
+//    __try
+//#endif
+//#ifdef __GNUC__
     try
+//#endif
     {
         pos = birthplace(posSelected, map);
     }
-    catch(exception e)
+//#ifdef _MSC_VER
+//    __except(EXCEPTION_EXECUTE_HANDLER)
+//#endif
+//#ifdef __GNUC__
+    catch(...)
+//#endif
     {
         cout << "[ERROR] Player " <<  (int)id << " raised an exception in birthplace()." <<  endl;
-        cout << e.what() << endl;
+        //cout << e.what() << endl;
         Valid = false;
         return false;
     }

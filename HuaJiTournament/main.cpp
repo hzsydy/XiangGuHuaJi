@@ -3,10 +3,14 @@
  * 采用瑞士赛制 https://zh.wikipedia.org/wiki/%E7%91%9E%E5%A3%AB%E5%88%B6
  */
 
+#include<ctime>
+#include<cstdlib>
+
 #include<iostream>  
 #include<fstream>
 #include<string>
 #include<sstream>
+
 
 #include "military_kernel.h"
 #include "controller.h"
@@ -22,11 +26,15 @@ struct scoredAI
 {
     Player p;
     string name;
-    int score;
+    float score;
     scoredAI(Player &_p, const string& _name)
         :score(0), name(_name), p(_p)
     { }
 };
+
+float rand_f(){
+    return (float)rand()/RAND_MAX;
+}
 
 void usage()
 {
@@ -105,12 +113,22 @@ int main(int argc, char** argv)
     cout << "[Info] " << players.size() << " players loaded." << endl;
 
     cout << "[Info] loading dummy players" << endl;
-    for (size_t i=0; i<PLAYERS_PER_GAME-1; ++i) {
+    int cnt_dummy = PLAYERS_PER_GAME - players.size() % PLAYERS_PER_GAME;
+    if (cnt_dummy == PLAYERS_PER_GAME) cnt_dummy = 0; 
+    for (size_t i=0; i<cnt_dummy; ++i) {
         Player player(weak_ai_filename, i);
         if (player.isValid()) {
             players.push_back(scoredAI(player, "weak_ai_dummy#"+std::to_string(i)));
         }
     }
+
+    srand(time(NULL));
+    for (scoredAI& player : players) player.score = rand_f();
+    //sort the scores
+    std::sort(players.begin(), players.end(), 
+        [](const scoredAI &a, const scoredAI &b) -> bool { return a.score > b.score; }
+    );
+    for (scoredAI& player : players) player.score = 0;
 
     for (int tour_round = 0; tour_round<TOTAL_ROUND; tour_round++)
     {
@@ -131,6 +149,7 @@ int main(int argc, char** argv)
                 Controller controller(game, game_players);
                 controller.setSilentMode(true);
 
+                cout << "--- Game ---" << endl;
                 while (controller.isValid()) controller.run();
 
                 vector<int> rank = game.getPlayerRanking();
@@ -145,12 +164,15 @@ int main(int argc, char** argv)
         game_players.clear();
 
         cout<<"RESULT:"<<endl;
+        for (scoredAI& player : players)
+            player.score += rand_f();
         //sort the scores
         std::sort(players.begin(), players.end(), 
             [](const scoredAI &a, const scoredAI &b) -> bool { return a.score > b.score; }
         );
-        for (int i=0; i<players.size(); i++) {
-            cout<<setw(30)<<players[i].name<<" : "<<players[i].score<<endl;
+        for (scoredAI& player : players) {
+            player.score = (int)player.score;
+            cout<<setw(30)<<player.name<<" : "<<(int)player.score<<endl;
         }
     }
 
