@@ -69,6 +69,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,7 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="controller.h" />
-  </ItemGroup>  
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XiangGuHuaJi\XiangGuHuaJi.vcxproj">
       <Project>{c0bd96c8-e0aa-4521-8f58-e8512266e268}</Project>

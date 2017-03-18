@@ -12,7 +12,9 @@ namespace XGHJ
 {
     using namespace std;
 
-    float rand_f(){
+    static const int FLAG_ID_1 = -8930218;
+
+    static float rand_f(){
         return (float)rand()/RAND_MAX;
     }
 
@@ -119,7 +121,10 @@ namespace XGHJ
             }
 
             if (file_output_enabled_) {
+                ofs << FLAG_ID_1 << endl;
                 ofs << (int)playerSize << endl;
+                for (int i=0; i<playerSize; ++i) ofs << players_[i].getName() << endl;
+
                 for (int i=0; i<playerSize; ++i) ofs<<" "<<(int)bidPrice[i];
                 ofs << endl;
                 for (int i=0; i<playerSize; ++i) ofs<<" "<<(int)posChoosedSorted[i].x << " " << (int)posChoosedSorted[i].y;

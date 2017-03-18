@@ -5,7 +5,7 @@ TMoney birthplacePrice(BaseMap* map) {
     return 3; // 返回3元
 }
 
-TPosition birthplace(vector<TPosition> posSelected, BaseMap* map) { 
+TPosition birthplace(vector<TPosition>& posSelected, BaseMap* map) { 
     // 先考虑固定出生点
     //TPosition birthplace_list[] = {{15, 24}, /* 李兆基 */ {17, 4}, /* 紫荆桃李 */  };
     //for (TPosition p : birthplace_list) if (check_birth_pos_validity(posSelected, p)) return p;

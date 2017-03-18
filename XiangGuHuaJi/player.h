@@ -36,7 +36,7 @@ using namespace std;
 
 typedef void (*TPlayerAi)(Info& info); 
 typedef TMoney (*TBirthplacePrice)(BaseMap* map);
-typedef TPosition (*TBirthplace)(vector<TPosition> posSelected, BaseMap* map);
+typedef TPosition (*TBirthplace)(vector<TPosition>& posSelected, BaseMap* map);
 
 class Player
 {
@@ -52,7 +52,8 @@ public:
     bool load();
 
     inline void kill() {Valid = false;}
-
+    
+    inline string getName() { return name;}
     inline bool isValid() { return Valid; }
 
 private:
@@ -60,6 +61,7 @@ private:
     TBirthplacePrice  birthplacePrice;
     TBirthplace       birthplace;
     string           file_name;
+    string           name;
     TId              id;
     bool             Valid;
     __FUCK_DLLHANDLE hDLL;

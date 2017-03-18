@@ -15,6 +15,14 @@ Player::Player()
 Player::Player(string file_name, int id)
     : id(id), file_name(file_name)
 {
+    name = file_name;
+    if (name.rfind('/') != string::npos) {
+        name = name.substr(name.rfind('/')+1);
+    }
+    if (name.rfind('\\') != string::npos) {
+        name = name.substr(name.rfind('\\')+1);
+    }
+
     player_ai = NULL;
     birthplacePrice = NULL;
     birthplace = NULL;
@@ -116,21 +124,21 @@ bool Player::run(TMoney &price, BaseMap* map)
 bool Player::run(TPosition &pos, vector<TPosition> &posSelected, BaseMap* map)
 {
 
-//#ifdef _MSC_VER
-//    __try
-//#endif
-//#ifdef __GNUC__
-    try
-//#endif
+#ifdef _MSC_VER
+    __try
+#endif
+#ifdef __GNUC__
+  try
+#endif
     {
         pos = birthplace(posSelected, map);
     }
-//#ifdef _MSC_VER
-//    __except(EXCEPTION_EXECUTE_HANDLER)
-//#endif
-//#ifdef __GNUC__
-    catch(...)
-//#endif
+#ifdef _MSC_VER
+    __except(EXCEPTION_EXECUTE_HANDLER)
+#endif
+#ifdef __GNUC__
+  catch(...)
+#endif
     {
         cout << "[ERROR] Player " <<  (int)id << " raised an exception in birthplace()." <<  endl;
         //cout << e.what() << endl;

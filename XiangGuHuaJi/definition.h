@@ -113,8 +113,8 @@ struct Info
 {
 	TId id;             // 我方id
 	TId playerSize;     // 游戏总人数=8
-	TMap rows;          // rows=25
-	TMap cols;          // cols=35
+	TMap cols;          // cols=25
+    TMap rows;          // rows=35
 	TRound round;       // 当前回合数
 
     bool backstabUsed;  // 我是否已经用了背刺
