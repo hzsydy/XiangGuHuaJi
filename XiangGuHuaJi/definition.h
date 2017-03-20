@@ -28,26 +28,26 @@ enum TDiplomaticCommand {
     KeepNeutral, 
     FormAlliance, 
     JustifyWar,
-	Backstab
+    Backstab
 };
 
 struct TMilitaryCommand {
-	TPosition place;        // »î¶¯µØµã
-	TMilitary bomb_size;    // »î¶¯¹æÄ£
+    TPosition place;        // »î¶¯µØµã
+    TMilitary bomb_size;    // »î¶¯¹æÄ£
 };
 
 class BaseMap
 {
 public:
-	inline TMap getRows() const {return rows;}  // rows=25
-	inline TMap getCols() const {return cols;}  // cols=35
-	
+    inline TMap getRows() const {return rows;}  // rows=25
+    inline TMap getCols() const {return cols;}  // cols=35
+    
     inline bool isPosValid(int x, int y) const { return x>=0&&x<cols&&y>=0&&y<rows; }
     inline bool isPosValid(TPosition pos) const  { return isPosValid(pos.x, pos.y); }
 
     inline vector<vector<TMoney> >    getMapRes() const {return MapResource_;}      // ×ÊÔ´·Ö²¼Í¼
-	inline vector<vector<TMilitary> > getMapAtk() const {return MapAttackRatio_;}   // ¹¥»÷ÏµÊıÍ¼
-	inline vector<vector<TMilitary> > getMapDef() const {return MapDefenseRatio_;}  // ·ÀÊØÏµÊıÍ¼
+    inline vector<vector<TMilitary> > getMapAtk() const {return MapAttackRatio_;}   // ¹¥»÷ÏµÊıÍ¼
+    inline vector<vector<TMilitary> > getMapDef() const {return MapDefenseRatio_;}  // ·ÀÊØÏµÊıÍ¼
     
     inline TMoney getMapRes(int x, int y) const    { if (isPosValid(x,y)) return MapResource_[x][y]; else return 0;}        // res
     inline TMilitary getMapAtk(int x, int y) const { if (isPosValid(x,y)) return MapAttackRatio_[x][y]; else return 0;}     // atk
@@ -55,9 +55,9 @@ public:
 
 
 protected:
-	TMap	rows, cols;
-	vector<vector<TMoney> >  MapResource_;
-	vector<vector<TMilitary> > MapDefenseRatio_, MapAttackRatio_;
+    TMap    rows, cols;
+    vector<vector<TMoney> >  MapResource_;
+    vector<vector<TMilitary> > MapDefenseRatio_, MapAttackRatio_;
 };
 
 
@@ -70,65 +70,65 @@ const static TMoney     WAR_JUSTIFY_PRICE = 5;          // JustifyWarËùĞèÒªµÄ·ÑÓ
 const static float      UNIT_AREA_ALLY_COST = 0.05f;    // FormAllianceËùĞèÒªÖ§¸¶µÄ·ÑÓÃ(±ÈÀı)
 // ¾üÊÂ³£Êı
 const static int        MILITARY_COUNT_LIMIT = 32;      // Ò»»ØºÏ×î¶à½øĞĞµÄÓĞĞ§»î¶¯ÊıÄ¿
-const static int		MILITARY_KERNEL_SIZE = 5;       // Ó°ÏìÁ¦ºËĞÄµÄ°ë¾¶ (³ß´çÎª9*9)
-const static TMilitary	SUPPESS_LIMIT = 400;            // ²Î¿¼¹¥»÷ÅĞ¶¨ atk*atk_flu - def*def_flu >= SUPPRESS_LIMIT
+const static int        MILITARY_KERNEL_SIZE = 5;       // Ó°ÏìÁ¦ºËĞÄµÄ°ë¾¶ (³ß´çÎª9*9)
+const static TMilitary  SUPPESS_LIMIT = 400;            // ²Î¿¼¹¥»÷ÅĞ¶¨ atk*atk_flu - def*def_flu >= SUPPRESS_LIMIT
 const static float      CAPITAL_INFLUENCE = 0.3f;       // Ê×¶¼×ÔÎÀ (±ÈÀı)
 // ¾­¼Ã³£Êı
 const static TMoney     INITIAL_PLAYER_MONEY = 50;      // ³õÊ¼½ğ¶î
-const static float		UNIT_CITY_INCOME = 1.0f;        // µÍ±£±ÈÀıÏµÊı
-const static float		CORRUPTION_COEF = 0.0003f;      // ´æ¿î¸¯°ÜÏµÊı
+const static float      UNIT_CITY_INCOME = 1.0f;        // µÍ±£±ÈÀıÏµÊı
+const static float      CORRUPTION_COEF = 0.0003f;      // ´æ¿î¸¯°ÜÏµÊı
 const static TMoney     UNIT_BOMB_COST = 1;             // µ¥Î»»î¶¯»¨·Ñ
 // µØÍ¼³£Êı
-const static TMap		MIN_ABS_DIST_BETWEEN_CAP = 3;   // Ê×¶¼Ö®¼äµÄ×îĞ¡½ÖµÀ¾àÀëÏŞÖÆ Âü¹ş¶Ù¾àÀë >= 3 
-const static int		FIELD_BOUNDARY = 2;             // Ò»¿éÁìÍÁµÄÊÓÒ°£¬Âü¹ş¶Ù¾àÀë = 2
+const static TMap       MIN_ABS_DIST_BETWEEN_CAP = 3;   // Ê×¶¼Ö®¼äµÄ×îĞ¡½ÖµÀ¾àÀëÏŞÖÆ Âü¹ş¶Ù¾àÀë >= 3 
+const static int        FIELD_BOUNDARY = 2;             // Ò»¿éÁìÍÁµÄÊÓÒ°£¬Âü¹ş¶Ù¾àÀë = 2
 // Íæ¼ÒID³£Êı
-const static TId		NEUTRAL_PLAYER_ID = 233;
-const static TId		UNKNOWN_PLAYER_ID = 213;
+const static TId        NEUTRAL_PLAYER_ID = 233;
+const static TId        UNKNOWN_PLAYER_ID = 213;
 
 struct PlayerInfo {    
-	TDiplomaticStatus dipStatus;    // ºÍÄãµÄÍâ½»×´Ì¬
-	bool isVisible;     // ÊÇ·ñ¿É¼û£¬¾ö¶¨ÊÇ·ñ¿ÉÖª basic info
-	bool isUnion;       // ÊÇ·ñÍ¬ÃË£¬¾ö¶¨ÊÇ·ñ¿ÉÖª all info
-	
+    TDiplomaticStatus dipStatus;    // ºÍÄãµÄÍâ½»×´Ì¬
+    bool isVisible;     // ÊÇ·ñ¿É¼û£¬¾ö¶¨ÊÇ·ñ¿ÉÖª basic info
+    bool isUnion;       // ÊÇ·ñÍ¬ÃË£¬¾ö¶¨ÊÇ·ñ¿ÉÖª all info
+    
     // basic info
     TMoney income;          // ÊÕÈë£¬¼´ÓÃÓÚÅÅÃûµÄÉçÔ±Êı
-	int mapArea;            // ÁìÍÁ×ÜÃæ»ı
-	vector<TId> warList;    // ´¦ÔÚÕ½Õù¶ÔÏóÁĞ±í
-	
+    int mapArea;            // ÁìÍÁ×ÜÃæ»ı
+    vector<TId> warList;    // ´¦ÔÚÕ½Õù¶ÔÏóÁĞ±í
+    
     //all info
-	TMoney saving;      // ¶Ô·½µÄ´æ¿î
-	TPosition capital;  // ¶Ô·½µÄÊ×¶¼Î»ÖÃ
+    TMoney saving;      // ¶Ô·½µÄ´æ¿î
+    TPosition capital;  // ¶Ô·½µÄÊ×¶¼Î»ÖÃ
 };
 
 struct MapPointInfo {
     TMoney res;
     TMilitary atk, def;
 
-	TMask isVisible;    // ÊÇ·ñ¿É¼û
-	TId owner;          // Ö÷ÈË
-	TMask isSieged;
+    TMask isVisible;    // ÊÇ·ñ¿É¼û
+    TId owner;          // Ö÷ÈË
+    TMask isSieged;
 };
 
 struct Info
 {
-	TId id;             // ÎÒ·½id
-	TId playerSize;     // ÓÎÏ·×ÜÈËÊı=8
-	TMap cols;          // cols=25
+    TId id;             // ÎÒ·½id
+    TId playerSize;     // ÓÎÏ·×ÜÈËÊı=8
+    TMap cols;          // cols=25
     TMap rows;          // rows=35
-	TRound round;       // µ±Ç°»ØºÏÊı
+    TRound round;       // µ±Ç°»ØºÏÊı
 
     bool backstabUsed;  // ÎÒÊÇ·ñÒÑ¾­ÓÃÁË±³´Ì
 
-	BaseMap* map;       // µØÍ¼
+    BaseMap* map;       // µØÍ¼
 
     vector<PlayerInfo> playerInfo;              // Íæ¼ÒĞÅÏ¢
-	vector<vector<MapPointInfo> > mapPointInfo; // µØÍ¼ĞÅÏ¢
+    vector<vector<MapPointInfo> > mapPointInfo; // µØÍ¼ĞÅÏ¢
 
     vector<vector<float> > militaryKernel;  // ¾üÊÂkernel
 
-	vector<TDiplomaticCommand> DiplomaticCommandList;   // Íâ½»Ö¸Áî
+    vector<TDiplomaticCommand> DiplomaticCommandList;   // Íâ½»Ö¸Áî
     vector<TMilitaryCommand> MilitaryCommandList;       // ¾üÊÂÖ¸Áî
-	TPosition newCapital;                               // ĞÂµÄÊ×¶¼Î»ÖÃ
+    TPosition newCapital;                               // ĞÂµÄÊ×¶¼Î»ÖÃ
 };
 
 #endif

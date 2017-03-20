@@ -39,7 +39,7 @@ namespace XGHJ
 			vector<vector<TDiplomaticCommand> > DiplomaticCommandMap(playerSize);
 			vector<TPosition > NewCapitalList(playerSize);
 
-            // each player run 
+            // 每个玩家开始运行
 			for (TId id=0; id<playerSize; ++id)
 			{
                 Player& player = players_[id];
@@ -47,6 +47,7 @@ namespace XGHJ
                 Info info = game_.generateInfo(id);
                 if (player.isValid() && game_.isAlive(id))
                 {
+                    // 单个玩家执行
                     if (!silent_mode_) cout << "Calling Player " << (int)id << "'s Run() method" << endl;
                     players_[id].run(info);
                 }
@@ -58,6 +59,7 @@ namespace XGHJ
                 MilitaryCommandMap[id] = info.MilitaryCommandList;
                 NewCapitalList[id] = info.newCapital;
 
+                // 直接输出此玩家的操作
                 if (file_output_enabled_) {
                     for (int i=0; i<playerSize; ++i) ofs<<" "<<(int)info.DiplomaticCommandList[i];
                     for (int i=0; i<min(info.MilitaryCommandList.size(),MILITARY_COUNT_LIMIT); ++i) 
@@ -69,6 +71,7 @@ namespace XGHJ
 			}
             if (file_output_enabled_) ofs << endl;
 
+            // 导入game
 			if (!game_.Run(MilitaryCommandMap, DiplomaticCommandMap, NewCapitalList))
                 if (!silent_mode_) cout << "-=-=-=-=-=-=-=-=-=-=-= GAME OVER ! =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
 			
@@ -76,13 +79,14 @@ namespace XGHJ
 		}
 		else
         {
-            // bid
+            // 第0回合竞价阶段
             if (!silent_mode_) cout << "Bidding......" << endl;
             vector<TMoney> bidPrice;
             vector<std::tuple<float, TId> > bidPriceTuple;
 
             srand(time(NULL));
 
+            // 调用竞价
             for (TId id=0; id<playerSize; ++id) {
                 Player& player = players_[id];
                 TMoney price = 0;
@@ -90,17 +94,16 @@ namespace XGHJ
                     if (!silent_mode_) cout << "Calling Player " << (int)id << "'s birthplacePrice() method" << endl;
                     players_[id].run(price, &(game_.map));
                 }
+                if (price<0) price = 0;
                 if (price>INITIAL_PLAYER_MONEY) price = INITIAL_PLAYER_MONEY;
                 bidPriceTuple.push_back(std::make_tuple(price + rand_f(), id));  // 在竞价中引入0~1的随机量
                 bidPrice.push_back(price);
             }
             
-            //sort
+            // 排序并进入选出生点
             std::sort(bidPriceTuple.begin(), bidPriceTuple.end(), 
                 [](const std::tuple<float, TId> &a, const std::tuple<float, TId> &b) -> bool { return std::get<0>(a) > std::get<0>(b);  }
             );
-
-            // choose start pos
             if (!silent_mode_) cout << "Choosing birthplace......" << endl;
             vector<TPosition> posChoosed;
             for (TId i=0; i<playerSize; ++i) {
@@ -114,6 +117,7 @@ namespace XGHJ
                 posChoosed.push_back(pos);
             }
 
+            // 总结数据
             vector<TPosition> posChoosedSorted(playerSize);
             for (TId i=0; i<playerSize; ++i) {
                 TId id = std::get<1>(bidPriceTuple[i]);
@@ -131,7 +135,7 @@ namespace XGHJ
                 ofs << endl;
             }
 
-			// choose start pos
+			// 给game进行第1回合
 			game_.Start(bidPrice, posChoosedSorted);
 		}
 

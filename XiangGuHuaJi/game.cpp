@@ -51,6 +51,7 @@ bool Game::Start(vector<TMoney> bidPrice, vector<TPosition> posChoosed)
         TPosition& capital = posChoosed[i];
         
         // 去除竞价金额
+        if (bidPrice[i] < 0) bidPrice[i] = 0;
         if (bidPrice[i] > INITIAL_PLAYER_MONEY) bidPrice[i] = INITIAL_PLAYER_MONEY;
         playerSaving[i] = INITIAL_PLAYER_MONEY - bidPrice[i];
 

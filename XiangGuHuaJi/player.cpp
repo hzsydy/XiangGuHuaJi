@@ -4,6 +4,7 @@
  *
  */
 
+#include <ctime>
 #include"player.h"
 
 namespace XGHJ {
@@ -70,13 +71,17 @@ bool Player::load()
 
 bool Player::run(Info &info)
 {
+    int time_a = GetTickCount();
+    int time_b;
+
+
 #ifdef _MSC_VER
     __try
 #endif
 #ifdef __GNUC__
     try
 #endif
-    {
+    {   
         player_ai(info);
     }
 #ifdef _MSC_VER
@@ -91,6 +96,10 @@ bool Player::run(Info &info)
         Valid = false;
 		return false;
     }
+
+    time_b = GetTickCount();
+    if (time_b - time_a > 2000) kill();
+
     return true;
 }
 

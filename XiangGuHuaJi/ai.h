@@ -18,7 +18,7 @@ extern "C" _declspec(dllexport) void player_ai(Info& info);
 #ifdef __GNUC__
 
 extern "C" TMoney birthplacePrice(BaseMap* map);
-extern "C" TPosition birthplace(vector<TPosition> posSelected, BaseMap* map);
+extern "C" TPosition birthplace(vector<TPosition>& posSelected, BaseMap* map);
 
 extern "C" void player_ai(Info& info);
 
