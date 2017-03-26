@@ -1,3 +1,3 @@
-/GS /GL /analyze- /W3 /Gy /Zc:wchar_t /I"../XiangGuHuaJi" /Zi /Gm- /O2 /Fd"Release\\vc110.pdb" /fp:precise /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "TESTAI_EXPORTS" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /Gd /Oy- /Oi /MD /Fa"Release\\" /EHa /nologo /Fo"Release\\" /Fp"Release\\TestAi.pch" 
+/GS /GL /analyze- /W3 /Gy /wd"4018" /wd"4024" /wd"4244" /wd"4819" /Zc:wchar_t /I"../XiangGuHuaJi" /I"../TestAi" /Zi /Gm- /O2 /Fd"Release\\vc110.pdb" /fp:precise /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "TESTAI_EXPORTS" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /Gd /Oy- /Oi /MD /Fa"Release\\" /EHa /nologo /Fo"Release\\" /Fp"Release\\TestAi.pch" 
 
 /LD

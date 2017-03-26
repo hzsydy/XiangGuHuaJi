@@ -2,6 +2,7 @@
 dir /s/b content\*.cpp > dir.txt
 
 for /f "delims=," %%i in (dir.txt) do (
+  echo ------------------------------------------------------------------------------------------------------------------------------------
   echo %%i
   cl @RESP_RELEASE %%i content\user_toolbox.cpp
 )

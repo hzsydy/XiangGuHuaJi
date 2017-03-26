@@ -45,7 +45,7 @@ public:
     inline vector<TMoney> getPlayerSaving() const { return playerSaving; }
     inline vector<TMoney> getPlayerIncome() const { return playerIncome; }
     inline vector<TId> getPlayerRanking() const { return player_ranking; }
-   
+    inline vector<bool> getBackstabEnabled() const { return backstab_enabled; }
 
     Map& map; 
 
@@ -66,9 +66,9 @@ protected:
 	vector<vector<TDiplomaticStatus> >	diplomacy;
 	vector<vector<int>>					roundToJusifyWar;
 	vector<bool>						backstabUsed;
+    vector<bool>                        backstab_enabled;
     vector<TMoney>                      playerIncome;
     vector<TId>                         player_ranking;
-
 	
 	vector<TId> getWarList(TId id) const;
     TMask isPointVisible(TMap x, TMap y, TId playerId) const;

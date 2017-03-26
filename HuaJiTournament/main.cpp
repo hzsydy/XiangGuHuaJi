@@ -52,7 +52,10 @@ int main(int argc, char** argv)
 #ifdef __GNUC__
         "../config_tournament_gnu.ini";
 #endif
-    if (argc != 1)
+    if (argc == 2) {
+        config_filename = argv[1];
+    }
+    else if (argc != 1)
     {
         usage();
         return -1;
@@ -172,8 +175,15 @@ int main(int argc, char** argv)
         );
         for (scoredAI& player : players) {
             player.score = (int)player.score;
-            cout<<setw(30)<<player.name<<" : "<<(int)player.score<<endl;
+            cout<<player.p.getName()<<"\t"<<(int)player.score<<endl;
         }
+    }
+
+
+    ofstream ofs("tournament.txt");
+    for (scoredAI& player : players) {
+        player.score = (int)player.score;
+        ofs<<player.p.getName()<<"\t"<<(int)player.score<<endl;
     }
 
     system("pause");

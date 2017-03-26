@@ -87,8 +87,12 @@ int main(int argc, char** argv)
         Player player(players_filename[i], i);
         if (player.isValid()) 
             players.push_back(player); 
-        else 
+        else {
             cout << "[Warning] failed to load player_ai " << players_filename[i] << endl;
+#if (defined _MSC_VER && defined _DEBUG)
+            system("pause");
+#endif
+        }
     }
     if (players.size() <= 1) {
         cout << "[Error] Not enough player_ais to start the game." << endl;

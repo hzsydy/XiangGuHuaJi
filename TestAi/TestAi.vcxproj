@@ -70,6 +70,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;TESTAI_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>../XiangGuHuaJi;</AdditionalIncludeDirectories>
       <ExceptionHandling>Async</ExceptionHandling>
+      <DisableSpecificWarnings>4018;4024</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

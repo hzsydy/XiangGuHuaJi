@@ -30,6 +30,7 @@ Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
     , diplomacy(playersize, vector<TDiplomaticStatus>(playersize, Undiscovered))
     , roundToJusifyWar(playersize, vector<int>(playersize, 0))
     , backstabUsed(playersize, false)
+    , backstab_enabled(playersize, false)
     , player_ranking(playersize)
 {
     
@@ -104,9 +105,27 @@ void Game::StartWar(TId a, TId b) {
 // 外交阶段
 bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticCommandMap)
 {
+    // clear backstab_enabled
+    for (size_t i=0; i<playerSize; ++i) backstab_enabled[i] = false;
+
 	for (TId i = 0; i < playerSize-1; ++i)
 		for (TId j = i+1; j < playerSize; ++j)
 			if (i != j && diplomacy[i][j] != Undiscovered) {
+
+                // Backstab 费用（一次性）
+				if (DiplomaticCommandMap[i][j] == Backstab) 
+                    if (backstabUsed[i] == false) { 
+                        backstabUsed[i] = true; 
+                        backstab_enabled[i] = true;
+                    } 
+                    else DiplomaticCommandMap[i][j] = JustifyWar;
+				if (DiplomaticCommandMap[j][i] == Backstab)
+					if (backstabUsed[j] == false) { 
+                        backstabUsed[j] = true; 
+                        backstab_enabled[j] = true;
+                    }
+                    else DiplomaticCommandMap[j][i] = JustifyWar;
+
                 // JustifyWar 费用
 				if (DiplomaticCommandMap[i][j] == JustifyWar) 
 					if (playerSaving[i] - WAR_JUSTIFY_PRICE >= 0) playerSaving[i] -= WAR_JUSTIFY_PRICE; else DiplomaticCommandMap[i][j] = KeepNeutral;
@@ -123,11 +142,7 @@ bool Game::DiplomacyPhase(vector<vector<TDiplomaticCommand> > & DiplomaticComman
                     if (playerSaving[j] >= m) playerSaving[j] -= m; else DiplomaticCommandMap[j][i] = KeepNeutral;
                 }
 
-                // Backstab 费用（一次性）
-				if (DiplomaticCommandMap[i][j] == Backstab) 
-					if (backstabUsed[i] == false) backstabUsed[i] = true; else DiplomaticCommandMap[i][j] = KeepNeutral;
-				if (DiplomaticCommandMap[j][i] == Backstab)
-					if (backstabUsed[j] == false) backstabUsed[j] = true; else DiplomaticCommandMap[j][i] = KeepNeutral;
+
 				
                 // --- --- --- ---
 
@@ -245,7 +260,13 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
                     if (!map.isPosValid(x,y)) continue;
                     my_map[x][y] += MilitaryKernel[n][m] * tmc.bomb_size;
                 }
-        }       
+        }
+        // 规则更新 背刺buff
+        if (backstab_enabled[id]) {
+            for (int x = 0; x < cols; ++x)
+                for (int y = 0; y < rows; ++y)
+                    my_map[x][y] = my_map[x][y] + my_map[x][y] / 2;
+        }
     }
 
     // (参考断补性) 生成1张防御力图;  1张击破图
@@ -563,6 +584,7 @@ PlayerInfo Game::getPlayerInfo(TId id, TId playerId) const
 TMask Game::isPointVisible(TMap x, TMap y, TId playerId) const
 {
     if (!isPlayer(playerId)) return true;
+    if (!map.isPosValid(x,y)) return false;
 
 	if (globalMap[x][y] == playerId) return true;
 	//if (globalMap[x][y] != NEUTRAL_PLAYER_ID && (diplomacy[playerId][globalMap[x][y]] == Neutral || diplomacy[playerId][globalMap[x][y]] == Allied))

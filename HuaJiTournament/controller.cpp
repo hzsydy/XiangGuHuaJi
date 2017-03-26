@@ -49,7 +49,10 @@ namespace XGHJ
                 {
                     // 单个玩家执行
                     if (!silent_mode_) cout << "Calling Player " << (int)id << "'s Run() method" << endl;
+                    
+                    // TODO
                     players_[id].run(info);
+                    // TODO
                 }
                 else
                 {
