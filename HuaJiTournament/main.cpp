@@ -115,8 +115,6 @@ int main(int argc, char** argv)
     int             curr_round;
     vector<int>     init_score;
 
-    vector<ScoredString>  scored_logfile_list;
-
     Map map = Map();
     vector<vector<float> > militaryKernel;
 
@@ -179,14 +177,6 @@ int main(int argc, char** argv)
         }
         ofs.close();
 
-        // ´¦Àí scored_logfile_list
-        std::sort(scored_logfile_list.begin(), scored_logfile_list.end(),
-            [](const ScoredString&a, const ScoredString&b) -> bool { return a.score > b.score; }
-        );
-        ofstream ofs_l("logfile_socre.txt", ios::app);
-        for (ScoredString& ss : scored_logfile_list) ofs_l << ss.name << "\t" << ss.score << endl;
-        ofs_l.close();
-
         cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
         cout << "-=-=-=-=-=-=-=-=-= SWISS-SYSTEM TOURNAMENT ROUND "<<curr_round << endl;
         cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
@@ -210,9 +200,9 @@ int main(int argc, char** argv)
                 cout << "Finished" << endl;
 
                 // score log file
-                scored_logfile.name = controller.getLogFilename();
-                scored_logfile.score = controller.getExcitingGameScore();
-                scored_logfile_list.push_back(scored_logfile);
+                ofstream ofs_l("logfile_score.txt", ios::app);
+                ofs_l << controller.getLogFilename() << "\t" << controller.getExcitingGameScore() << endl;
+                ofs_l.clear();
 
                 // player score
                 vector<int> rank = game.getPlayerRanking();

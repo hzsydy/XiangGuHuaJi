@@ -374,8 +374,10 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
     // 更新世界地图
     for (TMap x=0; x<cols; ++x)
         for (TMap y=0; y<rows; ++y) 
-            if (map_new_owner[x][y] != UNKNOWN_PLAYER_ID) 
+            if (map_new_owner[x][y] != UNKNOWN_PLAYER_ID) {
+                ++exciting_game_score;
                 globalMap[x][y] = map_new_owner[x][y];
+            }
 
     // 强行去除无敌土地上的领土        
     for (TMap x=0; x<cols; ++x)
@@ -488,11 +490,6 @@ bool Game::ProducingPhase()
                 playerIncome[globalMap[i][j]] += mapRes[i][j];
                 ++playerArea[globalMap[i][j]];
             }
-
-    // 计算游戏兴奋程度
-    for (TId id=0; id<playerSize; ++id) {
-        exciting_game_score += (bakPlayerArea[id] - playerArea[id]) * (bakPlayerArea[id] - playerArea[id]);
-    }
 
     // 收入
     for (TId id=0; id<playerSize; ++id)
