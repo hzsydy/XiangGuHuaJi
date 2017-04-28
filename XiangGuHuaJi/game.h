@@ -46,6 +46,7 @@ public:
     inline vector<TMoney> getPlayerIncome() const { return playerIncome; }
     inline vector<TId> getPlayerRanking() const { return player_ranking; }
     inline vector<bool> getBackstabEnabled() const { return backstab_enabled; }
+    inline int getExcitingGameScore() const { return exciting_game_score; }
 
     Map& map; 
 
@@ -56,7 +57,8 @@ protected:
 	TMap				rows,cols;
 	TId                 playerSize;
     TId                 aliveCnt;
-	
+	int                 exciting_game_score;
+
 	TRound								round;
 	vector<vector<TId> >				globalMap;//ownership of the lands
 	vector<vector<TMask> >				isSieged;

@@ -27,8 +27,10 @@ namespace XGHJ
         if (file_output_enabled_ && !ofs.is_open()) {
             char buffer[1024];
             time_t t = time(0);
-            strftime(buffer, sizeof(buffer), "log_%Y%m%d_%H%M%S.txt",localtime(&t));
-            ofs.open(buffer);
+            int st = rand_f() * 99;
+            strftime(buffer, sizeof(buffer), "log_%Y%m%d_%H%M%S",localtime(&t));
+            log_filename = buffer+to_string(st) + ".txt";
+            ofs.open(log_filename.c_str());
         }
 
         if (!silent_mode_) cout << "-=-=-=-=-=-=-=-=-=-=-= Controller: Round[" << round << "] =-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
@@ -58,9 +60,12 @@ namespace XGHJ
                 {
                     players_[id].kill();
                 }
+
+                
                 DiplomaticCommandMap[id] = info.DiplomaticCommandList;	
                 MilitaryCommandMap[id] = info.MilitaryCommandList;
-                NewCapitalList[id] = info.newCapital;
+                NewCapitalList[id] = info.newCapital;            
+
 
                 // 直接输出此玩家的操作
                 if (file_output_enabled_) {

@@ -14,6 +14,7 @@ SET(LOGIC_SRC
     ./XiangGuHuaJi/game.cpp
     ./XiangGuHuaJi/player.cpp
     ./XiangGuHuaJi/map.cpp
+    ./XiangGuHuaJi/military_kernel.cpp
 )
 
 SET(CMD_SRC

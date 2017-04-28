@@ -34,13 +34,17 @@ namespace XGHJ
         inline void setFileOutputEnabled(bool flag) { file_output_enabled_ = flag; }
 
 		inline bool isValid() const {return isValid_;}
-
+        
+        inline int getExcitingGameScore() const { return game_.getExcitingGameScore(); }
+        inline std::string getLogFilename() const { return log_filename; }
 
 	protected:
 		Game& game_;
 		std::vector<Player>& players_;
 
         std::ofstream ofs;
+
+        std::string log_filename;
 
         bool file_output_enabled_;
         bool silent_mode_;

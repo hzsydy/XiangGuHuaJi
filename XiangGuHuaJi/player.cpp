@@ -74,7 +74,7 @@ bool Player::run(Info &info)
     int time_a = GetTickCount();
     int time_b;
 
-#if (!defined _MSC_VER) || (defined _DEBUG)
+#if (!defined _MSC_VER) //|| (defined _DEBUG)
     try {
         player_ai(info);
     }
@@ -102,7 +102,7 @@ bool Player::run(Info &info)
 
 bool Player::run(TMoney &price, BaseMap* map)
 {
-#if (!defined _MSC_VER) || (defined _DEBUG)
+#if (!defined _MSC_VER) //|| (defined _DEBUG)
     try {
         price = birthplacePrice(map);
         if (price>INITIAL_PLAYER_MONEY) price = INITIAL_PLAYER_MONEY;
@@ -129,7 +129,7 @@ bool Player::run(TMoney &price, BaseMap* map)
 bool Player::run(TPosition &pos, vector<TPosition> &posSelected, BaseMap* map)
 {
 
-#if (!defined _MSC_VER) || (defined _DEBUG)
+#if (!defined _MSC_VER) //|| (defined _DEBUG)
     try {
         pos = birthplace(posSelected, map);
     }

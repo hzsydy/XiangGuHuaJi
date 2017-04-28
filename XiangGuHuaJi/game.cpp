@@ -32,6 +32,7 @@ Game::Game(Map& map, vector<vector<float> > militaryKernel,int playersize)
     , backstabUsed(playersize, false)
     , backstab_enabled(playersize, false)
     , player_ranking(playersize)
+    , exciting_game_score(0)
 {
     
     for (TId id = 0; id < playersize; ++id) diplomacy[id][id] = Allied;
@@ -215,10 +216,12 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
         // 检查军事指令
         for (i=0; i<tmc_list.size(); ++i) {
             TMilitaryCommand& tmc = tmc_list[i];
-            TId t_owner = globalMap[tmc.place.x][tmc.place.y];
+            TId t_owner;
 
             // 检查位置
             if (!map.isPosValid(tmc.place)) { tmc.bomb_size = 0; continue; }
+            t_owner = globalMap[tmc.place.x][tmc.place.y];
+
             if (!isPlayer(t_owner) || diplomacy[id][t_owner] != Allied) { tmc.bomb_size = 0; continue; }
 
             // 检查金额
@@ -300,7 +303,7 @@ bool Game::MilitaryPhase(vector<vector<TMilitaryCommand> > & MilitaryCommandList
 
             // 逐个检查攻击方，得到最强的2个攻击者
             for (TId id = 0; id < playerSize; ++id)
-                if (owner == NEUTRAL_PLAYER_ID || diplomacy[owner][id] == AtWar) {
+                if (!isPlayer(owner) || diplomacy[owner][id] == AtWar) {
                     TMilitary attack = player_influence_map[id][x][y] * atk_ratio;
                     if (attack > best_attack) {
                         second_attack = best_attack;
@@ -466,11 +469,17 @@ bool Game::ProducingPhase()
 
     vector<vector<TMoney> > mapRes = map.getMapRes();
 
+    vector<int>	bakPlayerArea = playerArea;// 为了计算游戏兴奋程度，留下一个备份
+
     // 初始化
     for (TId id=0; id<playerSize; ++id)
         if (isPlayerAlive[id]) {
             playerArea[id] = 0;
             playerIncome[id] = 1; // 至少有社长一个人
+        }
+        else {
+            playerArea[id] = 0;
+            playerIncome[id] = 0;
         }
     // 更新income，mapArea
     for (TMap i=0; i<cols; i++) 
@@ -479,6 +488,11 @@ bool Game::ProducingPhase()
                 playerIncome[globalMap[i][j]] += mapRes[i][j];
                 ++playerArea[globalMap[i][j]];
             }
+
+    // 计算游戏兴奋程度
+    for (TId id=0; id<playerSize; ++id) {
+        exciting_game_score += (bakPlayerArea[id] - playerArea[id]) * (bakPlayerArea[id] - playerArea[id]);
+    }
 
     // 收入
     for (TId id=0; id<playerSize; ++id)

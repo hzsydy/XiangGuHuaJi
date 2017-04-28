@@ -8,6 +8,7 @@ for /f "delims=," %%i in (dir.txt) do (
 )
 
 copy *.dll compiled_release\
+copy *.dll ..\Release\
 
 del *.ilk
 del *.pdb

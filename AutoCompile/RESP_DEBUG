@@ -1,3 +1,5 @@
 /GS /analyze- /W3 /Zc:wchar_t /I"../XiangGuHuaJi" /ZI /Gm /Od /Fd"Debug\\vc110.pdb" /fp:precise /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "TESTAI_EXPORTS" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" /errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /Oy- /MDd /Fa"Debug\\" /EHsc /nologo /Fo"Debug\\" /Fp"Debug\\TestAi.pch" 
 
+/I"../XiangGuHuaJi" /I"../TestAi"
+
 /LDd
